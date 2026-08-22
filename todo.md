@@ -299,3 +299,17 @@
 
 - [x] Sustituir el logo de FM Latina por el recurso oficial del sitio proporcionado
 - [x] Verificar carga remota y conservar el fallback visual
+
+## Ampliación de radios principales
+
+- [x] Identificar emisoras adicionales de noticias, música, deportes y regiones
+- [x] Verificar logos y streams de las nuevas emisoras
+- [x] Incorporar las señales verificadas al orden inicial
+- [x] Validar catálogo ampliado, filtros, typecheck, tests y lint
+
+## Corrección de reproducción FM Latina
+
+- [x] Extraer la URL real usada por el reproductor oficial
+- [x] Comparar el stream actual con la señal web
+- [x] Sustituir FM Latina por una señal compatible y verificable
+- [x] Validar audio real, typecheck, tests y lint
