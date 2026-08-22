@@ -209,3 +209,10 @@
 - [x] Transferir las métricas al detalle mediante parámetros de navegación
 - [x] Calcular escala y desplazamiento inicial desde el origen medido
 - [x] Validar distintos tamaños de pantalla y rutas de apertura
+
+## Desvanecimiento del contenedor del mini reproductor
+
+- [x] Medir posición y tamaño del contenedor completo
+- [x] Transferir las métricas del contenedor al detalle
+- [x] Coordinar el desvanecimiento con la expansión de la carátula
+- [x] Validar apertura, fallback y continuidad de reproducción
