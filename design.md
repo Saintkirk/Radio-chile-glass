@@ -49,3 +49,32 @@ El hero principal debe sentirse como una tarjeta de vidrio flotante con un halo 
 ## Decisiones técnicas
 
 El catálogo inicial será local y tipado para evitar dependencias de backend. Los favoritos se guardarán con AsyncStorage. La reproducción usará `expo-audio` y su configuración de modo de audio; la continuidad en segundo plano y la pantalla de bloqueo dependerán de la configuración nativa final del build Android y de las capacidades del stream de cada emisora. FM Latina será una entrada destacada del catálogo.
+
+
+## Evolución visual premium y Android 16
+
+La dirección recomendada es tratar la aplicación como un **dial editorial vivo**, combinando descubrimiento, identidad sonora y una carátula protagonista. La referencia funcional toma la jerarquía de descubrimiento de Spotify, la lectura directa de Deezer y la atmósfera premium de Tidal, sin copiar sus identidades. Radio Chile Glass conservará una personalidad propia basada en negro tinta, coral FM Latina, azul eléctrico y superficies de vidrio.
+
+| Elemento | Decisión visual |
+|---|---|
+| Fondo | Negro tinta `#090B12` con halos radiales muy sutiles derivados del acento de la emisora activa |
+| Superficies | Vidrio oscuro translúcido, borde blanco al 10–14 %, radios de 20–28 px y sombras suaves |
+| Tipografía | Titulares grandes y compactos; metadatos pequeños, contrastados y espaciados |
+| Acción primaria | Coral `#FF6B5F` para reproducir, pausar y estados activos |
+| Acentos | Cian `#64D8FF`, menta `#76E0B5`, violeta `#8B7CFF` y amarillo `#FFD36A` |
+| Carátulas | Logo oficial primero; iniciales con degradado de marca como fallback intencional |
+| Movimiento | Transiciones de 180–320 ms, desaceleración suave y ausencia de rebotes excesivos |
+
+En Android 16 conviene mantener la experiencia edge-to-edge, respetar las inserciones del sistema y basar la composición en el ancho disponible, no en una orientación fija. Esto permite adaptarse a tabletas, ventanas divididas y rotación. La transición compartida de la carátula debe convivir con predictive back: el detalle se reduce y se desplaza con el gesto, mientras el contenido evita las zonas reservadas para gestos del sistema. El desenfoque se utilizará en fondos y capas decorativas, nunca sobre texto o controles.
+
+La experiencia debe usar animaciones expresivas pero controladas: halo de la emisora activa con baja frecuencia, ecualizador detenido cuando el audio está pausado, entrada escalonada de título y controles, y transición de carátula entre mini reproductor y detalle. `reduced motion` debe desactivar halos y desplazamientos no esenciales. El resultado buscado es una aplicación más cinematográfica que un directorio, pero con la claridad y velocidad necesarias para iniciar una radio en un solo toque.
+
+### Logos pendientes
+
+La cobertura de logos se reforzará con una política de tres niveles: logo oficial del dominio de la emisora, recurso público del directorio radios-chilenas.com cuando la marca coincida y fallback de iniciales cuando ninguno sea estable. Cada logo debe verificarse como imagen antes de incorporarse; una respuesta HTTP exitosa con HTML no se considerará válida. La caché persistente ya permite reutilizar imágenes confirmadas entre sesiones.
+
+### Referencias técnicas
+
+[1]: https://developer.android.com/about/versions/16/behavior-changes-16 "Android 16 behavior changes"
+[2]: https://developer.android.com/about/versions/16/summary "Android 16 summary"
+[3]: https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back "Predictive back design"

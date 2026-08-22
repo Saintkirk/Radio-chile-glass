@@ -354,3 +354,11 @@
 - [x] Incorporar radios regionales sin duplicar las editoriales
 - [x] Adaptar búsqueda, filtros y reproducción
 - [x] Validar favoritos, logos, typecheck, tests y lint
+
+## Dirección visual premium y Android 16
+
+- [x] Definir lenguaje visual premium inspirado en plataformas de streaming
+- [x] Auditar y completar logos faltantes del catálogo
+- [x] Añadir animaciones de alto impacto con reduced motion
+- [x] Optimizar superficies, navegación y layouts para Android 16
+- [x] Validar accesibilidad, rendimiento, typecheck, tests y lint
