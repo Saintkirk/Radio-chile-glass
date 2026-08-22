@@ -406,3 +406,10 @@
 - [x] Cambiar emisora circularmente usando el catálogo disponible
 - [x] Sincronizar logo, nombre, metadatos, favoritos y audio activo
 - [x] Añadir etiquetas accesibles y validar typecheck, tests, lint, preview y checkpoint
+
+## Nitidez de logos en reproducción
+
+- [x] Auditar recursos de baja resolución y URLs de logos
+- [x] Optimizar el renderizado y escalado de StationLogo
+- [x] Añadir fallback nítido cuando el recurso remoto no tenga resolución suficiente
+- [x] Validar nitidez en móvil, typecheck, tests, lint, preview y checkpoint

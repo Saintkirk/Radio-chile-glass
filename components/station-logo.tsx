@@ -21,8 +21,15 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
           source={{ uri: radio.favicon }}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
           contentFit="contain"
+          contentPosition="center"
           cachePolicy="memory-disk"
-          transition={180}
+          transition={220}
+          onLoad={(event) => {
+            const sourceWidth = event.source?.width ?? 0;
+            const sourceHeight = event.source?.height ?? 0;
+            const smallestSide = Math.min(sourceWidth, sourceHeight);
+            if (size >= 120 && smallestSide > 0 && smallestSide < size * 1.35) setFailed(true);
+          }}
           onError={() => setFailed(true)}
         />
       ) : (
