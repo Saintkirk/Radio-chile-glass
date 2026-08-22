@@ -28,3 +28,11 @@
 - [x] Añadir indicador de última actualización y estado de sincronización
 - [x] Preservar favoritos cuando cambie el catálogo remoto
 - [x] Añadir pruebas de normalización, fallback y actualización remota
+
+## Logos remotos
+
+- [x] Crear componente reutilizable de identidad visual de emisora
+- [x] Mostrar favicon/logo remoto cuando exista
+- [x] Usar iniciales y acento de marca como fallback si falta o falla la imagen
+- [x] Integrar el fallback en Inicio, Explorar y Favoritos
+- [x] Añadir pruebas para normalización de logos y estados de imagen

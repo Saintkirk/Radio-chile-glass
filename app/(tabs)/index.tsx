@@ -3,15 +3,14 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
+import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 
 function RadioRow({ radio, onPlay, onFavorite, favorite }: { radio: Radio; onPlay: () => void; onFavorite: () => void; favorite: boolean }) {
   return (
     <Pressable onPress={onPlay} style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}>
-      <LinearGradient colors={[`${radio.accent}44`, "#161B2A"]} style={styles.radioLogo}>
-        <Text style={styles.radioInitials}>{radio.initials}</Text>
-      </LinearGradient>
+      <StationLogo radio={radio} size={54} radius={16} />
       <View style={styles.radioInfo}>
         <Text style={styles.radioName}>{radio.name}</Text>
         <Text style={styles.radioMeta}>{radio.frequency}  ·  {radio.genre}</Text>
@@ -88,8 +87,6 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   seeAll: { color: "#FF8C7F", fontSize: 13, fontWeight: "600", marginBottom: 12 },
   radioRow: { minHeight: 75, borderRadius: 19, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
-  radioLogo: { width: 54, height: 54, borderRadius: 16, alignItems: "center", justifyContent: "center", overflow: "hidden" },
-  radioInitials: { color: "#F5F3EE", fontSize: 15, fontWeight: "800", letterSpacing: 0.6 },
   radioInfo: { flex: 1, marginLeft: 13 },
   radioName: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
   radioMeta: { color: "#8D95A7", fontSize: 12, marginTop: 5 },
