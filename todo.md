@@ -286,3 +286,11 @@
 - [x] Confirmar URL HTTPS de streaming y tipo de audio
 - [x] Actualizar el catálogo con logos remotos y streams definitivos
 - [x] Validar carga de logos, fallbacks, conectividad, typecheck, tests y lint
+
+## Caché persistente de logos
+
+- [x] Definir clave y formato de caché de logos
+- [x] Cargar logos cacheados antes de la red
+- [x] Guardar y actualizar logos remotos correctamente
+- [x] Manejar expiración, errores y fallback visual
+- [x] Validar carga inicial, typecheck, tests y lint

@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { prefetchLogo } from "@/lib/logo-cache";
 import { StyleSheet, Text, View } from "react-native";
 import type { Radio } from "@/lib/radios";
 
@@ -8,6 +9,10 @@ type StationLogoProps = { radio: Pick<Radio, "favicon" | "initials" | "accent">;
 
 export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
   const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    setFailed(false);
+    if (radio.favicon) void prefetchLogo(radio.favicon);
+  }, [radio.favicon]);
   const showRemote = Boolean(radio.favicon && !failed);
   return (
     <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}> 
@@ -16,7 +21,7 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
           source={{ uri: radio.favicon }}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
           contentFit="contain"
-          cachePolicy="disk"
+          cachePolicy="memory-disk"
           transition={180}
           onError={() => setFailed(true)}
         />
