@@ -498,3 +498,10 @@
 - [x] Integrar flechas laterales visibles sobre la carátula
 - [x] Reforzar deslizamiento táctil horizontal sin conflicto con cierre vertical
 - [x] Mantener accesibilidad, carrusel, audio y validar preview, pruebas y checkpoint
+
+## Fondo estático y carrusel focalizado
+
+- [x] Auditar las capas que actualmente heredan stationTransition
+- [x] Animar solo carátula, flechas y controles de reproducción
+- [x] Mantener fondo, encabezado, metadatos e información estáticos
+- [x] Validar gestos, accesibilidad, typecheck, tests, preview y checkpoint
