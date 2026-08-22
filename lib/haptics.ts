@@ -12,3 +12,9 @@ export function favoriteRemovedHaptic() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   }
 }
+
+export function detailOpenedHaptic() {
+  if (Platform.OS !== "web") {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+}

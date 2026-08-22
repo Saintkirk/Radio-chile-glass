@@ -12,6 +12,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { StationLogo } from "@/components/station-logo";
 import { useRadioPlayer } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
+import { detailOpenedHaptic } from "@/lib/haptics";
 
 export default function RadioDetailScreen() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function RadioDetailScreen() {
   const dismissY = useRef(new Animated.Value(0)).current;
   const entryProgress = useRef(new Animated.Value(0)).current;
   const artworkRef = useRef<View>(null);
+  const entryHapticSent = useRef(false);
   const [entryOrigin, setEntryOrigin] = useState({ scale: 0.52, translateX: 0, translateY: 210 });
   const hasMeasuredOrigin = [originX, originY, originWidth, originHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const hasMeasuredContainer = [containerX, containerY, containerWidth, containerHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
@@ -49,7 +51,12 @@ export default function RadioDetailScreen() {
   useEffect(() => {
     if (!hasMeasuredOrigin) {
       const animation = Animated.timing(entryProgress, { toValue: 1, duration: 300, useNativeDriver: true });
-      animation.start();
+      animation.start(({ finished }) => {
+        if (finished && !entryHapticSent.current) {
+          entryHapticSent.current = true;
+          detailOpenedHaptic();
+        }
+      });
       return () => animation.stop();
     }
     return undefined;
@@ -61,7 +68,12 @@ export default function RadioDetailScreen() {
   useEffect(() => {
     if (!hasMeasuredOrigin) return;
     const animation = Animated.timing(entryProgress, { toValue: 1, duration: 300, useNativeDriver: true });
-    animation.start();
+    animation.start(({ finished }) => {
+      if (finished && !entryHapticSent.current) {
+        entryHapticSent.current = true;
+        detailOpenedHaptic();
+      }
+    });
     return () => animation.stop();
   }, [entryOrigin, entryProgress, hasMeasuredOrigin]);
   const panResponder = useMemo(() => PanResponder.create({

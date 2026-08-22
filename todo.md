@@ -223,3 +223,10 @@
 - [x] Adaptar offsets a áreas seguras y layouts amplios
 - [x] Mantener la transición estable al rotar la pantalla
 - [x] Validar teléfono, tableta y orientación dinámica
+
+## Haptic de apertura del detalle
+
+- [x] Revisar helper háptico y soporte de plataforma
+- [x] Activar impacto suave al completar la transición de apertura
+- [x] Respetar reduced motion y evitar duplicados
+- [x] Validar typecheck, tests y lint
