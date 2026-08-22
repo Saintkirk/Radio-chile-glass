@@ -29,17 +29,26 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
 
   if (!active) return null;
 
-  const cardStyle = (side: -1 | 0 | 1) => ({
-    opacity: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) : 0.85,
+  const requestChange = (nextDirection: number) => {
+    direction.current = nextDirection < 0 ? -1 : 1;
+    onChange(direction.current);
+  };
+
+  const cardStyle = (side: -1 | 0 | 1) => {
+    const endX = side * 112;
+    const startX = side === 0 ? direction.current * 230 : side === -direction.current ? 0 : side * 228;
+    return {
+    opacity: side === 0 ? motion.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.35, 0.8, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.85] }),
     transform: [
-      { translateX: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [direction.current * 46, 0] }) : 0 },
-      { scale: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [0.86, 1] }) : 0.82 },
+      { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [startX, endX] }) },
+      { scale: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [0.84, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.68, 0.82] }) },
       { rotateY: side === -1 ? "34deg" : side === 1 ? "-34deg" : "0deg" },
     ],
-  });
+    };
+  };
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1) => radio ? (
-    <Pressable onPress={() => onChange(side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
+    <Pressable onPress={() => requestChange(side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
       <Animated.View style={[styles.cover, styles.sideCover, cardStyle(side), { backgroundColor: `${radio.accent}32` }]}>
         <StationLogo radio={radio} size={124} radius={20} />
         <View style={styles.sideShade} />
@@ -64,9 +73,9 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
         {sideCard(next, 1)}
       </View>
       <View style={styles.captionRow}>
-        <Pressable onPress={() => onChange(-1)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={20} color="#F5F3EE" /></Pressable>
+        <Pressable onPress={() => requestChange(-1)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={20} color="#F5F3EE" /></Pressable>
         <View style={styles.caption}><Text style={[styles.stationName, lightMode && styles.stationNameLight]} numberOfLines={1}>{active.name}</Text><Text style={[styles.stationMeta, lightMode && styles.stationMetaLight]}>{active.frequency}  ·  {active.genre}</Text><Text style={styles.counter}>{activeIndex + 1} / {radios.length}</Text></View>
-        <Pressable onPress={() => onChange(1)} accessibilityRole="button" accessibilityLabel="Emisora siguiente" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.right" size={20} color="#F5F3EE" /></Pressable>
+        <Pressable onPress={() => requestChange(1)} accessibilityRole="button" accessibilityLabel="Emisora siguiente" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.right" size={20} color="#F5F3EE" /></Pressable>
       </View>
       <View style={styles.dots} accessibilityElementsHidden><View style={[styles.dot, styles.dotActive]} /><View style={styles.dot} /><View style={styles.dot} /></View>
     </View>

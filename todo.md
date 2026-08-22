@@ -574,3 +574,11 @@
 - [x] Sincronizar carrusel, navegación, audio, metadatos y control circular
 - [x] Validar gestos, accesibilidad, reduced motion y layout móvil
 - [x] Ejecutar typecheck, tests, lint y preview
+
+## Animación Slide direccional del Flow Cover
+
+- [x] Desplazar las carátulas horizontalmente según avance o retroceso
+- [x] Animar entrada, escala y opacidad de la nueva estación
+- [x] Coordinar movimiento de portada, metadatos y navegación
+- [x] Mantener audio, gestos, reduced motion y accesibilidad
+- [x] Validar typecheck, tests, lint y preview móvil
