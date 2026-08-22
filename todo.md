@@ -518,3 +518,12 @@
 - [x] Hacer más claro el desplazamiento de derecha a izquierda al avanzar
 - [x] Mantener dirección inversa al retroceder y controles fijos
 - [x] Validar gestos, accesibilidad, typecheck, tests, preview y checkpoint
+
+## Auditoría individual de logos y reproducción
+
+- [x] Inventariar 21 emisoras editoriales y 100 entradas remotas
+- [x] Verificar uno a uno los streams; mantener 112 válidos y excluir 7 endpoints Digital FM caídos
+- [x] Corregir StationLogo para mostrar los 21 assets locales, incluido Oasis FM
+- [x] Añadir fallback de favicon desde homepage para radios remotas sin favicon
+- [x] Documentar resultados en docs/catalog-audit.md y docs/catalog-audit.json
+- [x] Validar typecheck, 15 tests, lint, preview móvil y checkpoint

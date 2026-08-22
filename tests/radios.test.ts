@@ -30,6 +30,21 @@ describe("catálogo de radios chilenas", () => {
     expect(result[0].city).toBe("Valparaíso");
   });
 
+  it("excluye endpoints Digital FM que no responden", () => {
+    const result = normalizeRemoteStations([
+      { stationuuid: "digital", name: "Digital FM Concepción", country: "Chile", state: "Biobío", tags: "music", url_resolved: "https://radio.digitalfm.cl:8000/concepcion1", lastcheckok: 1 },
+      { stationuuid: "healthy", name: "Radio Saludable", country: "Chile", state: "Santiago", tags: "music", url_resolved: "https://healthy.example/live", lastcheckok: 1 },
+    ]);
+    expect(result.map((radio) => radio.name)).toEqual(["Radio Saludable"]);
+  });
+
+  it("usa el favicon del homepage cuando la fuente remota no entrega uno", () => {
+    const result = normalizeRemoteStations([
+      { stationuuid: "home", name: "Radio Homepage", country: "Chile", homepage: "https://radio.example.cl/", url_resolved: "https://radio.example.cl/live", lastcheckok: 1 },
+    ]);
+    expect(result[0].favicon).toBe("https://radio.example.cl/favicon.ico");
+  });
+
   it("fusiona el remoto sin eliminar FM Latina", () => {
     const merged = mergeCatalog([{ id: "remote-1", name: "Nueva FM", frequency: "En línea", city: "Chile", genre: "Música", description: "", streamUrl: "https://new.example/live", initials: "NF", accent: "#64D8FF" }]);
     expect(merged.some((radio) => radio.id === "fmlatina")).toBe(true);

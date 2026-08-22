@@ -58,6 +58,8 @@ const EDITORIAL_RADIOS: Radio[] = [
 const accents = ["#64D8FF", "#8B7CFF", "#1ED760", "#F2B6FF", "#FFD36A", "#1ED760"];
 const initials = (name: string) => name.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "FM";
 const genreFromTags = (tags: string) => { const value = tags.toLowerCase(); if (/news|noticia|talk|actual/.test(value)) return "Noticias"; if (/rock/.test(value)) return "Rock"; if (/pop|hit/.test(value)) return "Pop"; if (/jazz/.test(value)) return "Jazz"; if (/classic|clásic/.test(value)) return "Clásica"; return "Música"; };
+const isKnownBrokenStream = (url: string) => /radio\.digitalfm\.cl:8000/i.test(url);
+const fallbackFavicon = (homepage?: string) => { if (!homepage) return undefined; try { return `${new URL(homepage).origin}/favicon.ico`; } catch { return undefined; } };
 
 export function normalizeRemoteStations(input: RemoteStation[]): Radio[] {
   const seen = new Set<string>();
@@ -69,8 +71,11 @@ export function normalizeRemoteStations(input: RemoteStation[]): Radio[] {
     seen.add(key);
     const name = station.name!.trim().replace(/\s+/g, " ");
     const city = station.state?.trim() || "Chile";
+    if (isKnownBrokenStream(streamUrl)) return;
     const genre = genreFromTags(station.tags || "");
-    result.push({ id: `remote-${station.stationuuid || index}-${key.length}`, name, frequency: "En línea", city, genre, description: `${genre} desde ${city}.`, streamUrl, initials: initials(name), accent: accents[index % accents.length], ...(station.favicon ? { favicon: station.favicon } : {}), ...(station.homepage ? { homepage: station.homepage } : {}) });
+    const homepage = station.homepage?.trim();
+    const favicon = station.favicon?.trim() || fallbackFavicon(homepage);
+    result.push({ id: `remote-${station.stationuuid || index}-${key.length}`, name, frequency: "En línea", city, genre, description: `${genre} desde ${city}.`, streamUrl, initials: initials(name), accent: accents[index % accents.length], ...(favicon ? { favicon } : {}), ...(homepage ? { homepage } : {}) });
   });
   return result;
 }

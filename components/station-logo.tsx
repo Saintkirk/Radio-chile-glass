@@ -37,10 +37,11 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
     setFailed(false);
     if (radio.favicon) void prefetchLogo(radio.favicon);
   }, [radio.favicon]);
-  const showRemote = Boolean(radio.favicon && !failed);
+  const hasLocalLogo = Boolean(LOCAL_LOGOS[radio.id]);
+  const showLogo = Boolean((hasLocalLogo || radio.favicon) && !failed);
   return (
     <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}> 
-      {showRemote ? (
+      {showLogo ? (
         <Image
           source={LOCAL_LOGOS[radio.id] ?? { uri: radio.favicon }}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
@@ -52,7 +53,7 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
             const sourceWidth = event.source?.width ?? 0;
             const sourceHeight = event.source?.height ?? 0;
             const smallestSide = Math.min(sourceWidth, sourceHeight);
-            if (size >= 120 && smallestSide > 0 && smallestSide < size * 1.35) setFailed(true);
+            if (!hasLocalLogo && size >= 120 && smallestSide > 0 && smallestSide < size * 1.35) setFailed(true);
           }}
           onError={() => setFailed(true)}
         />
