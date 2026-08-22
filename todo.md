@@ -477,3 +477,10 @@
 - [x] Añadir halo y elevación sutil solo en hover web
 - [x] Mantener intacta la interacción táctil y la legibilidad
 - [x] Validar reduced motion, typecheck, tests, lint, preview y checkpoint
+
+## Sincronización de tarjeta hero y emisora activa
+
+- [x] Trazar por qué anterior y siguiente cambian solo la presentación
+- [x] Hacer que el cambio actualice la emisora activa y el audio global
+- [x] Mantener Play, mini-player, logo y metadatos sincronizados
+- [x] Validar botones, gestos, typecheck, tests, lint, preview y checkpoint

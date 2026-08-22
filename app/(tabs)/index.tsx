@@ -55,7 +55,14 @@ export default function HomeScreen() {
     return matchesQuery && matchesGenre;
   }), [activeGenre, query, radios]);
   useEffect(() => { setFeaturedIndex((index) => filtered.length ? index % filtered.length : 0); }, [filtered.length]);
-  const browseFeatured = (direction: number) => setFeaturedIndex((index) => { const total = filtered.length; return total ? (index + direction + total) % total : 0; });
+  const browseFeatured = (direction: number) => {
+    const total = filtered.length;
+    if (!total) return;
+    const nextIndex = (featuredIndex + direction + total) % total;
+    const nextRadio = filtered[nextIndex];
+    setFeaturedIndex(nextIndex);
+    void playRadio(nextRadio);
+  };
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
   return (
