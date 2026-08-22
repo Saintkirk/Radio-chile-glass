@@ -399,3 +399,10 @@
 - [x] Ajustar tarjetas, chips, hero, navegación y mini-player al lenguaje streaming
 - [x] Mantener glasmorfismo, legibilidad y controles accesibles
 - [x] Validar contraste, typecheck, tests, lint, preview y checkpoint
+
+## Navegación desde pantalla de reproducción
+
+- [x] Añadir botones anterior y siguiente junto al control Pausar
+- [x] Cambiar emisora circularmente usando el catálogo disponible
+- [x] Sincronizar logo, nombre, metadatos, favoritos y audio activo
+- [x] Añadir etiquetas accesibles y validar typecheck, tests, lint, preview y checkpoint
