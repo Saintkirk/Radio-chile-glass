@@ -527,3 +527,10 @@
 - [x] Añadir fallback de favicon desde homepage para radios remotas sin favicon
 - [x] Documentar resultados en docs/catalog-audit.md y docs/catalog-audit.json
 - [x] Validar typecheck, 15 tests, lint, preview móvil y checkpoint
+
+## Bug: Pausar/Reproducir no responde
+
+- [x] Trazar el flujo entre currentRadio, isPlaying y expo-audio
+- [x] Corregir pausa y reanudación del stream activo
+- [x] Sincronizar tarjeta hero, detalle y mini-player
+- [x] Añadir regresión automatizada y validar preview, lint y checkpoint

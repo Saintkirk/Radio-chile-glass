@@ -10,7 +10,7 @@ const CITY_OPTIONS = ["Todas", "Valparaíso", "Temuco", "La Serena", "Concepció
 
 export default function ExploreScreen() {
   const router = useRouter();
-  const { radios, playRadio, isPlaying, currentRadio } = useRadioPlayer();
+  const { radios, playRadio, togglePlay, isPlaying, currentRadio } = useRadioPlayer();
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("Todas");
   const regionalRadios = useMemo(() => radios.filter((radio) => radio.regional || (radio.city !== "Santiago" && radio.city !== "Cubre Chile")), [radios]);
@@ -25,7 +25,7 @@ export default function ExploreScreen() {
     return <Pressable onPress={() => router.push(`/radio/${item.id}`)} style={({ pressed, hovered }) => [styles.row, hovered && styles.rowHovered, pressed && styles.pressed]}>
       <StationLogo radio={item} size={54} radius={16} />
       <View style={styles.info}><Text style={styles.name}>{item.name}</Text><Text style={styles.meta}>{item.city}  ·  {item.genre}</Text></View>
-      <Pressable onPress={() => playRadio(item)} accessibilityRole="button" accessibilityLabel={playing ? `Pausar ${item.name}` : `Reproducir ${item.name}`} style={({ pressed }) => [styles.play, playing && styles.playActive, pressed && styles.pressed]}><IconSymbol name={playing ? "pause.fill" : "play.fill"} size={17} color="#F5F3EE" /></Pressable>
+      <Pressable onPress={() => playing ? togglePlay() : playRadio(item)} accessibilityRole="button" accessibilityLabel={playing ? `Pausar ${item.name}` : `Reproducir ${item.name}`} style={({ pressed }) => [styles.play, playing && styles.playActive, pressed && styles.pressed]}><IconSymbol name={playing ? "pause.fill" : "play.fill"} size={17} color="#F5F3EE" /></Pressable>
     </Pressable>;
   };
 

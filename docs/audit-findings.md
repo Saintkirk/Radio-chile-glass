@@ -9,3 +9,7 @@ El resultado bruto está en `docs/catalog-audit.json`. La auditoría debe contin
 ## Verificación visual
 
 La vista móvil de Inicio muestra los logos locales de FM Latina y Radio Cooperativa sin caer en iniciales. La pantalla de Oasis FM muestra correctamente el asset local de Oasis en la carátula, confirmando que el cambio de StationLogo permite renderizar logos locales incluso cuando la radio no publica favicon remoto. La auditoría final mantiene 112 streams válidos y excluye siete endpoints Digital FM que respondían vacío.
+
+## Verificación del bug de pausa
+
+La vista móvil de Inicio y la pantalla de detalle muestran los controles de reproducción correctamente. El bug identificado era que varias superficies llamaban siempre a playRadio, por lo que el botón con estado de pausa reiniciaba el stream en lugar de ejecutar pause. La corrección conecta el estado activo con togglePlay y mantiene playRadio solo para cambiar de emisora.
