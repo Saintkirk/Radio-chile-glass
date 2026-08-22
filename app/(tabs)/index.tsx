@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { RADIOS, useRadioPlayer, type Radio } from "@/lib/radio-player";
+import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 
 function RadioRow({ radio, onPlay, onFavorite, favorite }: { radio: Radio; onPlay: () => void; onFavorite: () => void; favorite: boolean }) {
   return (
@@ -26,10 +26,10 @@ function RadioRow({ radio, onPlay, onFavorite, favorite }: { radio: Radio; onPla
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { currentRadio, isPlaying, isLoading, playRadio, togglePlay, toggleFavorite, isFavorite } = useRadioPlayer();
+  const { currentRadio, isPlaying, isLoading, playRadio, togglePlay, toggleFavorite, isFavorite, radios, refreshCatalog, isRefreshingCatalog, catalogSource } = useRadioPlayer();
   const [query, setQuery] = useState("");
-  const filtered = useMemo(() => RADIOS.filter((radio) => `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase())), [query]);
-  const featured = currentRadio ?? RADIOS[0];
+  const filtered = useMemo(() => radios.filter((radio) => `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase())), [query, radios]);
+  const featured = currentRadio ?? radios[0];
 
   return (
     <ScreenContainer containerClassName="bg-[#090B12]" className="px-5 pt-3">
@@ -42,10 +42,10 @@ export default function HomeScreen() {
           <>
             <View style={styles.topBar}>
               <View><Text style={styles.eyebrow}>RADIO CHILE</Text><Text style={styles.title}>Escucha lo que{`\n`}te mueve.</Text></View>
-              <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
+              <Pressable onPress={() => refreshCatalog()} style={styles.settingsButton}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
             </View>
             <View style={styles.searchWrap}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor="#7F8799" style={styles.searchInput} /></View>
-            <Text style={styles.sectionLabel}>AHORA SONANDO</Text>
+            <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "Catálogo actualizado" : "Modo sin conexión"}</Text></View>
             <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, pressed && styles.pressed]}>
               <LinearGradient colors={[`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
               <View style={styles.heroOrb} /><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={styles.liveText}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={styles.heroFreq}>{featured.frequency}</Text></View>
@@ -73,6 +73,8 @@ const styles = StyleSheet.create({
   searchWrap: { height: 48, borderRadius: 16, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF14", flexDirection: "row", alignItems: "center", paddingHorizontal: 15, marginBottom: 28 },
   searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 },
   sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
+  syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  syncText: { color: "#76E0B5", fontSize: 10, fontWeight: "600", marginBottom: 12 },
   hero: { height: 210, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
   heroOrb: { position: "absolute", width: 190, height: 190, borderRadius: 100, right: -35, top: -48, backgroundColor: "#FFFFFF0B", borderWidth: 1, borderColor: "#FFFFFF10" },
   heroTop: { flexDirection: "row", alignItems: "center" },

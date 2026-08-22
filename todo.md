@@ -18,3 +18,13 @@
 - [x] Añadir iconos necesarios al mapa de IconSymbol
 - [x] Ejecutar typecheck, lint y tests deterministas
 - [x] Revisar todo el flujo de interacción y preparar checkpoint final
+
+## Sincronización remota
+
+- [x] Integrar fuente remota pública de radios chilenas
+- [x] Normalizar y validar estaciones remotas antes de mostrarlas
+- [x] Mantener FM Latina aunque la fuente remota no la devuelva
+- [x] Guardar caché local del catálogo y usar fallback sin conexión
+- [x] Añadir indicador de última actualización y estado de sincronización
+- [x] Preservar favoritos cuando cambie el catálogo remoto
+- [x] Añadir pruebas de normalización, fallback y actualización remota
