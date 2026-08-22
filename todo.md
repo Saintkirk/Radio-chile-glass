@@ -131,3 +131,10 @@
 - [x] Ajustar texto, metadatos y controles de favorito/reproducción
 - [x] Mantener estados pressed y acentos de emisora legibles
 - [x] Validar Inicio y Explorar en claro y oscuro
+
+## Prueba automatizada de contraste
+
+- [x] Crear utilidad de cálculo de contraste WCAG
+- [x] Definir pares de colores de tarjetas para claro y oscuro
+- [x] Probar texto principal, metadatos, controles y estados activos
+- [x] Ejecutar la prueba junto con Vitest y documentar los umbrales
