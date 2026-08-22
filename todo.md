@@ -419,3 +419,10 @@
 - [x] Reemplazar textos Anterior y Siguiente por iconos compactos
 - [x] Mantener etiquetas accesibles y contador central
 - [x] Validar visual móvil, typecheck, tests, lint, preview y checkpoint
+
+## Gestos horizontales en carátula
+
+- [x] Detectar deslizamiento horizontal sobre la carátula
+- [x] Cambiar a emisora anterior o siguiente según la dirección
+- [x] Evitar conflictos con el gesto vertical de cierre y el ScrollView
+- [x] Añadir feedback accesible y validar typecheck, tests, lint, preview y checkpoint
