@@ -251,3 +251,10 @@
 - [x] Mantener el toast accesible y no dependiente de hápticos
 - [x] Limpiar automáticamente la notificación breve
 - [x] Validar guardado, typecheck, tests y lint
+
+## Animación del toast
+
+- [x] Añadir entrada animada al toast
+- [x] Añadir salida animada al toast
+- [x] Mantener accesibilidad y desmontaje correcto
+- [x] Validar typecheck, tests y lint
