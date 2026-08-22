@@ -624,3 +624,12 @@
 - [x] Crear secciones regionales y filtros por las 16 regiones de Chile en Explorar
 - [x] Mantener búsqueda, género, favoritos, navegación y reproducción
 - [x] Validar streams candidatos, typecheck, 17 pruebas, lint y preview móvil
+
+## Auditoría adicional de radios-chilenas.com
+
+- [x] Revisar categorías, logos y candidatos de la fuente pública
+- [x] Verificar candidatos con homepage, identidad y stream
+- [x] Añadir 13C Radio, Radio La Mexicana y Radio Carnaval La Serena
+- [x] Mantener los candidatos con stream 400/404 o token temporal fuera del catálogo
+- [x] Documentar resultados en docs/catalog-audit.md
+- [x] Validar 18 pruebas, typecheck, lint y preview móvil

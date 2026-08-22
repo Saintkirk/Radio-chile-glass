@@ -1,0 +1,186 @@
+[
+  {
+    "name": "13C",
+    "state": "",
+    "homepage": "https://13cradio.cl/",
+    "favicon": "https://ott-assets.mdstrm.com/5c58a34e176c2c0813b22e4b/6305400df11545083964b856/assets/Logo13cRadio_sitio.png",
+    "stream": "https://us-b4-p-e-qg12-audio.cdn.mdstrm.com/live-audio-aw/5c915497c6fd7c085b29169d/playlist.m3u8",
+    "tags": "cultura,pop"
+  },
+  {
+    "name": "13c Radio",
+    "state": "Metropolitana de Santiago",
+    "homepage": "https://13cradio.cl/",
+    "favicon": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.facebook.com%2F13cRadio.cl%2F&psig=AOvVaw0tGx_Yv1k8Yp2FdTrBlj5j&ust=1700534834920000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJC7rYnI0YIDFQAAAAAdAAAAABAD",
+    "stream": "https://mdstrm.com/audio/5c915497c6fd7c085b29169d/live.m3u8",
+    "tags": ""
+  },
+  {
+    "name": "Carnaval Aconcagua",
+    "state": "San Felipe",
+    "homepage": "http://www.radiocarnaval.cl/",
+    "favicon": "https://www.radiocarnaval.cl/wp-content/uploads/2019/10/favicon-webcarnaval.png",
+    "stream": "http://sonando.us.digitalproserver.com/carnaval_aconcagua.aac",
+    "tags": ""
+  },
+  {
+    "name": "CARNAVAL ANTOFAGASTA",
+    "state": "",
+    "homepage": "https://envivo.radiocarnaval.cl/antofagasta/#",
+    "favicon": "",
+    "stream": "https://sonando-us.digitalproserver.com/carnaval_antofagasta.aac",
+    "tags": ""
+  },
+  {
+    "name": "Carnaval Punta Arenas",
+    "state": "Punta Arenas",
+    "homepage": "http://radiocarnaval.cl/patagonia/",
+    "favicon": "https://www.radiocarnaval.cl/wp-content/uploads/2019/10/favicon-webcarnaval.png",
+    "stream": "http://sonando.us.digitalproserver.com/carnaval_puntaarenas.aac",
+    "tags": ""
+  },
+  {
+    "name": "Carnaval Quillota",
+    "state": "Quillota",
+    "homepage": "http://www.radiocarnaval.cl/",
+    "favicon": "https://www.radiocarnaval.cl/wp-content/uploads/2019/10/favicon-webcarnaval.png",
+    "stream": "http://sonando.us.digitalproserver.com/carnaval_quillota.aac",
+    "tags": "cumbia"
+  },
+  {
+    "name": "Carnaval San Antonio",
+    "state": "San Antonio",
+    "homepage": "http://www.radiocarnaval.cl/",
+    "favicon": "https://www.radiocarnaval.cl/wp-content/uploads/2019/10/favicon-webcarnaval.png",
+    "stream": "http://sonando.us.digitalproserver.com/carnaval_sanantonio.aac",
+    "tags": ""
+  },
+  {
+    "name": "CARNAVAL VINA DEL MAR",
+    "state": "",
+    "homepage": "https://envivo.radiocarnaval.cl/vinadelmar/#",
+    "favicon": "http://envivo.radiocarnaval.cl/vinadelmar/img/img-log-reproductor.png?81549",
+    "stream": "https://sonando-us.digitalproserver.com/carnaval_vinadelmar.aac",
+    "tags": ""
+  },
+  {
+    "name": "Carnaval Viña del Mar",
+    "state": "Viña del Mar",
+    "homepage": "http://www.radiocarnaval.cl/",
+    "favicon": "",
+    "stream": "http://sonando.us.digitalproserver.com/carnaval_vinadelmar.aac",
+    "tags": ""
+  },
+  {
+    "name": "La Mexicana 95.3 San Vicente",
+    "state": "",
+    "homepage": "https://radiolamexicana.cl/",
+    "favicon": "https://radiolamexicana.cl/favicon.ico",
+    "stream": "http://audio0.tustreaming.cl:7160/aire",
+    "tags": ""
+  },
+  {
+    "name": "La Mexicana Chile",
+    "state": "",
+    "homepage": "https://radiolamexicana.cl/",
+    "favicon": "",
+    "stream": "https://audio0.tustreaming.cl/7170/casablanca",
+    "tags": ""
+  },
+  {
+    "name": "Radio 13c",
+    "state": "",
+    "homepage": "https://radio13c.cl/",
+    "favicon": "",
+    "stream": "https://us-b4-p-e-cg11-audio.cdn.mdstrm.com/live-audio-aw/5c915497c6fd7c085b29169d",
+    "tags": "cultural programming"
+  },
+  {
+    "name": "Radio 13c 102.1 FM",
+    "state": "Santiago",
+    "homepage": "https://radio13c.cl/",
+    "favicon": "https://ott-assets.mdstrm.com/5c58a34e176c2c0813b22e4b/6305400df11545083964b856/assets/logo_Radio13c_sitio.png?auto=format,compress&h=48",
+    "stream": "https://us-b4-p-e-cg11-audio.cdn.mdstrm.com/live-audio-aw/5c915497c6fd7c085b29169d",
+    "tags": "2000s,80s,90s,cultura,culture,entretenimiento,hits,information,música y noticias,noticias"
+  },
+  {
+    "name": "Radio Caricia",
+    "state": "",
+    "homepage": "https://www.radios-chilenas.com/radio-caricia",
+    "favicon": "",
+    "stream": "https://sonic.portalfoxmix.club/8244/stream/",
+    "tags": "miscellaneous"
+  },
+  {
+    "name": "RADIO CARICIA FM",
+    "state": "",
+    "homepage": "https://www.radioprensa.cl/radiosonline/radiocaricia.html",
+    "favicon": "",
+    "stream": "https://sonic.portalfoxmix.club/8244/stream/",
+    "tags": ""
+  },
+  {
+    "name": "Radio Carnaval (La Serena)",
+    "state": "La Serena",
+    "homepage": "https://radiocarnavalfm.cl/",
+    "favicon": "https://radiocarnavalfm.cl/wp/wp-content/uploads/2022/05/cropped-RADIO-CARNAVAL-300x300.jpg",
+    "stream": "https://cp2.streamchileno.cl//listen//radiocarnaval//radio.mp3",
+    "tags": ""
+  },
+  {
+    "name": "Radio Carnaval 104.5 FM",
+    "state": "Coquimbo",
+    "homepage": "https://radiocarnavalfm.cl/",
+    "favicon": "",
+    "stream": "https://cp2.streamchileno.cl//listen//radiocarnaval//radio.mp3",
+    "tags": ""
+  },
+  {
+    "name": "Radio Ignacio Serrano",
+    "state": "",
+    "homepage": "https://www.radioprensa.cl/radiosonline/radioserrano.html",
+    "favicon": "https://www.radioprensa.cl/favicon.ico",
+    "stream": "https://sonic.portalfoxmix.club/8242/stream/",
+    "tags": ""
+  },
+  {
+    "name": "Radio La Mexicana",
+    "state": "Valparaíso",
+    "homepage": "https://radiolamexicana.cl/",
+    "favicon": "https://radiolamexicana.cl/wp-content/uploads/2023/06/logomx.png",
+    "stream": "https://audio0.tustreaming.cl/7160/aire",
+    "tags": "ranchera,tropical"
+  },
+  {
+    "name": "Radio Nuevo Mundo",
+    "state": "",
+    "homepage": "https://radionuevomundo.cl/",
+    "favicon": "",
+    "stream": "http://190.82.105.90:8012/;",
+    "tags": ""
+  },
+  {
+    "name": "Radio Portales 1180 AM",
+    "state": "Santiago, Región Metropolitana",
+    "homepage": "https://radioportales.cl/sitio/",
+    "favicon": "https://static.mytuner.mobi/media/tvos_radios/263/radio-portales.59a5a520.png",
+    "stream": "http://audio3.tustreaming.cl:7350/stream",
+    "tags": "generalist,news,news talk,sports news,sports talk"
+  },
+  {
+    "name": "Radio Recuerdos",
+    "state": "Santiago, Región Metropolitana",
+    "homepage": "https://www.radiorecuerdos.cl/",
+    "favicon": "https://www.radiorecuerdos.cl/wp-content/uploads/2021/08/cropped-Caratula-Player-180x180.png",
+    "stream": "http://sonando.us.digitalproserver.com/radiorecuerdos.mp3",
+    "tags": "pop music,recuerdos"
+  },
+  {
+    "name": "Radio Sinfónica",
+    "state": "",
+    "homepage": "https://emisora.cl/sinfonica/",
+    "favicon": "",
+    "stream": "https://stream-176.surfernetwork.com/9wzpfshiu2nvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiI5d3pwZnNoaXUybnZ2IiwiaG9zdCI6InN0cmVhbS0xNzYuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IkNndHJWVUdLUWMyMUVXLTBLQTN6YnciLCJpYXQiOjE3ODczNjc3MDIsImV4cCI6MTc4NzM2Nzc2Mn0.xR9TNwaHTFAS8rNe1lfNsbEMzZBJtt23z94jBvUes3E",
+    "tags": ""
+  }
+]
