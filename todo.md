@@ -167,3 +167,10 @@
 - [x] Animar guardado y eliminación con escala suave
 - [x] Integrarlo en Inicio y Explorar junto con hápticos y toast
 - [x] Respetar reduced motion y validar typecheck
+
+## Transición del mini reproductor
+
+- [x] Crear entrada y salida animadas del mini reproductor
+- [x] Coordinar opacidad y desplazamiento vertical
+- [x] Respetar reduced motion y áreas seguras
+- [x] Validar aparición, ocultamiento y navegación en mobile

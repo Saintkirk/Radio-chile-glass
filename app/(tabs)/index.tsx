@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Animated, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
@@ -36,8 +36,23 @@ export default function HomeScreen() {
   const lightMode = colorScheme === "light";
   const [query, setQuery] = useState("");
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
+  const [miniRadio, setMiniRadio] = useState<Radio | null>(currentRadio);
+  const miniProgress = useRef(new Animated.Value(currentRadio ? 1 : 0)).current;
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+  useEffect(() => {
+    let active = true;
+    if (currentRadio) {
+      setMiniRadio(currentRadio);
+      Animated.timing(miniProgress, { toValue: 1, duration: 240, useNativeDriver: true }).start();
+      return () => { active = false; };
+
+    }
+    Animated.timing(miniProgress, { toValue: 0, duration: 200, useNativeDriver: true }).start(({ finished }) => {
+      if (finished && active) setMiniRadio(null);
+    });
+    return () => { active = false; };
+  }, [currentRadio, miniProgress]);
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const filtered = useMemo(() => radios.filter((radio) => `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase())), [query, radios]);
   const featured = currentRadio ?? radios[0];
@@ -70,7 +85,7 @@ export default function HomeScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
-      {currentRadio && <View style={styles.miniPlayer}><Pressable onPress={() => router.push(`/radio/${currentRadio.id}`)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><StationLogo radio={currentRadio} size={48} radius={14} /><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : currentRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></View>}
+      {miniRadio && <Animated.View style={[styles.miniPlayer, { opacity: miniProgress, transform: [{ translateY: miniProgress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}><Pressable onPress={() => router.push(`/radio/${miniRadio.id}`)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><StationLogo radio={miniRadio} size={48} radius={14} /><View style={{ flex: 1 }}><Text style={styles.miniName}>{miniRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : miniRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></Animated.View>}
     <FavoriteToast message={favoriteNotice} /></ScreenContainer>
   );
 }
