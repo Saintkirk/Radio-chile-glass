@@ -265,3 +265,17 @@
 - [x] Cancelar el temporizador anterior antes de mostrar un nuevo mensaje
 - [x] Reiniciar la duración del toast en cada guardado
 - [x] Limpiar el temporizador al desmontar y validar typecheck, tests y lint
+
+## Conectividad de emisoras
+
+- [x] Extraer todas las URLs de streaming del catálogo
+- [x] Comprobar disponibilidad y tipo de respuesta de cada stream
+- [x] Verificar específicamente la conexión de FM Latina
+- [x] Corregir o documentar enlaces no reproducibles y validar resultados
+
+## Lista inicial de emisoras principales
+
+- [x] Definir emisoras prioritarias de alcance nacional y mantener FM Latina
+- [x] Verificar conexión de los streams priorizados
+- [x] Reordenar la portada según la selección principal
+- [x] Mantener catálogo ampliado disponible en Explorar y validar cambios
