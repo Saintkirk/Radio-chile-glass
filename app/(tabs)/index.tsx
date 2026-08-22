@@ -59,7 +59,7 @@ export default function HomeScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
-      {currentRadio && <Pressable onPress={togglePlay} style={styles.miniPlayer}><View style={[styles.miniArtwork, { backgroundColor: `${currentRadio.accent}CC` }]}><Text style={styles.miniInitials}>{currentRadio.initials}</Text></View><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={currentRadio.accent} barCount={5} compact /><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable>}
+      {currentRadio && <View style={styles.miniPlayer}><Pressable onPress={() => router.push(`/radio/${currentRadio.id}`)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><View style={[styles.miniArtwork, { backgroundColor: `${currentRadio.accent}CC` }]}><Text style={styles.miniInitials}>{currentRadio.initials}</Text></View><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={currentRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></View>}
     </ScreenContainer>
   );
 }
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.78, transform: [{ scale: 0.985 }] },
   empty: { color: "#A8B0C2", textAlign: "center", paddingVertical: 30 },
   miniPlayer: { position: "absolute", left: 16, right: 16, bottom: 8, minHeight: 68, borderRadius: 20, backgroundColor: "#1D2333F2", borderWidth: 1, borderColor: "#FFFFFF1C", padding: 9, flexDirection: "row", alignItems: "center", gap: 12 },
-  miniArtwork: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  miniMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 11 }, miniControl: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" }, miniArtwork: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   miniInitials: { color: "#090B12", fontSize: 13, fontWeight: "800" },
   miniName: { color: "#F5F3EE", fontSize: 14, fontWeight: "700" },
   miniMeta: { color: "#9AA2B3", fontSize: 11, marginTop: 4 },

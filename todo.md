@@ -66,3 +66,9 @@
 - [x] Añadir variante compacta del ecualizador al mini reproductor
 - [x] Sincronizarlo con la radio activa y el estado de pausa
 - [x] Validar que no desborde el mini reproductor en mobile
+
+## Navegación desde mini reproductor
+
+- [x] Abrir el detalle al tocar el contenido del mini reproductor
+- [x] Mantener el botón de reproducción/pausa como acción independiente
+- [x] Validar la ruta de la emisora activa y el layout móvil
