@@ -37,7 +37,7 @@ async function checkStream(url) {
     if (reader) await reader.cancel();
     const hls = type.includes("mpegurl") || type.includes("x-mpegurl");
     const audio = type.startsWith("audio/") || type.includes("octet-stream") || hls;
-    return { status: response.status, contentType: type, bytes: first.value?.length ?? 0, ok: response.ok && audio && Boolean(first.value?.length), hls };
+    return { status: response.status, finalUrl: response.url, contentType: type, icyName: response.headers.get("icy-name"), server: response.headers.get("server"), bytes: first.value?.length ?? 0, ok: response.ok && audio && Boolean(first.value?.length), hls };
   } catch (error) { return { status: null, contentType: null, bytes: 0, ok: false, reason: error instanceof Error ? error.message : String(error) }; }
 }
 

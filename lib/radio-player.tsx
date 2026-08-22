@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
+import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -27,7 +28,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    AsyncStorage.getItem("radio-favorites").then((value) => { if (value) setFavorites(JSON.parse(value)); });
+    loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
     AsyncStorage.getItem("radio-background-playback").then((value) => { if (value !== null) setBackgroundPlaybackEnabled(value !== "false"); });
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
     refreshCatalog().catch(() => undefined);
@@ -44,7 +45,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     finally { setIsLoading(false); }
   };
   const togglePlay = () => { if (!playerRef.current) return; if (isPlaying) { playerRef.current.pause(); setIsPlaying(false); } else { playerRef.current.play(); setIsPlaying(true); } };
-  const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = previous.includes(radioId) ? previous.filter((id) => id !== radioId) : [...previous, radioId]; AsyncStorage.setItem("radio-favorites", JSON.stringify(next)).catch(() => undefined); return next; }); };
+  const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = previous.includes(radioId) ? previous.filter((id) => id !== radioId) : [...previous, radioId]; saveFavoriteIds(next).catch(() => undefined); return next; }); };
   const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled]);
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }

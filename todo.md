@@ -330,3 +330,18 @@
 - [x] Comparar señales con fuentes oficiales cuando sea posible
 - [x] Corregir o retirar radios no verificables
 - [x] Ejecutar validación final y documentar resultados por emisora
+
+## Favoritos locales en navegador
+
+- [x] Confirmar botón de favoritos visible y accesible
+- [x] Persistir favoritos en localStorage o almacenamiento web equivalente
+- [x] Mantener sincronizado el estado entre portada, detalle y Favoritos
+- [x] Validar persistencia tras recarga, typecheck, tests y lint
+
+## Correspondencia logo y streaming
+
+- [x] Enumerar dominio oficial, logo y stream de cada emisora
+- [x] Contrastar cada logo con la marca correspondiente
+- [x] Contrastar cada stream con el nombre y proveedor oficial
+- [x] Corregir o retirar coincidencias dudosas
+- [x] Documentar y validar el catálogo final
