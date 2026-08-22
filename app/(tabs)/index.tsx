@@ -7,6 +7,7 @@ import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
+import { useThemeContext } from "@/lib/theme-provider";
 
 function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean }) {
   return (
@@ -27,6 +28,8 @@ function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite }: { radio: Radi
 export default function HomeScreen() {
   const router = useRouter();
   const { currentRadio, isPlaying, isLoading, playRadio, togglePlay, toggleFavorite, isFavorite, radios, refreshCatalog, isRefreshingCatalog, catalogSource } = useRadioPlayer();
+  const { colorScheme } = useThemeContext();
+  const lightMode = colorScheme === "light";
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => radios.filter((radio) => `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase())), [query, radios]);
   const featured = currentRadio ?? radios[0];
@@ -46,11 +49,11 @@ export default function HomeScreen() {
             </View>
             <View style={styles.searchWrap}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor="#7F8799" style={styles.searchInput} /></View>
             <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "Catálogo actualizado" : "Modo sin conexión"}</Text></View>
-            <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, pressed && styles.pressed]}>
-              <LinearGradient colors={[`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-              <View style={styles.heroOrb} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={styles.liveText}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={styles.heroFreq}>{featured.frequency}</Text></View>
-              <View style={styles.heroBottom}><Text style={styles.heroName}>{featured.name}</Text><Text style={styles.heroGenre}>{featured.city}  ·  {featured.genre}</Text></View>
-              <Pressable onPress={togglePlay} style={styles.heroPlay}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={25} color="#090B12" /></Pressable>
+            <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, lightMode && styles.heroLight, pressed && styles.pressed]}>
+              <LinearGradient colors={lightMode ? [`${featured.accent}CC`, "#EEF2FF", "#F8FAFC"] : [`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+              <View style={[styles.heroOrb, lightMode && styles.heroOrbLight]} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={[styles.liveText, lightMode && styles.heroTextLight]}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={[styles.heroFreq, lightMode && styles.heroTextLight]}>{featured.frequency}</Text></View>
+              <View style={styles.heroBottom}><Text style={[styles.heroName, lightMode && styles.heroTextLight]}>{featured.name}</Text><Text style={[styles.heroGenre, lightMode && styles.heroSubtextLight]}>{featured.city}  ·  {featured.genre}</Text></View>
+              <Pressable onPress={togglePlay} style={[styles.heroPlay, lightMode && styles.heroPlayLight]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={25} color={lightMode ? "#F8FAFC" : "#090B12"} /></Pressable>
             </Pressable>
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
@@ -59,7 +62,7 @@ export default function HomeScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
-      {currentRadio && <View style={styles.miniPlayer}><Pressable onPress={() => router.push(`/radio/${currentRadio.id}`)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><StationLogo radio={currentRadio} size={48} radius={14} /><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={currentRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></View>}
+      {currentRadio && <View style={styles.miniPlayer}><Pressable onPress={() => router.push(`/radio/${currentRadio.id}`)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><StationLogo radio={currentRadio} size={48} radius={14} /><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : currentRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></View>}
     </ScreenContainer>
   );
 }
@@ -75,9 +78,10 @@ const styles = StyleSheet.create({
   sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   syncText: { color: "#76E0B5", fontSize: 10, fontWeight: "600", marginBottom: 12 },
-  hero: { height: 210, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
+  heroLight: { borderColor: "#CBD5E1" }, hero: { height: 210, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
   heroLogo: { position: "absolute", right: 18, top: 54, opacity: 0.96 },
-  heroOrb: { position: "absolute", width: 190, height: 190, borderRadius: 100, right: -35, top: -48, backgroundColor: "#FFFFFF0B", borderWidth: 1, borderColor: "#FFFFFF10" },
+  heroTextLight: { color: "#172033" }, heroSubtextLight: { color: "#46536B" }, heroPlayLight: { backgroundColor: "#172033" },
+  heroOrbLight: { backgroundColor: "#FFFFFF55", borderColor: "#FFFFFFAA" }, heroOrb: { position: "absolute", width: 190, height: 190, borderRadius: 100, right: -35, top: -48, backgroundColor: "#FFFFFF0B", borderWidth: 1, borderColor: "#FFFFFF10" },
   heroTop: { flexDirection: "row", alignItems: "center" },
   liveDot: { width: 8, height: 8, borderRadius: 5, marginRight: 8 },
   liveText: { color: "#F5F3EE", fontSize: 10, fontWeight: "700", letterSpacing: 1.3 },

@@ -117,3 +117,10 @@
 - [x] Persistir la preferencia de tema localmente
 - [x] Conectar la selección con ThemeProvider
 - [x] Validar legibilidad, persistencia y layout móvil
+
+## Contraste visual en modo claro
+
+- [x] Crear paleta adaptativa para carátula hero en modo claro
+- [x] Ajustar textos, frecuencia, orb y botón sobre fondo claro
+- [x] Ajustar color del ecualizador activo y reposo en modo claro
+- [x] Validar contraste y composición en claro y oscuro
