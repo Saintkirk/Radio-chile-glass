@@ -1,0 +1,122 @@
+[
+  {
+    "name": "100.9 Play FM",
+    "state": "",
+    "homepage": "https://playfm.cl/",
+    "favicon": "https://ott-assets.mdstrm.com/5c58a34e176c2c0813b22e4b/633db501b938191960de607d/assets/playconfondo.png",
+    "stream": "https://mdstrm.com/audio/5c8d6406f98fbf269f57c82c/icecast.audio",
+    "tags": "hits,pop,pop music,pop rock,top 100,top 40,top hits"
+  },
+  {
+    "name": "4FUN ROCK",
+    "state": "",
+    "homepage": "https://zeno.fm/radio/4fun-rock/",
+    "favicon": "",
+    "stream": "https://sonic-us.arkeo.cl/8358/stream",
+    "tags": "punk rock"
+  },
+  {
+    "name": "De los Recuerdos",
+    "state": "",
+    "homepage": "http://www.fmdelosrecuerdos.cl/online.php",
+    "favicon": "https://www.fmdelosrecuerdos.cl/wp-content/uploads/2023/02/cropped-fav-recuerdos-180x180.png",
+    "stream": "http://sonando.us.digitalproserver.com/fmdelosrecuerdos.aac",
+    "tags": ""
+  },
+  {
+    "name": "El Conquistador FM",
+    "state": "",
+    "homepage": "https://www.elconquistadorfm.net/",
+    "favicon": "",
+    "stream": "https://stream10.usastreams.com/9314/stream",
+    "tags": ""
+  },
+  {
+    "name": "El Conquistador Fm (Santiago)",
+    "state": "",
+    "homepage": "",
+    "favicon": "",
+    "stream": "https://stream10.usastreams.com/9314/stream/",
+    "tags": "pop"
+  },
+  {
+    "name": "FM de los Recuerdos",
+    "state": "",
+    "homepage": "http://www.fmdelosrecuerdos.cl/online.php",
+    "favicon": "",
+    "stream": "http://sonando.us.digitalproserver.com/fmdelosrecuerdos.aac",
+    "tags": ""
+  },
+  {
+    "name": "FM De Los Recuerdos",
+    "state": "",
+    "homepage": "https://www.fmdelosrecuerdos.cl/",
+    "favicon": "https://www.fmdelosrecuerdos.cl/wp-content/uploads/2021/07/logohead.png",
+    "stream": "https://sonando.us.digitalproserver.com/fmdelosrecuerdos.aac",
+    "tags": "60s,70s,80s,90s,baladas en español,música en español,oldies,retro"
+  },
+  {
+    "name": "FM PlayBack",
+    "state": "",
+    "homepage": "https://zeno.fm/radio/fm-playback/",
+    "favicon": "",
+    "stream": "https://audio3.tustreaming.cl/7270/stream",
+    "tags": ""
+  },
+  {
+    "name": "FM Siete Rock",
+    "state": "",
+    "homepage": "https://www.fm7.cl/",
+    "favicon": "https://fm7.s3-accelerate.amazonaws.com/media/img/stations/2a520731-069b-4ef6-a110-590b65f72dda.png",
+    "stream": "https://sp1.streamingssl.com/8036/stream",
+    "tags": ""
+  },
+  {
+    "name": "Frecuencia Rock 95.3",
+    "state": "",
+    "homepage": "",
+    "favicon": "",
+    "stream": "http://audio.streaminghd.cl:9206/stream",
+    "tags": "rock"
+  },
+  {
+    "name": "Frecuencia Rock 95.3",
+    "state": "",
+    "homepage": "https://frecuenciarock.cl/",
+    "favicon": "",
+    "stream": "http://audio.streaminghd.cl:9206/stream",
+    "tags": "rock"
+  },
+  {
+    "name": "La Clave 92.9FM",
+    "state": "Santiago",
+    "homepage": "https://radiolaclave.cl/",
+    "favicon": "",
+    "stream": "https://unlimited1-cl-isp.dps.live/laclavetv/laclavetv.smil/playlist.m3u8",
+    "tags": "80s,hits,news,pop,rock"
+  },
+  {
+    "name": "María",
+    "state": "Santiago",
+    "homepage": "https://www.radiomaria.cl/",
+    "favicon": "",
+    "stream": "http://dreamsiteradiocp4.com:8024/",
+    "tags": "catholic,christian"
+  },
+  {
+    "name": "Master of Rock Chile",
+    "state": "Valparaíso",
+    "homepage": "https://zeno.fm/radio/master-of-rock-chile/",
+    "favicon": "https://zeno.fm/_ipx/_/https://images.zeno.fm/ldTgc_P3vzTWAj3rWPnfYugBl2CRgKlNnH-BgbwsvnQ/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvZmMxMjk3OGItMDQ3Ny00ZWEzLTk1NmUtZTZlODAxOTIxMzQ4L2ltYWdlLz91PTE3MjQ2MzQxMzMwMDA.webp",
+    "stream": "https://stream.zeno.fm/n0ndubthhaytv",
+    "tags": "rock"
+  },
+  {
+    "name": "Play FM",
+    "state": "",
+    "homepage": "https://playfm.cl/",
+    "favicon": "",
+    "stream": "https://azura.servercast.com.br/listen/radio_fernanda/radio.mp3",
+    "tags": ""
+  }
+]

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mergeCatalog, normalizeRemoteStations, RADIOS } from "../lib/radios";
+import { mergeCatalog, normalizeRemoteStations, RADIOS, regionFromCity } from "../lib/radios";
 
 describe("catálogo de radios chilenas", () => {
   it("incluye FM Latina como radio destacada", () => {
@@ -16,6 +16,18 @@ describe("catálogo de radios chilenas", () => {
       expect(radio.frequency.length).toBeGreaterThan(0);
       expect(radio.city.length).toBeGreaterThan(0);
     });
+  });
+
+  it("incluye emisoras adicionales verificadas de Santiago", () => {
+    expect(RADIOS.map((radio) => radio.id)).toEqual(expect.arrayContaining(["play-fm", "conquistador", "radio-maria", "la-clave"]));
+    expect(RADIOS.filter((radio) => radio.city === "Santiago").length).toBeGreaterThanOrEqual(20);
+  });
+
+  it("clasifica ciudades chilenas en sus regiones", () => {
+    expect(regionFromCity("Santiago")).toBe("Región Metropolitana");
+    expect(regionFromCity("Valparaíso")).toBe("Valparaíso");
+    expect(regionFromCity("Temuco")).toBe("La Araucanía");
+    expect(regionFromCity("Puerto Montt")).toBe("Los Lagos");
   });
 
   it("normaliza estaciones chilenas válidas y descarta duplicados o streams rotos", () => {

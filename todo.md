@@ -615,3 +615,12 @@
 - [x] Mostrar now playing de forma compacta en el mini reproductor
 - [x] Añadir fallback cuando la emisora no publica metadatos
 - [x] Validar typecheck, tests, lint y preview móvil
+
+## Catálogo ampliado y regiones
+
+- [x] Auditar candidatos de Santiago con fuentes públicas y Radio Browser
+- [x] Añadir Play FM, El Conquistador FM, Radio María Chile y Radio La Clave
+- [x] Añadir clasificación automática por región para emisoras editoriales y remotas
+- [x] Crear secciones regionales y filtros por las 16 regiones de Chile en Explorar
+- [x] Mantener búsqueda, género, favoritos, navegación y reproducción
+- [x] Validar streams candidatos, typecheck, 17 pruebas, lint y preview móvil

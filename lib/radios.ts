@@ -12,6 +12,7 @@ export type Radio = {
   accent: string;
   featured?: boolean;
   regional?: boolean;
+  region?: string;
   favicon?: string;
   homepage?: string;
 };
@@ -50,9 +51,13 @@ const EDITORIAL_RADIOS: Radio[] = [
   { id: "duna", name: "Radio Duna", frequency: "89.7 FM", city: "Santiago", genre: "Actualidad", description: "Información, cultura y música cuidadosamente seleccionada.", streamUrl: "https://mdstrm.com/audio/67f42f96e464d19a6eda3c7d/icecast.audio", initials: "DU", accent: "#64D8FF", homepage: "https://www.duna.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/351/radio-duna.2949e2d8.jpg" },
   { id: "oasis", name: "Oasis FM", frequency: "102.1 FM", city: "Santiago", genre: "Música", description: "Música y contenidos para disfrutar con calma.", streamUrl: "https://mdstrm.com/audio/5c915497c6fd7c085b29169d/live.m3u8", initials: "OA", accent: "#1ED760", homepage: "https://oasisfm.cl/home" },
   { id: "beethoven", name: "Radio Beethoven", frequency: "97.7 FM", city: "Santiago", genre: "Clásica", description: "Música clásica, cultura y conocimiento para escuchar distinto.", streamUrl: "https://unlimited5-us.dps.live/beethovenfm/aac/icecast.audio", initials: "BE", accent: "#F2B6FF", homepage: "https://www.beethovenfm.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/827/radio-beethoven.6119e830.png" },
-  { id: "festival", name: "Radio Festival", frequency: "93.7 FM", city: "Valparaíso", genre: "Música y compañía", description: "La radio de Valparaíso y Viña del Mar, con música y compañía regional.", streamUrl: "https://stream.festival.cl/1", initials: "FE", accent: "#FFD36A", regional: true, homepage: "https://www.radiofestival.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/170/radio-festival.8d55ce30.jpg" },
-  { id: "punto7-temuco", name: "Radio Punto 7 Temuco", frequency: "95.7 FM", city: "Temuco", genre: "Música y noticias", description: "Información, música y compañía desde La Araucanía.", streamUrl: "https://redirector.dps.live/p7temuco/aac/icecast.audio", initials: "P7", accent: "#64D8FF", regional: true, homepage: "https://www.punto7.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/zskhvcfxt4xp.png" },
-  { id: "edelweiss", name: "Radio Edelweiss", frequency: "Cubre Temuco", city: "Temuco", genre: "Música", description: "Selección musical y compañía desde Temuco.", streamUrl: "https://encoder.stationlink.cl/listen/edelweiss/radio.mp3", initials: "ED", accent: "#1ED760", regional: true, homepage: "https://edelweiss.fm/", favicon: "https://edelweiss.fm/wp-content/uploads/2022/07/logo-edelweiss-100x100.png" },
+  { id: "play-fm", name: "Play FM", frequency: "100.9 FM", city: "Santiago", region: "Región Metropolitana", genre: "Música", description: "Pop, clásicos y canciones para escuchar con calma.", streamUrl: "https://mdstrm.com/audio/5c8d6406f98fbf269f57c82c/icecast.audio", initials: "PL", accent: "#F2B6FF", homepage: "https://playfm.cl/", favicon: "https://ott-assets.mdstrm.com/5c58a34e176c2c0813b22e4b/633db501b938191960de607d/assets/playconfondo.png" },
+  { id: "conquistador", name: "El Conquistador FM", frequency: "91.3 FM", city: "Santiago", region: "Región Metropolitana", genre: "Actualidad", description: "Información, conversación y compañía desde Santiago.", streamUrl: "https://stream10.usastreams.com/9314/stream", initials: "EC", accent: "#FFD36A", homepage: "https://www.elconquistadorfm.net/" },
+  { id: "radio-maria", name: "Radio María Chile", frequency: "89.3 FM", city: "Santiago", region: "Región Metropolitana", genre: "Religiosa", description: "Programación espiritual y compañía para Chile.", streamUrl: "http://dreamsiteradiocp4.com:8024/", initials: "RM", accent: "#64D8FF", homepage: "https://www.radiomaria.cl/" },
+  { id: "la-clave", name: "Radio La Clave", frequency: "92.9 FM", city: "Santiago", region: "Región Metropolitana", genre: "Noticias", description: "Noticias, análisis y conversación con mirada actual.", streamUrl: "https://unlimited1-cl-isp.dps.live/laclavetv/laclavetv.smil/playlist.m3u8", initials: "LC", accent: "#8B7CFF", homepage: "https://radiolaclave.cl/" },
+  { id: "festival", name: "Radio Festival", frequency: "93.7 FM", city: "Valparaíso", region: "Región de Valparaíso", genre: "Música y compañía", description: "La radio de Valparaíso y Viña del Mar, con música y compañía regional.", streamUrl: "https://stream.festival.cl/1", initials: "FE", accent: "#FFD36A", regional: true, homepage: "https://www.radiofestival.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/170/radio-festival.8d55ce30.jpg" },
+  { id: "punto7-temuco", name: "Radio Punto 7 Temuco", frequency: "95.7 FM", city: "Temuco", region: "Región de La Araucanía", genre: "Música y noticias", description: "Información, música y compañía desde La Araucanía.", streamUrl: "https://redirector.dps.live/p7temuco/aac/icecast.audio", initials: "P7", accent: "#64D8FF", regional: true, homepage: "https://www.punto7.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/zskhvcfxt4xp.png" },
+  { id: "edelweiss", name: "Radio Edelweiss", frequency: "Cubre Temuco", city: "Temuco", region: "Región de La Araucanía", genre: "Música", description: "Selección musical y compañía desde Temuco.", streamUrl: "https://encoder.stationlink.cl/listen/edelweiss/radio.mp3", initials: "ED", accent: "#1ED760", regional: true, homepage: "https://edelweiss.fm/", favicon: "https://edelweiss.fm/wp-content/uploads/2022/07/logo-edelweiss-100x100.png" },
 ];
 
 const accents = ["#64D8FF", "#8B7CFF", "#1ED760", "#F2B6FF", "#FFD36A", "#1ED760"];
@@ -60,6 +65,27 @@ const initials = (name: string) => name.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑ�
 const genreFromTags = (tags: string) => { const value = tags.toLowerCase(); if (/news|noticia|talk|actual/.test(value)) return "Noticias"; if (/rock/.test(value)) return "Rock"; if (/pop|hit/.test(value)) return "Pop"; if (/jazz/.test(value)) return "Jazz"; if (/classic|clásic/.test(value)) return "Clásica"; return "Música"; };
 const isKnownBrokenStream = (url: string) => /radio\.digitalfm\.cl:8000/i.test(url);
 const fallbackFavicon = (homepage?: string) => { if (!homepage) return undefined; try { return `${new URL(homepage).origin}/favicon.ico`; } catch { return undefined; } };
+
+export function regionFromCity(city: string): string {
+  const value = city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (value.includes("santiago") || value.includes("metropolitana")) return "Región Metropolitana";
+  if (value.includes("arica") || value.includes("parinacota")) return "Arica y Parinacota";
+  if (value.includes("iquique") || value.includes("alto hospicio") || value.includes("tarapaca")) return "Tarapacá";
+  if (value.includes("antofagasta") || value.includes("calama") || value.includes("tocopilla")) return "Antofagasta";
+  if (value.includes("copiapo") || value.includes("vallenar") || value.includes("atacama")) return "Atacama";
+  if (value.includes("la serena") || value.includes("coquimbo") || value.includes("ovalle") || value.includes("coquimbo")) return "Coquimbo";
+  if (value.includes("valparaiso") || value.includes("vina") || value.includes("quilpue") || value.includes("san antonio")) return "Valparaíso";
+  if (value.includes("rancagua") || value.includes("san fernando") || value.includes("ohiggins")) return "O'Higgins";
+  if (value.includes("talca") || value.includes("curico") || value.includes("linares") || value.includes("maule")) return "Maule";
+  if (value.includes("chillan") || value.includes("nuble")) return "Ñuble";
+  if (value.includes("concepcion") || value.includes("talcahuano") || value.includes("los angeles") || value.includes("biobio")) return "Biobío";
+  if (value.includes("temuco") || value.includes("villarrica") || value.includes("pucon") || value.includes("araucania")) return "La Araucanía";
+  if (value.includes("valdivia") || value.includes("rio bueno") || value.includes("rios")) return "Los Ríos";
+  if (value.includes("puerto montt") || value.includes("osorno") || value.includes("castro") || value.includes("chiloe") || value.includes("lagos")) return "Los Lagos";
+  if (value.includes("coyhaique") || value.includes("aysen")) return "Aysén";
+  if (value.includes("punta arenas") || value.includes("puerto natales") || value.includes("magallanes")) return "Magallanes";
+  return "Sin región";
+}
 
 export function normalizeRemoteStations(input: RemoteStation[]): Radio[] {
   const seen = new Set<string>();
@@ -75,7 +101,7 @@ export function normalizeRemoteStations(input: RemoteStation[]): Radio[] {
     const genre = genreFromTags(station.tags || "");
     const homepage = station.homepage?.trim();
     const favicon = station.favicon?.trim() || fallbackFavicon(homepage);
-    result.push({ id: `remote-${station.stationuuid || index}-${key.length}`, name, frequency: "En línea", city, genre, description: `${genre} desde ${city}.`, streamUrl, initials: initials(name), accent: accents[index % accents.length], ...(favicon ? { favicon } : {}), ...(homepage ? { homepage } : {}) });
+    result.push({ id: `remote-${station.stationuuid || index}-${key.length}`, name, frequency: "En línea", city, region: regionFromCity(city), genre, description: `${genre} desde ${city}.`, streamUrl, initials: initials(name), accent: accents[index % accents.length], ...(favicon ? { favicon } : {}), ...(homepage ? { homepage } : {}) });
   });
   return result;
 }
