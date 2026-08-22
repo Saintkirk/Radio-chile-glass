@@ -46,3 +46,10 @@
 - [x] Añadir enlace a la página web oficial
 - [x] Conectar las tarjetas de Inicio, Explorar y Favoritos al detalle
 - [x] Validar navegación, enlace externo y estados sin homepage
+
+## Fondo dinámico del detalle
+
+- [x] Añadir imagen de logo como fondo ampliado y desenfocado
+- [x] Aplicar overlay oscuro y gradiente para asegurar legibilidad
+- [x] Mantener fallback visual cuando no exista favicon remoto
+- [x] Validar el detalle en mobile y actualizar checkpoint
