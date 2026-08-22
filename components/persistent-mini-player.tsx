@@ -1,0 +1,76 @@
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StationLogo } from "@/components/station-logo";
+import { AudioEqualizer } from "@/components/audio-equalizer";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useRadioPlayer, type Radio } from "@/lib/radio-player";
+import { useThemeContext } from "@/lib/theme-provider";
+
+export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number }) {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
+  const { currentRadio, isPlaying, isLoading, togglePlay } = useRadioPlayer();
+  const { colorScheme } = useThemeContext();
+  const [miniRadio, setMiniRadio] = useState<Radio | null>(currentRadio);
+  const progress = useRef(new Animated.Value(currentRadio ? 1 : 0)).current;
+  const containerRef = useRef<View>(null);
+  const logoRef = useRef<View>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (currentRadio) {
+      setMiniRadio(currentRadio);
+      Animated.timing(progress, { toValue: 1, duration: 240, useNativeDriver: true }).start();
+      return () => { active = false; };
+    }
+    Animated.timing(progress, { toValue: 0, duration: 200, useNativeDriver: true }).start(({ finished }) => {
+      if (finished && active) setMiniRadio(null);
+    });
+    return () => { active = false; };
+  }, [currentRadio, progress]);
+
+  const openDetail = (radio: Radio) => {
+    containerRef.current?.measureInWindow((containerX, containerY, containerWidth, containerHeight) => {
+      logoRef.current?.measureInWindow((originX, originY, originWidth, originHeight) => {
+        router.push({ pathname: "/radio/[id]", params: {
+          id: radio.id,
+          originX: originX.toFixed(2), originY: originY.toFixed(2),
+          originWidth: originWidth.toFixed(2), originHeight: originHeight.toFixed(2),
+          containerX: containerX.toFixed(2), containerY: containerY.toFixed(2),
+          containerWidth: containerWidth.toFixed(2), containerHeight: containerHeight.toFixed(2),
+          viewportWidth: viewportWidth.toFixed(2), viewportHeight: viewportHeight.toFixed(2),
+        } });
+      });
+    });
+  };
+
+  if (!miniRadio) return null;
+  const lightMode = colorScheme === "light";
+  const bottom = bottomOffset + Math.max(insets.bottom, 0);
+
+  return (
+    <Animated.View ref={containerRef} collapsable={false} style={[styles.container, { bottom, opacity: progress, transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}>
+      <Pressable onPress={() => openDetail(miniRadio)} accessibilityRole="button" accessibilityLabel={`Abrir reproductor de ${miniRadio.name}`} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
+        <View ref={logoRef} collapsable={false}><StationLogo radio={miniRadio} size={48} radius={14} /></View>
+        <View style={styles.info}><Text numberOfLines={1} style={styles.name}>{miniRadio.name}</Text><Text style={styles.meta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View>
+        <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : miniRadio.accent} barCount={5} compact />
+      </Pressable>
+      <Pressable onPress={togglePlay} accessibilityRole="button" accessibilityLabel={isPlaying ? `Pausar ${miniRadio.name}` : `Reproducir ${miniRadio.name}`} style={({ pressed }) => [styles.control, pressed && styles.pressed]}>
+        {isLoading ? <ActivityIndicator size="small" color="#F5F3EE" /> : <IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" />}
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { position: "absolute", left: 16, right: 16, minHeight: 68, borderRadius: 20, backgroundColor: "#171D2BF7", borderWidth: 1, borderColor: "#FFFFFF22", padding: 9, flexDirection: "row", alignItems: "center", gap: 12, shadowColor: "#000", shadowOpacity: 0.24, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
+  main: { flex: 1, flexDirection: "row", alignItems: "center", gap: 11 },
+  info: { flex: 1 },
+  name: { color: "#F5F3EE", fontSize: 14, fontWeight: "700" },
+  meta: { color: "#9AA2B3", fontSize: 11, marginTop: 4 },
+  control: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF14" },
+  pressed: { opacity: 0.72, transform: [{ scale: 0.97 }] },
+});

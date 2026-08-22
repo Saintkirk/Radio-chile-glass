@@ -1,10 +1,9 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Animated, FlatList, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
-import { AudioEqualizer } from "@/components/audio-equalizer";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
@@ -34,42 +33,18 @@ export default function HomeScreen() {
   const { currentRadio, isPlaying, isLoading, playRadio, togglePlay, toggleFavorite, isFavorite, radios, refreshCatalog, isRefreshingCatalog, catalogSource } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
   const lightMode = colorScheme === "light";
-  const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("Todo");
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
-  const [miniRadio, setMiniRadio] = useState<Radio | null>(currentRadio);
-  const miniProgress = useRef(new Animated.Value(currentRadio ? 1 : 0)).current;
-  const miniLogoRef = useRef<View>(null);
-  const miniContainerRef = useRef<View>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
-  useEffect(() => {
-    let active = true;
-    if (currentRadio) {
-      setMiniRadio(currentRadio);
-      Animated.timing(miniProgress, { toValue: 1, duration: 240, useNativeDriver: true }).start();
-      return () => { active = false; };
-
-    }
-    Animated.timing(miniProgress, { toValue: 0, duration: 200, useNativeDriver: true }).start(({ finished }) => {
-      if (finished && active) setMiniRadio(null);
-    });
-    return () => { active = false; };
-  }, [currentRadio, miniProgress]);
+    useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const filtered = useMemo(() => radios.filter((radio) => {
     const matchesQuery = `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase());
     const matchesGenre = activeGenre === "Todo" || radio.genre.toLowerCase().includes(activeGenre.toLowerCase());
     return matchesQuery && matchesGenre;
   }), [activeGenre, query, radios]);
-  const openMiniDetail = (radio: Radio) => {
-    miniContainerRef.current?.measureInWindow((containerX, containerY, containerWidth, containerHeight) => {
-      miniLogoRef.current?.measureInWindow((x, y, width, height) => {
-        router.push({ pathname: "/radio/[id]", params: { id: radio.id, originX: x.toFixed(2), originY: y.toFixed(2), originWidth: width.toFixed(2), originHeight: height.toFixed(2), containerX: containerX.toFixed(2), containerY: containerY.toFixed(2), containerWidth: containerWidth.toFixed(2), containerHeight: containerHeight.toFixed(2), viewportWidth: viewportWidth.toFixed(2), viewportHeight: viewportHeight.toFixed(2) } });
-      });
-    });
-  };
+
   const featured = currentRadio ?? radios[0];
 
   return (
@@ -101,7 +76,6 @@ export default function HomeScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
-      {miniRadio && <Animated.View ref={miniContainerRef} collapsable={false} style={[styles.miniPlayer, { opacity: miniProgress, transform: [{ translateY: miniProgress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}><Pressable onPress={() => openMiniDetail(miniRadio)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><View ref={miniLogoRef} collapsable={false}><StationLogo radio={miniRadio} size={48} radius={14} /></View><View style={{ flex: 1 }}><Text style={styles.miniName}>{miniRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : miniRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></Animated.View>}
     <FavoriteToast message={favoriteNotice} /></ScreenContainer>
   );
 }
@@ -142,7 +116,4 @@ const styles = StyleSheet.create({
   playMini: { width: 30, height: 30, borderRadius: 15, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", marginLeft: 4 },
   pressed: { opacity: 0.78, transform: [{ scale: 0.985 }] },
   empty: { color: "#A8B0C2", textAlign: "center", paddingVertical: 30 },
-  miniPlayer: { position: "absolute", left: 16, right: 16, bottom: 8, minHeight: 68, borderRadius: 20, backgroundColor: "#1D2333F2", borderWidth: 1, borderColor: "#FFFFFF1C", padding: 9, flexDirection: "row", alignItems: "center", gap: 12 },
-  miniMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 11 }, miniControl: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },   miniName: { color: "#F5F3EE", fontSize: 14, fontWeight: "700" },
-  miniMeta: { color: "#9AA2B3", fontSize: 11, marginTop: 4 },
 });

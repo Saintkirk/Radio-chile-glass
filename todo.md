@@ -370,3 +370,11 @@
 - [x] Actualizar Explorar con composición más compacta y destacada
 - [x] Añadir animaciones perceptibles y respetar reduced motion
 - [x] Validar visual, accesibilidad, funcionalidad, typecheck, tests y lint
+
+## Mini reproductor persistente estilo streaming
+
+- [x] Crear mini reproductor compartido en el layout de pestañas
+- [x] Mostrar logo, nombre, estado y ecualizador de la radio activa
+- [x] Añadir play/pausa y apertura del detalle
+- [x] Respetar safe areas, accesibilidad y navegación entre pestañas
+- [x] Validar typecheck, tests, lint y preview

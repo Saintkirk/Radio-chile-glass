@@ -1,10 +1,11 @@
 import { Tabs } from "expo-router";
+import { View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Platform } from "react-native";
 import { useColors } from "@/hooks/use-colors";
+import { PersistentMiniPlayer } from "@/components/persistent-mini-player";
 
 export default function TabLayout() {
   const colors = useColors();
@@ -13,6 +14,7 @@ export default function TabLayout() {
   const tabBarHeight = 56 + bottomPadding;
 
   return (
+    <View style={{ flex: 1 }}>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.tint,
@@ -50,5 +52,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    <PersistentMiniPlayer bottomOffset={tabBarHeight + 8} />
+    </View>
   );
 }
