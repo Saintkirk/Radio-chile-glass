@@ -160,3 +160,10 @@
 - [x] Crear patrón distintivo para eliminar emisora
 - [x] Conectar cada patrón con el toast correspondiente
 - [x] Validar Android, iOS y web mediante mocks y typecheck
+
+## Animación del corazón favorito
+
+- [x] Crear componente de corazón animado reutilizable
+- [x] Animar guardado y eliminación con escala suave
+- [x] Integrarlo en Inicio y Explorar junto con hápticos y toast
+- [x] Respetar reduced motion y validar typecheck

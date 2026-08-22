@@ -10,6 +10,7 @@ import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
 import { favoriteAddedHaptic, favoriteRemovedHaptic } from "@/lib/haptics";
 import { FavoriteToast } from "@/components/favorite-toast";
+import { AnimatedFavoriteIcon } from "@/components/animated-favorite-icon";
 
 function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
   return (
@@ -21,7 +22,7 @@ function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, load
       </View>
       <Pressable onPress={onFavorite} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}>
 
-        <IconSymbol name={favorite ? "heart.fill" : "heart"} size={20} color={favorite ? "#D64E4A" : lightMode ? "#667085" : "#A8B0C2"} />
+        <AnimatedFavoriteIcon active={favorite} color={favorite ? "#D64E4A" : lightMode ? "#667085" : "#A8B0C2"} />
       </Pressable>
       <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={loading ? `Conectando con ${radio.name}` : playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`} style={({ pressed }) => [styles.playMini, lightMode && styles.playMiniLight, playing && styles.playMiniActive, pressed && styles.controlPressed]}>{loading ? <ActivityIndicator size="small" color={lightMode ? "#F8FAFC" : "#F5F3EE"} /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color={lightMode ? "#F8FAFC" : "#F5F3EE"} />}</Pressable>
     </Pressable>
