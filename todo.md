@@ -462,3 +462,11 @@
 - [x] Añadir recursos HD locales o remotos confiables para las faltantes
 - [x] Mejorar el fallback de marca y validar toda la cuadrícula
 - [x] Ejecutar typecheck, tests, lint, preview y guardar checkpoint
+
+## Auditoría completa de logos faltantes
+
+- [x] Enumerar todas las emisoras del catálogo y detectar logos ausentes o de baja resolución
+- [x] Buscar y verificar un logo oficial o HD para cada emisora pendiente
+- [x] Descargar e integrar los recursos locales faltantes sin romper el bundling
+- [x] Validar todas las tarjetas, fallbacks, typecheck, tests, lint y preview
+- [x] Guardar checkpoint con el catálogo completo de logos

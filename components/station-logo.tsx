@@ -10,6 +10,7 @@ type StationLogoProps = { radio: Pick<Radio, "id" | "favicon" | "initials" | "ac
 const LOCAL_LOGOS: Record<string, number> = {
   fmlatina: require("@/assets/images/radios/fmlatina.png"),
   cooperativa: require("@/assets/images/radio-cooperativa.png"),
+  biobio: require("@/assets/images/radios/biobio.webp"),
   pudahuel: require("@/assets/images/radios/pudahuel.png"),
   corazon: require("@/assets/images/radios/corazon.png"),
   futuro: require("@/assets/images/radios/futuro.png"),
@@ -23,6 +24,11 @@ const LOCAL_LOGOS: Record<string, number> = {
   duna: require("@/assets/images/radios/duna.jpg"),
   beethoven: require("@/assets/images/radios/beethoven.png"),
   festival: require("@/assets/images/radios/festival.jpg"),
+  carolina: require("@/assets/images/radios/carolina.png"),
+  sonar: require("@/assets/images/radios/sonar.png"),
+  oasis: require("@/assets/images/radios/oasis.png"),
+  "punto7-temuco": require("@/assets/images/radios/punto7-temuco.webp"),
+  edelweiss: require("@/assets/images/radios/edelweiss.png"),
 };
 
 export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
