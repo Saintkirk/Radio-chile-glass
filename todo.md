@@ -244,3 +244,10 @@
 - [x] Migrar la preferencia háptica existente sin perder la configuración del usuario
 - [x] Aplicar navegación y acciones a sus respectivos helpers
 - [x] Mostrar dos interruptores independientes y validar persistencia
+
+## Toast de preferencias hápticas
+
+- [x] Mostrar confirmación visual al guardar hápticos
+- [x] Mantener el toast accesible y no dependiente de hápticos
+- [x] Limpiar automáticamente la notificación breve
+- [x] Validar guardado, typecheck, tests y lint

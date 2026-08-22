@@ -24,9 +24,14 @@ export async function loadHapticsPreferences(): Promise<HapticPreferences> {
   return { ...hapticsPreferences };
 }
 
-export function setHapticsPreference(kind: keyof HapticPreferences, enabled: boolean) {
+export async function setHapticsPreference(kind: keyof HapticPreferences, enabled: boolean) {
   hapticsPreferences = { ...hapticsPreferences, [kind]: enabled };
-  void AsyncStorage.setItem(HAPTICS_KEY, JSON.stringify(hapticsPreferences)).catch(() => undefined);
+  try {
+    await AsyncStorage.setItem(HAPTICS_KEY, JSON.stringify(hapticsPreferences));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function navigationHaptic() {
