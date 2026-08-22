@@ -202,3 +202,10 @@
 - [x] Expandir y desplazar la carátula al abrir el detalle
 - [x] Coordinar la animación con la entrada del contenido y el mini reproductor
 - [x] Validar apertura, cierre, reduced motion y continuidad de audio
+
+## Coordenadas reales de transición
+
+- [x] Medir posición y tamaño reales del mini reproductor
+- [x] Transferir las métricas al detalle mediante parámetros de navegación
+- [x] Calcular escala y desplazamiento inicial desde el origen medido
+- [x] Validar distintos tamaños de pantalla y rutas de apertura
