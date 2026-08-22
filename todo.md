@@ -313,3 +313,11 @@
 - [x] Comparar el stream actual con la señal web
 - [x] Sustituir FM Latina por una señal compatible y verificable
 - [x] Validar audio real, typecheck, tests y lint
+
+## Radios regionales por ciudad
+
+- [ ] Añadir sección regional en Explorar
+- [ ] Crear búsqueda y selector de ciudades chilenas
+- [ ] Filtrar emisoras remotas por ciudad y disponibilidad
+- [ ] Conectar reproducción, favoritos y detalle
+- [ ] Validar estados vacíos, typecheck, tests y lint
