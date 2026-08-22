@@ -454,3 +454,11 @@
 - [x] Precargar logos al montar Inicio usando expo-image y caché memory-disk
 - [x] Ejecutar la precarga sin bloquear el renderizado ni repetir solicitudes innecesarias
 - [x] Validar typecheck, tests, lint, preview y checkpoint
+
+## Auditoría adicional de logos faltantes
+
+- [x] Enumerar las emisoras que aún muestran fallback en tarjetas
+- [x] Verificar cada URL de logo y su resolución real
+- [x] Añadir recursos HD locales o remotos confiables para las faltantes
+- [x] Mejorar el fallback de marca y validar toda la cuadrícula
+- [x] Ejecutar typecheck, tests, lint, preview y guardar checkpoint
