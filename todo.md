@@ -641,3 +641,10 @@
 - [x] Añadir FM de Los Recuerdos con logo oficial y sección Nacional/Online
 - [x] Mantener Radio Portales fuera del catálogo hasta confirmar su stream oficial
 - [x] Validar 18 pruebas, typecheck, lint y preview móvil
+
+## Exclusión de radios religiosas
+
+- [x] Eliminar Radio María Chile del catálogo editorial
+- [x] Actualizar pruebas y referencias que esperen Radio María
+- [x] Validar que Explorar y el catálogo remoto no la reincorporen
+- [x] Ejecutar typecheck, tests y lint
