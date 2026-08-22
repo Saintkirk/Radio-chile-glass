@@ -21,7 +21,7 @@ function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, load
       </View>
       <Pressable onPress={onFavorite} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}>
 
-        <AnimatedFavoriteIcon active={favorite} color={favorite ? "#D64E4A" : lightMode ? "#667085" : "#A8B0C2"} />
+        <AnimatedFavoriteIcon active={favorite} color={favorite ? "#15883E" : lightMode ? "#667085" : "#A8B0C2"} />
       </Pressable>
       <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={loading ? `Conectando con ${radio.name}` : playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`} style={({ pressed }) => [styles.playMini, lightMode && styles.playMiniLight, playing && styles.playMiniActive, pressed && styles.controlPressed]}>{loading ? <ActivityIndicator size="small" color={lightMode ? "#F8FAFC" : "#F5F3EE"} /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color={lightMode ? "#F8FAFC" : "#F5F3EE"} />}</Pressable>
     </Pressable>
@@ -50,7 +50,7 @@ export default function HomeScreen() {
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
   return (
-    <ScreenContainer containerClassName="bg-[#090B12]" className="px-5 pt-3">
+    <ScreenContainer containerClassName="bg-[#0B0B0B]" className="px-5 pt-3">
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -67,9 +67,9 @@ export default function HomeScreen() {
             <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></View>
             <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, lightMode && styles.heroLight, pressed && styles.pressed]}>
               <LinearGradient colors={lightMode ? [`${featured.accent}CC`, "#EEF2FF", "#F8FAFC"] : [`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-              <View style={[styles.heroOrb, lightMode && styles.heroOrbLight]} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={[styles.liveText, lightMode && styles.heroTextLight]}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={[styles.heroFreq, lightMode && styles.heroTextLight]}>{featured.frequency}</Text></View>
+              <View style={[styles.heroOrb, lightMode && styles.heroOrbLight]} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#1ED760" : "#B3B3B3" }]} /><Text style={[styles.liveText, lightMode && styles.heroTextLight]}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={[styles.heroFreq, lightMode && styles.heroTextLight]}>{featured.frequency}</Text></View>
               <View style={styles.heroNav}><Pressable onPress={(event) => { event.stopPropagation(); browseFeatured(-1); }} accessibilityRole="button" accessibilityLabel="Radio anterior" style={({ pressed }) => [styles.heroNavButton, pressed && styles.controlPressed]}><IconSymbol name="chevron.left" size={18} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable><Text style={styles.heroNavLabel}>{filtered.length ? `${featuredIndex + 1} / ${filtered.length}` : "0 / 0"}</Text><Pressable onPress={(event) => { event.stopPropagation(); browseFeatured(1); }} accessibilityRole="button" accessibilityLabel="Radio siguiente" style={({ pressed }) => [styles.heroNavButton, pressed && styles.controlPressed]}><IconSymbol name="chevron.right" size={18} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable></View><View style={styles.heroBottom}><Text style={[styles.heroName, lightMode && styles.heroTextLight]}>{featured.name}</Text><Text style={[styles.heroGenre, lightMode && styles.heroSubtextLight]}>{featured.city}  ·  {featured.genre}</Text></View>
-              <Pressable onPress={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} accessibilityRole="button" accessibilityLabel={currentRadio?.id === featured.id && isPlaying ? `Pausar ${featured.name}` : `Reproducir ${featured.name}`} style={[styles.heroPlay, lightMode && styles.heroPlayLight]}><IconSymbol name={currentRadio?.id === featured.id && isPlaying ? "pause.fill" : "play.fill"} size={25} color={lightMode ? "#F8FAFC" : "#090B12"} /></Pressable>
+              <Pressable onPress={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} accessibilityRole="button" accessibilityLabel={currentRadio?.id === featured.id && isPlaying ? `Pausar ${featured.name}` : `Reproducir ${featured.name}`} style={[styles.heroPlay, lightMode && styles.heroPlayLight]}><IconSymbol name={currentRadio?.id === featured.id && isPlaying ? "pause.fill" : "play.fill"} size={25} color={lightMode ? "#F8FAFC" : "#0B0B0B"} /></Pressable>
             </Pressable>
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
@@ -85,14 +85,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 },
-  eyebrow: { color: "#FF8C7F", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
+  eyebrow: { color: "#1ED760", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
   title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 },
   settingsButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },
   searchWrap: { height: 48, borderRadius: 16, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF14", flexDirection: "row", alignItems: "center", paddingHorizontal: 15, marginBottom: 28 },
   searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 },
   sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  syncText: { color: "#76E0B5", fontSize: 10, fontWeight: "600", marginBottom: 12 },
+  syncText: { color: "#1ED760", fontSize: 10, fontWeight: "600", marginBottom: 12 },
   heroLight: { borderColor: "#CBD5E1" }, hero: { height: 244, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
   heroLogo: { position: "absolute", right: 24, top: 48, opacity: 0.98, transform: [{ rotate: "3deg" }] },
   heroTextLight: { color: "#172033" }, heroSubtextLight: { color: "#46536B" }, heroPlayLight: { backgroundColor: "#172033" },
@@ -106,10 +106,10 @@ const styles = StyleSheet.create({
   heroName: { color: "#F5F3EE", fontSize: 27, fontWeight: "700", letterSpacing: -0.5 },
   heroGenre: { color: "#D0D3DD", fontSize: 13, marginTop: 5 },
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
-  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipActive: { backgroundColor: "#FF6B5F", borderColor: "#FF6B5F" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextActive: { color: "#160F14" },
+  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipActive: { backgroundColor: "#1DB954", borderColor: "#1DB954" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextActive: { color: "#160F14" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  seeAll: { color: "#FF8C7F", fontSize: 13, fontWeight: "600", marginBottom: 12 },
-  controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#FF6B5F1C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#D64E4A" },
+  seeAll: { color: "#1ED760", fontSize: 13, fontWeight: "600", marginBottom: 12 },
+  controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#1DB9541C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#15883E" },
   radioRowLight: { backgroundColor: "#FFFFFFD9", borderColor: "#D9E0EC" }, radioNameLight: { color: "#172033" }, radioMetaLight: { color: "#5B667B" }, playMiniLight: { backgroundColor: "#172033" },
   radioRow: { minHeight: 75, borderRadius: 19, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
   radioInfo: { flex: 1, marginLeft: 13 },

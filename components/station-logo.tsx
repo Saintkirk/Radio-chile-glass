@@ -26,7 +26,7 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
           onError={() => setFailed(true)}
         />
       ) : (
-        <LinearGradient colors={[`${radio.accent}66`, "#161B2A"]} style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}>
+        <LinearGradient colors={[`${radio.accent}66`, "#181818"]} style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}>
           <View style={[styles.glassOrb, { width: size * 0.7, height: size * 0.7, borderRadius: size }]} />
           <Text style={[styles.initials, { fontSize: Math.max(13, size * 0.28) }]}>{radio.initials}</Text>
         </LinearGradient>
@@ -35,5 +35,5 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
   );
 }
 
-const styles = StyleSheet.create({ container: { overflow: "hidden", backgroundColor: "#161B2A", alignItems: "center", justifyContent: "center" }, image: { backgroundColor: "#161B2A" }, fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" }, glassOrb: { position: "absolute", right: -sizeOffset(), top: -sizeOffset(), backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" }, initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 }, });
+const styles = StyleSheet.create({ container: { overflow: "hidden", backgroundColor: "#181818", alignItems: "center", justifyContent: "center" }, image: { backgroundColor: "#181818" }, fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" }, glassOrb: { position: "absolute", right: -sizeOffset(), top: -sizeOffset(), backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" }, initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 }, });
 function sizeOffset() { return 8; }

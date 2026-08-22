@@ -392,3 +392,10 @@
 - [x] Recorrer la lista filtrada con navegación circular
 - [x] Mantener Play independiente y sincronizar la radio destacada
 - [x] Añadir etiquetas accesibles y validar typecheck, tests, lint y preview
+
+## Tema visual inspirado en Spotify
+
+- [x] Aplicar paleta oscura profunda con acento verde eléctrico
+- [x] Ajustar tarjetas, chips, hero, navegación y mini-player al lenguaje streaming
+- [x] Mantener glasmorfismo, legibilidad y controles accesibles
+- [x] Validar contraste, typecheck, tests, lint, preview y checkpoint

@@ -5,7 +5,7 @@ type AudioEqualizerProps = { playing: boolean; color?: string; barCount?: number
 
 const LEVELS = [0.35, 0.72, 0.48, 0.9, 0.58, 0.8, 0.4];
 
-export function AudioEqualizer({ playing, color = "#FF8C7F", barCount = 7, compact = false }: AudioEqualizerProps) {
+export function AudioEqualizer({ playing, color = "#1ED760", barCount = 7, compact = false }: AudioEqualizerProps) {
   const levels = useRef(Array.from({ length: barCount }, (_, index) => new Animated.Value(playing ? LEVELS[index % LEVELS.length] : 0.22))).current;
 
   useEffect(() => {
