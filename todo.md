@@ -101,3 +101,12 @@
 - [x] Definir estrategia de push para avisos editoriales opt-in
 - [x] Documentar permisos Android, backend, tokens y privacidad
 - [x] Definir pruebas nativas y criterios de aceptación
+
+## Configuración de preferencias
+
+- [x] Crear pantalla de configuración dedicada
+- [x] Persistir preferencia de reproducción en segundo plano
+- [x] Persistir avisos de programación y radios favoritas
+- [x] Mostrar y solicitar estado de permisos de notificaciones
+- [x] Añadir acceso a configuración del sistema cuando el permiso esté bloqueado
+- [x] Validar estados, persistencia y layout móvil
