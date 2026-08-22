@@ -385,3 +385,10 @@
 - [x] Conectar correctamente iniciar y pausar con el reproductor global
 - [x] Mostrar estados de carga, error y reproducción activa
 - [x] Validar sincronización entre vistas, typecheck, tests, lint y preview
+
+## Navegación anterior y siguiente en tarjeta hero
+
+- [x] Añadir botones anterior y siguiente a la tarjeta principal
+- [x] Recorrer la lista filtrada con navegación circular
+- [x] Mantener Play independiente y sincronizar la radio destacada
+- [x] Añadir etiquetas accesibles y validar typecheck, tests, lint y preview

@@ -35,6 +35,7 @@ export default function HomeScreen() {
   const lightMode = colorScheme === "light";
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("Todo");
+  const [featuredIndex, setFeaturedIndex] = useState(0);
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
@@ -44,8 +45,9 @@ export default function HomeScreen() {
     const matchesGenre = activeGenre === "Todo" || radio.genre.toLowerCase().includes(activeGenre.toLowerCase());
     return matchesQuery && matchesGenre;
   }), [activeGenre, query, radios]);
-
-  const featured = currentRadio ?? radios[0];
+  useEffect(() => { setFeaturedIndex((index) => filtered.length ? index % filtered.length : 0); }, [filtered.length]);
+  const browseFeatured = (direction: number) => setFeaturedIndex((index) => { const total = filtered.length; return total ? (index + direction + total) % total : 0; });
+  const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
   return (
     <ScreenContainer containerClassName="bg-[#090B12]" className="px-5 pt-3">
@@ -66,7 +68,7 @@ export default function HomeScreen() {
             <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, lightMode && styles.heroLight, pressed && styles.pressed]}>
               <LinearGradient colors={lightMode ? [`${featured.accent}CC`, "#EEF2FF", "#F8FAFC"] : [`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
               <View style={[styles.heroOrb, lightMode && styles.heroOrbLight]} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={[styles.liveText, lightMode && styles.heroTextLight]}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={[styles.heroFreq, lightMode && styles.heroTextLight]}>{featured.frequency}</Text></View>
-              <View style={styles.heroBottom}><Text style={[styles.heroName, lightMode && styles.heroTextLight]}>{featured.name}</Text><Text style={[styles.heroGenre, lightMode && styles.heroSubtextLight]}>{featured.city}  ·  {featured.genre}</Text></View>
+              <View style={styles.heroNav}><Pressable onPress={(event) => { event.stopPropagation(); browseFeatured(-1); }} accessibilityRole="button" accessibilityLabel="Radio anterior" style={({ pressed }) => [styles.heroNavButton, pressed && styles.controlPressed]}><IconSymbol name="chevron.left" size={18} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable><Text style={styles.heroNavLabel}>{filtered.length ? `${featuredIndex + 1} / ${filtered.length}` : "0 / 0"}</Text><Pressable onPress={(event) => { event.stopPropagation(); browseFeatured(1); }} accessibilityRole="button" accessibilityLabel="Radio siguiente" style={({ pressed }) => [styles.heroNavButton, pressed && styles.controlPressed]}><IconSymbol name="chevron.right" size={18} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable></View><View style={styles.heroBottom}><Text style={[styles.heroName, lightMode && styles.heroTextLight]}>{featured.name}</Text><Text style={[styles.heroGenre, lightMode && styles.heroSubtextLight]}>{featured.city}  ·  {featured.genre}</Text></View>
               <Pressable onPress={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} accessibilityRole="button" accessibilityLabel={currentRadio?.id === featured.id && isPlaying ? `Pausar ${featured.name}` : `Reproducir ${featured.name}`} style={[styles.heroPlay, lightMode && styles.heroPlayLight]}><IconSymbol name={currentRadio?.id === featured.id && isPlaying ? "pause.fill" : "play.fill"} size={25} color={lightMode ? "#F8FAFC" : "#090B12"} /></Pressable>
             </Pressable>
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
@@ -99,6 +101,7 @@ const styles = StyleSheet.create({
   liveDot: { width: 8, height: 8, borderRadius: 5, marginRight: 8 },
   liveText: { color: "#F5F3EE", fontSize: 10, fontWeight: "700", letterSpacing: 1.3 },
   heroFreq: { marginLeft: "auto", color: "#D8D9E0", fontSize: 12, fontWeight: "600" },
+  heroNav: { position: "absolute", right: 20, bottom: 78, flexDirection: "row", alignItems: "center", gap: 6 }, heroNavButton: { width: 30, height: 30, borderRadius: 15, backgroundColor: "#FFFFFF24", alignItems: "center", justifyContent: "center" }, heroNavLabel: { color: "#D0D3DD", fontSize: 10, fontWeight: "700", minWidth: 34, textAlign: "center" },
   heroBottom: { marginBottom: 2 },
   heroName: { color: "#F5F3EE", fontSize: 27, fontWeight: "700", letterSpacing: -0.5 },
   heroGenre: { color: "#D0D3DD", fontSize: 13, marginTop: 5 },
