@@ -542,3 +542,11 @@
 - [x] Añadir control circular premium adaptado a radio en vivo
 - [x] Conservar navegación, gestos, favoritos, pausa y accesibilidad
 - [x] Validar móvil, typecheck, tests, lint, preview y checkpoint
+
+## Flujo de tarjetas inspirado en iTunes
+
+- [x] Definir tarjeta enfocada, tarjeta secundaria y comportamiento de selección
+- [x] Implementar navegación horizontal con transición de portada y metadatos
+- [x] Coordinar apertura del detalle, reproducción, favoritos y mini reproductor
+- [x] Respetar gestos, reduced motion, accesibilidad y safe areas
+- [x] Validar typecheck, tests, lint y preview móvil

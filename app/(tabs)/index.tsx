@@ -1,9 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
+import { ItunesRadioCard } from "@/components/itunes-radio-card";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
@@ -14,21 +15,15 @@ import { prefetchLogo } from "@/lib/logo-cache";
 
 const prefetchedFeaturedLogos = new Set<string>();
 
-function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
-  return (
-    <Pressable onPress={onOpen} style={({ pressed, hovered }) => [styles.radioRow, lightMode && styles.radioRowLight, hovered && styles.radioRowHovered, pressed && styles.pressed]}>
-      <StationLogo radio={radio} size={54} radius={16} />
-      <View style={styles.radioInfo}>
-        <Text style={[styles.radioName, lightMode && styles.radioNameLight]}>{radio.name}</Text>
-        <Text style={[styles.radioMeta, lightMode && styles.radioMetaLight]}>{radio.frequency}  ·  {radio.genre}</Text>
-      </View>
-      <Pressable onPress={onFavorite} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}>
-
-        <AnimatedFavoriteIcon active={favorite} color={favorite ? "#15883E" : lightMode ? "#667085" : "#A8B0C2"} />
-      </Pressable>
-      <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={loading ? `Conectando con ${radio.name}` : playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`} style={({ pressed }) => [styles.playMini, lightMode && styles.playMiniLight, playing && styles.playMiniActive, pressed && styles.controlPressed]}>{loading ? <ActivityIndicator size="small" color={lightMode ? "#F8FAFC" : "#F5F3EE"} /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color={lightMode ? "#F8FAFC" : "#F5F3EE"} />}</Pressable>
-    </Pressable>
-  );
+function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
+  return <ItunesRadioCard
+    radio={radio}
+    onOpen={onOpen}
+    onPlay={onPlay}
+    playing={playing}
+    lightMode={lightMode}
+    trailing={<Pressable onPress={(event) => { event.stopPropagation(); onFavorite(); }} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}><AnimatedFavoriteIcon active={favorite} color={favorite ? "#15883E" : lightMode ? "#667085" : "#A8B0C2"} /></Pressable>}
+  />;
 }
 
 export default function HomeScreen() {
