@@ -2,38 +2,45 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 
-const HAPTICS_KEY = "radio-haptics-enabled";
-let hapticsEnabled = true;
+const HAPTICS_KEY = "radio-haptics-preferences";
+const LEGACY_HAPTICS_KEY = "radio-haptics-enabled";
 
-export async function loadHapticsPreference() {
+export type HapticPreferences = { navigation: boolean; actions: boolean };
+export const DEFAULT_HAPTICS: HapticPreferences = { navigation: true, actions: true };
+let hapticsPreferences: HapticPreferences = { ...DEFAULT_HAPTICS };
+
+export async function loadHapticsPreferences(): Promise<HapticPreferences> {
   try {
     const value = await AsyncStorage.getItem(HAPTICS_KEY);
-    if (value !== null) hapticsEnabled = value !== "false";
+    if (value) {
+      hapticsPreferences = { ...DEFAULT_HAPTICS, ...JSON.parse(value) };
+    } else {
+      const legacy = await AsyncStorage.getItem(LEGACY_HAPTICS_KEY);
+      if (legacy !== null) hapticsPreferences = { navigation: legacy !== "false", actions: legacy !== "false" };
+    }
   } catch {
-    hapticsEnabled = true;
+    hapticsPreferences = { ...DEFAULT_HAPTICS };
   }
-  return hapticsEnabled;
+  return { ...hapticsPreferences };
 }
 
-export function setHapticsEnabled(enabled: boolean) {
-  hapticsEnabled = enabled;
-  void AsyncStorage.setItem(HAPTICS_KEY, String(enabled)).catch(() => undefined);
+export function setHapticsPreference(kind: keyof HapticPreferences, enabled: boolean) {
+  hapticsPreferences = { ...hapticsPreferences, [kind]: enabled };
+  void AsyncStorage.setItem(HAPTICS_KEY, JSON.stringify(hapticsPreferences)).catch(() => undefined);
+}
+
+export function navigationHaptic() {
+  if (hapticsPreferences.navigation && Platform.OS !== "web") void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 }
 
 export function favoriteAddedHaptic() {
-  if (hapticsEnabled && Platform.OS !== "web") {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }
+  if (hapticsPreferences.actions && Platform.OS !== "web") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 }
 
 export function favoriteRemovedHaptic() {
-  if (hapticsEnabled && Platform.OS !== "web") {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }
+  if (hapticsPreferences.actions && Platform.OS !== "web") void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 }
 
 export function detailOpenedHaptic() {
-  if (hapticsEnabled && Platform.OS !== "web") {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }
+  navigationHaptic();
 }

@@ -237,3 +237,10 @@
 - [x] Aplicar la preferencia a los helpers de feedback
 - [x] Crear interruptor accesible en Ajustes
 - [x] Validar persistencia, typecheck, tests y lint
+
+## Hápticos separados por contexto
+
+- [x] Separar preferencias persistentes de navegación y acciones
+- [x] Migrar la preferencia háptica existente sin perder la configuración del usuario
+- [x] Aplicar navegación y acciones a sus respectivos helpers
+- [x] Mostrar dos interruptores independientes y validar persistencia
