@@ -582,3 +582,11 @@
 - [x] Coordinar movimiento de portada, metadatos y navegación
 - [x] Mantener audio, gestos, reduced motion y accesibilidad
 - [x] Validar typecheck, tests, lint y preview móvil
+
+## Corrección de carátulas laterales visibles
+
+- [x] Ampliar el escenario del Flow Cover para mostrar ambas carátulas laterales
+- [x] Evitar que la portada central oculte demasiado las emisoras vecinas
+- [x] Añadir perspectiva 3D visible y reflejos laterales
+- [x] Mantener Slide direccional, flechas, gestos y audio sincronizado
+- [x] Validar en móvil con preview, typecheck, tests y lint
