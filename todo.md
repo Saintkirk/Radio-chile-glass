@@ -316,11 +316,11 @@
 
 ## Radios regionales por ciudad
 
-- [ ] Añadir sección regional en Explorar
-- [ ] Crear búsqueda y selector de ciudades chilenas
-- [ ] Filtrar emisoras remotas por ciudad y disponibilidad
-- [ ] Conectar reproducción, favoritos y detalle
-- [ ] Validar estados vacíos, typecheck, tests y lint
+- [x] Añadir sección regional en Explorar
+- [x] Crear búsqueda y selector de ciudades chilenas
+- [x] Filtrar emisoras remotas por ciudad y disponibilidad
+- [x] Conectar reproducción, favoritos y detalle
+- [x] Validar estados vacíos, typecheck, tests y lint
 
 ## Auditoría individual de logos y streaming
 
@@ -345,3 +345,12 @@
 - [x] Contrastar cada stream con el nombre y proveedor oficial
 - [x] Corregir o retirar coincidencias dudosas
 - [x] Documentar y validar el catálogo final
+
+## Fuente radios-chilenas.com
+
+- [x] Revisar la estructura pública y categorías regionales del sitio
+- [x] Extraer radios, ciudades, logos y enlaces candidatos
+- [x] Verificar señales reproducibles y correspondencia de identidad
+- [x] Incorporar radios regionales sin duplicar las editoriales
+- [x] Adaptar búsqueda, filtros y reproducción
+- [x] Validar favoritos, logos, typecheck, tests y lint

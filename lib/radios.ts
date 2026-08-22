@@ -11,6 +11,7 @@ export type Radio = {
   initials: string;
   accent: string;
   featured?: boolean;
+  regional?: boolean;
   favicon?: string;
   homepage?: string;
 };
@@ -49,6 +50,9 @@ const EDITORIAL_RADIOS: Radio[] = [
   { id: "duna", name: "Radio Duna", frequency: "89.7 FM", city: "Santiago", genre: "Actualidad", description: "Información, cultura y música cuidadosamente seleccionada.", streamUrl: "https://mdstrm.com/audio/67f42f96e464d19a6eda3c7d/icecast.audio", initials: "DU", accent: "#64D8FF", homepage: "https://www.duna.cl/" },
   { id: "oasis", name: "Oasis FM", frequency: "102.1 FM", city: "Santiago", genre: "Música", description: "Música y contenidos para disfrutar con calma.", streamUrl: "https://mdstrm.com/audio/5c915497c6fd7c085b29169d/live.m3u8", initials: "OA", accent: "#76E0B5", homepage: "https://oasisfm.cl/home", favicon: "https://oasisfm.cl/favicon.ico" },
   { id: "beethoven", name: "Radio Beethoven", frequency: "97.7 FM", city: "Santiago", genre: "Clásica", description: "Música clásica, cultura y conocimiento para escuchar distinto.", streamUrl: "https://unlimited5-us.dps.live/beethovenfm/aac/icecast.audio", initials: "BE", accent: "#F2B6FF", homepage: "https://www.beethovenfm.cl/", favicon: "https://www.beethovenfm.cl/favicon.ico" },
+  { id: "festival", name: "Radio Festival", frequency: "93.7 FM", city: "Valparaíso", genre: "Música y compañía", description: "La radio de Valparaíso y Viña del Mar, con música y compañía regional.", streamUrl: "https://stream.festival.cl/1", initials: "FE", accent: "#FFD36A", regional: true, homepage: "https://www.radiofestival.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/170/radio-festival.8d55ce30.jpg" },
+  { id: "punto7-temuco", name: "Radio Punto 7 Temuco", frequency: "95.7 FM", city: "Temuco", genre: "Música y noticias", description: "Información, música y compañía desde La Araucanía.", streamUrl: "https://redirector.dps.live/p7temuco/aac/icecast.audio", initials: "P7", accent: "#64D8FF", regional: true, homepage: "https://www.punto7.cl/", favicon: "https://static.mytuner.mobi/media/radios-150px/zskhvcfxt4xp.png" },
+  { id: "edelweiss", name: "Radio Edelweiss", frequency: "Cubre Temuco", city: "Temuco", genre: "Música", description: "Selección musical y compañía desde Temuco.", streamUrl: "https://encoder.stationlink.cl/listen/edelweiss/radio.mp3", initials: "ED", accent: "#76E0B5", regional: true, homepage: "https://edelweiss.fm/", favicon: "https://edelweiss.fm/wp-content/uploads/2022/07/logo-edelweiss-100x100.png" },
 ];
 
 const accents = ["#64D8FF", "#8B7CFF", "#76E0B5", "#F2B6FF", "#FFD36A", "#FF8C7F"];
