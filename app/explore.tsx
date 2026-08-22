@@ -6,7 +6,7 @@ import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
-import { favoriteHaptic } from "@/lib/haptics";
+import { favoriteAddedHaptic, favoriteRemovedHaptic } from "@/lib/haptics";
 import { FavoriteToast } from "@/components/favorite-toast";
 
 const FILTERS = ["Todas", "Pop latino", "Noticias", "Música", "Actualidad"];
@@ -22,7 +22,7 @@ export default function ExploreScreen() {
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
-  const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); favoriteHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
+  const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const [query, setQuery] = useState(""); const [filter, setFilter] = useState("Todas");
   const data = useMemo(() => radios.filter((r) => (filter === "Todas" || r.genre === filter) && `${r.name} ${r.city} ${r.genre}`.toLowerCase().includes(query.toLowerCase())), [query, filter, radios]);
   return <ScreenContainer containerClassName="bg-[#090B12]" className="px-5 pt-3"><FlatList data={data} keyExtractor={(r) => r.id} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }} ListHeaderComponent={<><View style={styles.header}><View><Text style={styles.eyebrow}>DIRECTORIO</Text><Text style={styles.title}>Explora Chile</Text></View><View style={styles.count}><Text style={styles.countText}>{data.length}</Text></View></View><View style={styles.search}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar emisora" placeholderTextColor="#7F8799" style={styles.input} /></View><FlatList data={FILTERS} horizontal showsHorizontalScrollIndicator={false} keyExtractor={(x) => x} contentContainerStyle={{ gap: 8, paddingBottom: 25 }} renderItem={({ item }) => <Pressable onPress={() => setFilter(item)} style={[styles.chip, filter === item && styles.chipActive]}><Text style={[styles.chipText, filter === item && styles.chipTextActive]}>{item}</Text></Pressable>} /></>} renderItem={({ item }) => <RadioListItem radio={item} onFavorite={handleFavorite} />} ListEmptyComponent={<Text style={styles.empty}>No hay radios para este filtro.</Text>} /><FavoriteToast message={favoriteNotice} /></ScreenContainer>;

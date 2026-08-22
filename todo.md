@@ -153,3 +153,10 @@
 - [x] Añadir impacto háptico al guardar o eliminar emisoras
 - [x] Integrar feedback en Inicio y Explorar
 - [x] Desactivar hápticos en web y validar accesibilidad
+
+## Hápticos diferenciados de favoritos
+
+- [x] Crear patrón suave para guardar emisora
+- [x] Crear patrón distintivo para eliminar emisora
+- [x] Conectar cada patrón con el toast correspondiente
+- [x] Validar Android, iOS y web mediante mocks y typecheck
