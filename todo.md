@@ -491,3 +491,10 @@
 - [x] Convertir el cambio de emisora en un movimiento horizontal tipo carrusel
 - [x] Coordinar dirección, portada, metadatos y audio activo
 - [x] Respetar reduced motion y validar typecheck, tests, lint, preview y checkpoint
+
+## Flechas laterales y gestos táctiles móviles
+
+- [x] Auditar controles laterales y PanResponder actuales
+- [x] Integrar flechas laterales visibles sobre la carátula
+- [x] Reforzar deslizamiento táctil horizontal sin conflicto con cierre vertical
+- [x] Mantener accesibilidad, carrusel, audio y validar preview, pruebas y checkpoint
