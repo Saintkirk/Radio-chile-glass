@@ -1,5 +1,5 @@
 const logos = [
-  ["FM Latina", "https://www.radiofmlatina.com/favicon.ico"],
+  ["FM Latina", "https://www.radiofmlatina.com/wp-content/uploads/2020/06/LogoLatina1024x1024.png"],
   ["Radio Cooperativa", "https://www.cooperativa.cl/favicon.ico"],
   ["Radio Bío Bío", "https://www.biobiochile.cl/favicon.ico"],
   ["Radio Pudahuel", "https://www.pudahuel.cl/favicon.ico"],

@@ -294,3 +294,8 @@
 - [x] Guardar y actualizar logos remotos correctamente
 - [x] Manejar expiración, errores y fallback visual
 - [x] Validar carga inicial, typecheck, tests y lint
+
+## Logo oficial de FM Latina
+
+- [x] Sustituir el logo de FM Latina por el recurso oficial del sitio proporcionado
+- [x] Verificar carga remota y conservar el fallback visual
