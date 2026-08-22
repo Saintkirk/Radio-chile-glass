@@ -24,7 +24,7 @@ describe("catálogo de radios chilenas", () => {
   });
 
   it("mantiene homepage y logo verificable en las nuevas emisoras editoriales", () => {
-    ["13c", "la-mexicana", "carnaval-la-serena"].forEach((id) => {
+    ["13c", "la-mexicana", "carnaval-la-serena", "radio-recuerdos"].forEach((id) => {
       const radio = RADIOS.find((item) => item.id === id);
       expect(radio?.homepage?.startsWith("http")).toBe(true);
       expect(radio?.favicon?.startsWith("http")).toBe(true);

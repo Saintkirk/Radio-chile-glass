@@ -57,3 +57,11 @@ La fuente consultada mantiene una sección de Noticias con emisoras y localidade
 Se incorporaron como radios editoriales nuevas **13C Radio** (Santiago, 102.1 FM), **Radio La Mexicana** (San Vicente, O’Higgins, 95.3 FM) y **Radio Carnaval La Serena** (La Serena, Coquimbo, 104.5 FM). Cada una conserva homepage oficial, favicon o logo remoto y una URL de stream que respondió correctamente durante la verificación: 13C entregó playlist HLS, La Mexicana respondió audio/mpeg y Carnaval La Serena respondió audio/aac con encabezados ICY.
 
 Se descartaron en esta pasada Radio Portales porque el endpoint candidato devolvió 404, Radio Recuerdos por respuesta 400, y varios endpoints Carnaval de Antofagasta, Viña del Mar y Punta Arenas por respuesta 400. Radio Sinfónica quedó fuera porque el enlace observado contiene un token temporal. Estas emisoras pueden reintentarse con sus URLs oficiales actualizadas en una auditoría posterior.
+
+## Reintento: Radio Portales y Radio Recuerdos
+
+La página oficial de Radio Portales corresponde a la señal de Valparaíso, con dirección en Condell 1190, frecuencias 840 AM y 89.5 FM, y dominio `portalesfm.cl`. Esto corrige la candidatura anterior de Portales Santiago 1180 AM: no se debe mezclar la identidad de ambas señales sin una verificación independiente del stream.
+
+La página oficial de Radio Recuerdos expone un reproductor Lunaradio activo y publica el texto dinámico `ANTONIO ZABALETA - Que daría yo - ANTONIO ZABALETA`, lo que confirma que la emisora entrega metadata de pista en su reproductor web. Falta localizar el endpoint directo de audio para incorporarla de forma nativa; no se agregará mientras el stream no esté confirmado.
+
+La fuente oficial alternativa `fmdelosrecuerdos.cl` confirma logo en `logohead.png` y una página propia `/senal-en-vivo/` para escuchar online. La señal se presenta como emisora solo por internet, por lo que su ciudad se mantendrá como Santiago/Región Metropolitana solo si el endpoint directo se confirma; la homepage y el logo sí son verificables.

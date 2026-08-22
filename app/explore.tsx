@@ -12,7 +12,7 @@ import { FavoriteToast } from "@/components/favorite-toast";
 import { AnimatedFavoriteIcon } from "@/components/animated-favorite-icon";
 
 const GENRE_FILTERS = ["Todas", "Pop latino", "Noticias", "Música", "Actualidad"];
-const REGION_FILTERS = ["Todas", "Región Metropolitana", "Arica y Parinacota", "Tarapacá", "Antofagasta", "Atacama", "Coquimbo", "Valparaíso", "O'Higgins", "Maule", "Ñuble", "Biobío", "La Araucanía", "Los Ríos", "Los Lagos", "Aysén", "Magallanes"];
+const REGION_FILTERS = ["Todas", "Nacional / Online", "Región Metropolitana", "Arica y Parinacota", "Tarapacá", "Antofagasta", "Atacama", "Coquimbo", "Valparaíso", "O'Higgins", "Maule", "Ñuble", "Biobío", "La Araucanía", "Los Ríos", "Los Lagos", "Aysén", "Magallanes"];
 type RadioSection = { title: string; data: Radio[] };
 
 function RadioListItem({ radio, onFavorite }: { radio: Radio; onFavorite: (id: string, name: string) => void }) {

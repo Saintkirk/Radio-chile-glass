@@ -633,3 +633,11 @@
 - [x] Mantener los candidatos con stream 400/404 o token temporal fuera del catálogo
 - [x] Documentar resultados en docs/catalog-audit.md
 - [x] Validar 18 pruebas, typecheck, lint y preview móvil
+
+## Reintento Radio Portales y Radio Recuerdos
+
+- [x] Revisar las páginas oficiales de ambas emisoras
+- [x] Encontrar y verificar el endpoint AAC de FM de Los Recuerdos
+- [x] Añadir FM de Los Recuerdos con logo oficial y sección Nacional/Online
+- [x] Mantener Radio Portales fuera del catálogo hasta confirmar su stream oficial
+- [x] Validar 18 pruebas, typecheck, lint y preview móvil
