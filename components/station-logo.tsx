@@ -5,7 +5,11 @@ import { prefetchLogo } from "@/lib/logo-cache";
 import { StyleSheet, Text, View } from "react-native";
 import type { Radio } from "@/lib/radios";
 
-type StationLogoProps = { radio: Pick<Radio, "favicon" | "initials" | "accent">; size?: number; radius?: number };
+type StationLogoProps = { radio: Pick<Radio, "id" | "favicon" | "initials" | "accent">; size?: number; radius?: number };
+
+const LOCAL_LOGOS: Record<string, number> = {
+  futuro: require("@/assets/images/radio-futuro.png"),
+};
 
 export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
   const [failed, setFailed] = useState(false);
@@ -18,7 +22,7 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
     <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}> 
       {showRemote ? (
         <Image
-          source={{ uri: radio.favicon }}
+          source={LOCAL_LOGOS[radio.id] ?? { uri: radio.favicon }}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
           contentFit="contain"
           contentPosition="center"

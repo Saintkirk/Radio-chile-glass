@@ -433,3 +433,10 @@
 - [x] Aplicarla a botones y gestos sin duplicar cambios de audio
 - [x] Respetar reduced motion y sincronizar logo, texto y ecualizador
 - [x] Validar typecheck, tests, lint, preview y checkpoint
+
+## Logos HD en reproducción
+
+- [x] Auditar logos principales ausentes o de baja resolución
+- [x] Sustituir recursos por versiones oficiales HD verificables
+- [x] Mantener fallback nítido cuando no exista un logo oficial adecuado
+- [x] Validar carga en reproducción, typecheck, tests, lint, preview y checkpoint
