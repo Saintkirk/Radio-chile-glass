@@ -321,3 +321,12 @@
 - [ ] Filtrar emisoras remotas por ciudad y disponibilidad
 - [ ] Conectar reproducción, favoritos y detalle
 - [ ] Validar estados vacíos, typecheck, tests y lint
+
+## Auditoría individual de logos y streaming
+
+- [x] Enumerar cada radio editorial con logo y stream configurados
+- [x] Verificar cada logo como imagen válida
+- [x] Verificar cada stream con audio real y formato compatible
+- [x] Comparar señales con fuentes oficiales cuando sea posible
+- [x] Corregir o retirar radios no verificables
+- [x] Ejecutar validación final y documentar resultados por emisora
