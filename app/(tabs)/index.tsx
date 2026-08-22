@@ -7,9 +7,9 @@ import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 
-function RadioRow({ radio, onPlay, onFavorite, favorite }: { radio: Radio; onPlay: () => void; onFavorite: () => void; favorite: boolean }) {
+function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean }) {
   return (
-    <Pressable onPress={onPlay} style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}>
+    <Pressable onPress={onOpen} style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}>
       <StationLogo radio={radio} size={54} radius={16} />
       <View style={styles.radioInfo}>
         <Text style={styles.radioName}>{radio.name}</Text>
@@ -18,7 +18,7 @@ function RadioRow({ radio, onPlay, onFavorite, favorite }: { radio: Radio; onPla
       <Pressable onPress={onFavorite} hitSlop={10} style={styles.iconButton}>
         <IconSymbol name={favorite ? "heart.fill" : "heart"} size={20} color={favorite ? "#FF6B5F" : "#A8B0C2"} />
       </Pressable>
-      <View style={styles.playMini}><IconSymbol name="play.fill" size={16} color="#F5F3EE" /></View>
+      <Pressable onPress={onPlay} style={styles.playMini}><IconSymbol name="play.fill" size={16} color="#F5F3EE" /></Pressable>
     </Pressable>
   );
 }
@@ -54,7 +54,7 @@ export default function HomeScreen() {
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
-        renderItem={({ item }) => <RadioRow radio={item} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
+        renderItem={({ item }) => <RadioRow radio={item} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />

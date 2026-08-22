@@ -6,6 +6,7 @@ describe("catálogo de radios chilenas", () => {
     const fmLatina = RADIOS.find((radio) => radio.id === "fmlatina");
     expect(fmLatina?.name).toBe("FM Latina");
     expect(fmLatina?.featured).toBe(true);
+    expect(fmLatina?.homepage).toBe("https://www.radiofmlatina.com/");
   });
 
   it("mantiene stream, frecuencia y ciudad en cada emisora editorial", () => {

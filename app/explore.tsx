@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useRouter } from "expo-router";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
@@ -7,8 +8,9 @@ import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 
 const FILTERS = ["Todas", "Pop latino", "Noticias", "Música", "Actualidad"];
 function RadioListItem({ radio }: { radio: Radio }) {
+  const router = useRouter();
   const { playRadio, toggleFavorite, isFavorite, currentRadio } = useRadioPlayer();
-  return <Pressable onPress={() => playRadio(radio)} style={({ pressed }) => [styles.item, pressed && { opacity: 0.75 }]}><StationLogo radio={radio} size={54} radius={16} /><View style={{ flex: 1 }}><Text style={styles.name}>{radio.name}</Text><Text style={styles.meta}>{radio.frequency}  ·  {radio.city}</Text></View><Pressable onPress={() => toggleFavorite(radio.id)} hitSlop={10}><IconSymbol name={isFavorite(radio.id) ? "heart.fill" : "heart"} size={19} color={isFavorite(radio.id) ? "#FF6B5F" : "#8D95A7"} /></Pressable><View style={styles.play}><IconSymbol name={currentRadio?.id === radio.id ? "pause.fill" : "play.fill"} size={14} color="#F5F3EE" /></View></Pressable>;
+  return <Pressable onPress={() => router.push(`/radio/${radio.id}`)} style={({ pressed }) => [styles.item, pressed && { opacity: 0.75 }]}><StationLogo radio={radio} size={54} radius={16} /><View style={{ flex: 1 }}><Text style={styles.name}>{radio.name}</Text><Text style={styles.meta}>{radio.frequency}  ·  {radio.city}</Text></View><Pressable onPress={() => toggleFavorite(radio.id)} hitSlop={10}><IconSymbol name={isFavorite(radio.id) ? "heart.fill" : "heart"} size={19} color={isFavorite(radio.id) ? "#FF6B5F" : "#8D95A7"} /></Pressable><Pressable onPress={() => playRadio(radio)} style={styles.play}><IconSymbol name={currentRadio?.id === radio.id ? "pause.fill" : "play.fill"} size={14} color="#F5F3EE" /></Pressable></Pressable>;
 }
 export default function ExploreScreen() {
   const { radios } = useRadioPlayer();

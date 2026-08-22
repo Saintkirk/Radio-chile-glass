@@ -7,7 +7,7 @@
 - [x] Pantalla Inicio con radio activa y reproductor persistente
 - [x] Pantalla Explorar con búsqueda y filtros
 - [x] Pantalla Favoritos con persistencia local
-- [ ] Pantalla Detalle de radio (pendiente para siguiente iteración)
+- [x] Pantalla Detalle de radio
 - [x] Reproductor expandido con controles multimedia
 - [x] Reproducción con expo-audio
 - [x] Configuración de audio para continuidad en segundo plano
@@ -36,3 +36,13 @@
 - [x] Usar iniciales y acento de marca como fallback si falta o falla la imagen
 - [x] Integrar el fallback en Inicio, Explorar y Favoritos
 - [x] Añadir pruebas para normalización de logos y estados de imagen
+
+## Detalle de emisora
+
+- [x] Crear ruta dinámica de detalle por emisora
+- [x] Mostrar logo ampliado con fallback de iniciales
+- [x] Mostrar frecuencia, ciudad, género y descripción
+- [x] Añadir reproducción y favoritos desde el detalle
+- [x] Añadir enlace a la página web oficial
+- [x] Conectar las tarjetas de Inicio, Explorar y Favoritos al detalle
+- [x] Validar navegación, enlace externo y estados sin homepage

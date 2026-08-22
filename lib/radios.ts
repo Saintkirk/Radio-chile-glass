@@ -31,7 +31,7 @@ type RemoteStation = {
 export const CATALOG_URL = "https://de1.api.radio-browser.info/json/stations/bycountryexact/Chile?hidebroken=true&limit=100";
 const CACHE_KEY = "radio-catalog-cache-v1";
 const EDITORIAL_RADIOS: Radio[] = [
-  { id: "fmlatina", name: "FM Latina", frequency: "101.7 FM", city: "Santiago", genre: "Pop latino", description: "La música que conecta a Chile, con clásicos y novedades en español.", streamUrl: "https://stream.zeno.fm/0r0xa792kwzuv", initials: "FL", accent: "#FF6B5F", featured: true },
+  { id: "fmlatina", name: "FM Latina", frequency: "89.1 FM", city: "Santiago", genre: "Pop latino", description: "La música que conecta a Chile, con clásicos y novedades en español.", streamUrl: "https://stream.zeno.fm/0r0xa792kwzuv", initials: "FL", accent: "#FF6B5F", featured: true, homepage: "https://www.radiofmlatina.com/" },
   { id: "cooperativa", name: "Radio Cooperativa", frequency: "93.3 FM", city: "Santiago", genre: "Noticias", description: "Información, actualidad y conversación para acompañar tu día.", streamUrl: "https://redirector.dps.live/cooperativafm/aac/icecast.audio", initials: "CO", accent: "#8B7CFF", featured: true },
   { id: "biobio", name: "Radio Bío Bío", frequency: "99.7 FM", city: "Concepción", genre: "Noticias", description: "La radio con cobertura nacional y mirada local.", streamUrl: "https://redirector.dps.live/biobio/aac/icecast.audio", initials: "BB", accent: "#64D8FF" },
   { id: "infinita", name: "Radio Infinita", frequency: "100.1 FM", city: "Santiago", genre: "Actualidad", description: "Ideas, entrevistas y música para pensar distinto.", streamUrl: "https://redirector.dps.live/infinita/aac/icecast.audio", initials: "IN", accent: "#76E0B5" },
