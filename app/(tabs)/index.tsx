@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
@@ -8,6 +8,8 @@ import { AudioEqualizer } from "@/components/audio-equalizer";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
+import { favoriteHaptic } from "@/lib/haptics";
+import { FavoriteToast } from "@/components/favorite-toast";
 
 function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
   return (
@@ -32,6 +34,10 @@ export default function HomeScreen() {
   const { colorScheme } = useThemeContext();
   const lightMode = colorScheme === "light";
   const [query, setQuery] = useState("");
+  const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+  const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); favoriteHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const filtered = useMemo(() => radios.filter((radio) => `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase())), [query, radios]);
   const featured = currentRadio ?? radios[0];
 
@@ -59,12 +65,12 @@ export default function HomeScreen() {
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
-        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
+        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
       {currentRadio && <View style={styles.miniPlayer}><Pressable onPress={() => router.push(`/radio/${currentRadio.id}`)} style={({ pressed }) => [styles.miniMain, pressed && { opacity: 0.78 }]}><StationLogo radio={currentRadio} size={48} radius={14} /><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : currentRadio.accent} barCount={5} compact /></Pressable><Pressable onPress={togglePlay} style={({ pressed }) => [styles.miniControl, pressed && { opacity: 0.72 }]}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable></View>}
-    </ScreenContainer>
+    <FavoriteToast message={favoriteNotice} /></ScreenContainer>
   );
 }
 

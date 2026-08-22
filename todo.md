@@ -146,3 +146,10 @@
 - [x] Añadir confirmación visual al guardar o quitar favoritos
 - [x] Mantener feedback accesible en Inicio y Explorar
 - [x] Validar interacción, typecheck y tests
+
+## Toast y hápticos de favoritos
+
+- [x] Crear toast reutilizable para confirmaciones de favoritos
+- [x] Añadir impacto háptico al guardar o eliminar emisoras
+- [x] Integrar feedback en Inicio y Explorar
+- [x] Desactivar hápticos en web y validar accesibilidad
