@@ -138,3 +138,11 @@
 - [x] Definir pares de colores de tarjetas para claro y oscuro
 - [x] Probar texto principal, metadatos, controles y estados activos
 - [x] Ejecutar la prueba junto con Vitest y documentar los umbrales
+
+## Feedback visual de controles
+
+- [x] Añadir estados pressed y foco visual a reproducción y favoritos
+- [x] Mostrar estado de carga al iniciar una emisora
+- [x] Añadir confirmación visual al guardar o quitar favoritos
+- [x] Mantener feedback accesible en Inicio y Explorar
+- [x] Validar interacción, typecheck y tests

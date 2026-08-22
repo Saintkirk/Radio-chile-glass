@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
@@ -9,7 +9,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
 
-function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean }) {
+function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
   return (
     <Pressable onPress={onOpen} style={({ pressed }) => [styles.radioRow, lightMode && styles.radioRowLight, pressed && styles.pressed]}>
       <StationLogo radio={radio} size={54} radius={16} />
@@ -17,10 +17,11 @@ function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode }: { 
         <Text style={[styles.radioName, lightMode && styles.radioNameLight]}>{radio.name}</Text>
         <Text style={[styles.radioMeta, lightMode && styles.radioMetaLight]}>{radio.frequency}  ·  {radio.genre}</Text>
       </View>
-      <Pressable onPress={onFavorite} hitSlop={10} style={styles.iconButton}>
+      <Pressable onPress={onFavorite} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}>
+
         <IconSymbol name={favorite ? "heart.fill" : "heart"} size={20} color={favorite ? "#D64E4A" : lightMode ? "#667085" : "#A8B0C2"} />
       </Pressable>
-      <Pressable onPress={onPlay} style={[styles.playMini, lightMode && styles.playMiniLight]}><IconSymbol name="play.fill" size={16} color={lightMode ? "#F8FAFC" : "#F5F3EE"} /></Pressable>
+      <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={loading ? `Conectando con ${radio.name}` : playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`} style={({ pressed }) => [styles.playMini, lightMode && styles.playMiniLight, playing && styles.playMiniActive, pressed && styles.controlPressed]}>{loading ? <ActivityIndicator size="small" color={lightMode ? "#F8FAFC" : "#F5F3EE"} /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color={lightMode ? "#F8FAFC" : "#F5F3EE"} />}</Pressable>
     </Pressable>
   );
 }
@@ -58,7 +59,7 @@ export default function HomeScreen() {
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
-        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
+        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
@@ -92,6 +93,7 @@ const styles = StyleSheet.create({
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   seeAll: { color: "#FF8C7F", fontSize: 13, fontWeight: "600", marginBottom: 12 },
+  controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#FF6B5F1C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#D64E4A" },
   radioRowLight: { backgroundColor: "#FFFFFFD9", borderColor: "#D9E0EC" }, radioNameLight: { color: "#172033" }, radioMetaLight: { color: "#5B667B" }, playMiniLight: { backgroundColor: "#172033" },
   radioRow: { minHeight: 75, borderRadius: 19, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
   radioInfo: { flex: 1, marginLeft: 13 },
