@@ -447,3 +447,10 @@
 - [x] Recopilar recursos oficiales HD para las emisoras faltantes
 - [x] Integrar logos locales y fallback de marca sin tarjetas vacías
 - [x] Validar todas las tarjetas, typecheck, tests, lint, preview y checkpoint
+
+## Precarga de logos destacados en Inicio
+
+- [x] Identificar las emisoras destacadas y sus recursos de logo válidos
+- [x] Precargar logos al montar Inicio usando expo-image y caché memory-disk
+- [x] Ejecutar la precarga sin bloquear el renderizado ni repetir solicitudes innecesarias
+- [x] Validar typecheck, tests, lint, preview y checkpoint

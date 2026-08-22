@@ -10,6 +10,9 @@ import { useThemeContext } from "@/lib/theme-provider";
 import { favoriteAddedHaptic, favoriteRemovedHaptic } from "@/lib/haptics";
 import { FavoriteToast } from "@/components/favorite-toast";
 import { AnimatedFavoriteIcon } from "@/components/animated-favorite-icon";
+import { prefetchLogo } from "@/lib/logo-cache";
+
+const prefetchedFeaturedLogos = new Set<string>();
 
 function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
   return (
@@ -38,7 +41,13 @@ export default function HomeScreen() {
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+  useEffect(() => {
+    const featuredLogos = radios.filter((radio) => radio.featured && radio.favicon).map((radio) => radio.favicon as string);
+    const pendingLogos = featuredLogos.filter((uri) => !prefetchedFeaturedLogos.has(uri));
+    pendingLogos.forEach((uri) => prefetchedFeaturedLogos.add(uri));
+    if (pendingLogos.length) void Promise.allSettled(pendingLogos.map((uri) => prefetchLogo(uri)));
+  }, [radios]);
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const filtered = useMemo(() => radios.filter((radio) => {
     const matchesQuery = `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase());
