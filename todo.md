@@ -598,3 +598,11 @@
 - [x] Compartir la misma transición Slide direccional al cambiar de estación
 - [x] Mantener sincronizados audio, metadatos, flechas, gestos y control circular
 - [x] Validar preview móvil, typecheck, tests y lint
+
+## Iluminación de carátula central
+
+- [x] Añadir halo de luz dinámico usando el color de la emisora
+- [x] Añadir reflejo diagonal y brillo de borde en la portada central
+- [x] Sincronizar la respiración de luz con el estado reproduciendo
+- [x] Mantener legibilidad, reduced motion y visibilidad de carátulas laterales
+- [x] Validar preview móvil, typecheck, tests y lint

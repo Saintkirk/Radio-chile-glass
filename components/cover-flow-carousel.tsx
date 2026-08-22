@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
-import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -7,6 +7,8 @@ import type { Radio } from "@/lib/radio-player";
 
 export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPlaying, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onChange: (direction: number) => void; onPlay: () => void; isPlaying: boolean; currentRadioId?: string; lightMode?: boolean }) {
   const motion = useRef(new Animated.Value(1)).current;
+  const glow = useRef(new Animated.Value(0)).current;
+  const [reduceMotion, setReduceMotion] = useState(false);
   const direction = useRef(1);
   const active = radios[activeIndex];
   const previous = radios.length ? radios[(activeIndex - 1 + radios.length) % radios.length] : undefined;
@@ -16,6 +18,26 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
     motion.setValue(0);
     Animated.timing(motion, { toValue: 1, duration: 360, useNativeDriver: true }).start();
   }, [activeIndex, motion]);
+
+  useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion).catch(() => undefined);
+    const subscription = AccessibilityInfo.addEventListener("reduceMotionChanged", setReduceMotion);
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    glow.stopAnimation();
+    if (reduceMotion || !isPlaying || currentRadioId !== active.id) {
+      glow.setValue(0);
+      return undefined;
+    }
+    const pulse = Animated.loop(Animated.sequence([
+      Animated.timing(glow, { toValue: 1, duration: 1250, useNativeDriver: true }),
+      Animated.timing(glow, { toValue: 0, duration: 1250, useNativeDriver: true }),
+    ]));
+    pulse.start();
+    return () => pulse.stop();
+  }, [active.id, currentRadioId, glow, isPlaying, reduceMotion]);
 
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -62,10 +84,13 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
       <View style={styles.stage}>
         {sideCard(previous, -1)}
         <Animated.View style={[styles.centerSlot, cardStyle(0)]}>
+          <Animated.View pointerEvents="none" style={[styles.outerGlow, { backgroundColor: active.accent, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.12, 0.32] }), transform: [{ scale: glow.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.08] }) }] }]} />
           <View style={[styles.cover, styles.centerCover, { backgroundColor: `${active.accent}32` }]}>
+            <Animated.View pointerEvents="none" style={[styles.innerGlow, { backgroundColor: active.accent, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.08, 0.18] }) }]} />
             <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
               <StationLogo radio={active} size={184} radius={27} />
-              <View style={styles.centerGloss} />
+              <View pointerEvents="none" style={styles.diagonalSheen} />
+              <View pointerEvents="none" style={styles.centerGloss} />
             </Pressable>
           </View>
           <View style={styles.centerReflection}><StationLogo radio={active} size={184} radius={27} /></View>
@@ -90,12 +115,15 @@ const styles = StyleSheet.create({
   sideLeft: { left: -4 },
   sideRight: { right: -4 },
   centerSlot: { width: 204, height: 242, zIndex: 3, alignItems: "center" },
+  outerGlow: { position: "absolute", width: 236, height: 236, borderRadius: 28, shadowColor: "#FFFFFF", shadowOpacity: 0.9, shadowRadius: 30, shadowOffset: { width: 0, height: 0 }, elevation: 14 },
   cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF45", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.62, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 10 },
   sideCover: { width: 150, height: 202, borderRadius: 4 },
   centerCover: { width: 204, height: 224, borderRadius: 4, shadowRadius: 30, shadowOpacity: 0.78 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
+  innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
+  diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
   reflection: { position: "absolute", top: 206, width: 150, height: 62, opacity: 0.18, transform: [{ scaleY: -1 }], overflow: "hidden" },
   centerReflection: { width: 204, height: 72, opacity: 0.15, transform: [{ scaleY: -1 }], overflow: "hidden" },
   captionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, marginTop: 4 },
