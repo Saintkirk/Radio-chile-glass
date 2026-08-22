@@ -124,3 +124,10 @@
 - [x] Ajustar textos, frecuencia, orb y botón sobre fondo claro
 - [x] Ajustar color del ecualizador activo y reposo en modo claro
 - [x] Validar contraste y composición en claro y oscuro
+
+## Tarjetas de listado en modo claro
+
+- [x] Crear estilos adaptativos para superficies y bordes de las tarjetas
+- [x] Ajustar texto, metadatos y controles de favorito/reproducción
+- [x] Mantener estados pressed y acentos de emisora legibles
+- [x] Validar Inicio y Explorar en claro y oscuro

@@ -9,18 +9,18 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
 
-function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean }) {
+function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean }) {
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}>
+    <Pressable onPress={onOpen} style={({ pressed }) => [styles.radioRow, lightMode && styles.radioRowLight, pressed && styles.pressed]}>
       <StationLogo radio={radio} size={54} radius={16} />
       <View style={styles.radioInfo}>
-        <Text style={styles.radioName}>{radio.name}</Text>
-        <Text style={styles.radioMeta}>{radio.frequency}  ·  {radio.genre}</Text>
+        <Text style={[styles.radioName, lightMode && styles.radioNameLight]}>{radio.name}</Text>
+        <Text style={[styles.radioMeta, lightMode && styles.radioMetaLight]}>{radio.frequency}  ·  {radio.genre}</Text>
       </View>
       <Pressable onPress={onFavorite} hitSlop={10} style={styles.iconButton}>
-        <IconSymbol name={favorite ? "heart.fill" : "heart"} size={20} color={favorite ? "#FF6B5F" : "#A8B0C2"} />
+        <IconSymbol name={favorite ? "heart.fill" : "heart"} size={20} color={favorite ? "#D64E4A" : lightMode ? "#667085" : "#A8B0C2"} />
       </Pressable>
-      <Pressable onPress={onPlay} style={styles.playMini}><IconSymbol name="play.fill" size={16} color="#F5F3EE" /></Pressable>
+      <Pressable onPress={onPlay} style={[styles.playMini, lightMode && styles.playMiniLight]}><IconSymbol name="play.fill" size={16} color={lightMode ? "#F8FAFC" : "#F5F3EE"} /></Pressable>
     </Pressable>
   );
 }
@@ -58,7 +58,7 @@ export default function HomeScreen() {
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
-        renderItem={({ item }) => <RadioRow radio={item} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
+        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => playRadio(item)} onFavorite={() => toggleFavorite(item.id)} favorite={isFavorite(item.id)} />}
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   seeAll: { color: "#FF8C7F", fontSize: 13, fontWeight: "600", marginBottom: 12 },
+  radioRowLight: { backgroundColor: "#FFFFFFD9", borderColor: "#D9E0EC" }, radioNameLight: { color: "#172033" }, radioMetaLight: { color: "#5B667B" }, playMiniLight: { backgroundColor: "#172033" },
   radioRow: { minHeight: 75, borderRadius: 19, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
   radioInfo: { flex: 1, marginLeft: 13 },
   radioName: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
