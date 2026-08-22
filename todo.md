@@ -440,3 +440,10 @@
 - [x] Sustituir recursos por versiones oficiales HD verificables
 - [x] Mantener fallback nítido cuando no exista un logo oficial adecuado
 - [x] Validar carga en reproducción, typecheck, tests, lint, preview y checkpoint
+
+## Completar logos faltantes en tarjetas
+
+- [x] Identificar emisoras sin logo visible en la tarjeta de reproducción
+- [x] Recopilar recursos oficiales HD para las emisoras faltantes
+- [x] Integrar logos locales y fallback de marca sin tarjetas vacías
+- [x] Validar todas las tarjetas, typecheck, tests, lint, preview y checkpoint

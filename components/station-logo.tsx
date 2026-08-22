@@ -8,6 +8,7 @@ import type { Radio } from "@/lib/radios";
 type StationLogoProps = { radio: Pick<Radio, "id" | "favicon" | "initials" | "accent">; size?: number; radius?: number };
 
 const LOCAL_LOGOS: Record<string, number> = {
+  cooperativa: require("@/assets/images/radio-cooperativa.png"),
   futuro: require("@/assets/images/radio-futuro.png"),
 };
 
@@ -46,5 +47,5 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
   );
 }
 
-const styles = StyleSheet.create({ container: { overflow: "hidden", backgroundColor: "#181818", alignItems: "center", justifyContent: "center" }, image: { backgroundColor: "#181818" }, fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" }, glassOrb: { position: "absolute", right: -sizeOffset(), top: -sizeOffset(), backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" }, initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 }, });
+const styles = StyleSheet.create({ container: { overflow: "hidden", backgroundColor: "#181818", alignItems: "center", justifyContent: "center" }, image: { backgroundColor: "#F4F4F2" }, fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" }, glassOrb: { position: "absolute", right: -sizeOffset(), top: -sizeOffset(), backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" }, initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 }, });
 function sizeOffset() { return 8; }
