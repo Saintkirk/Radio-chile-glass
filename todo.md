@@ -230,3 +230,10 @@
 - [x] Activar impacto suave al completar la transición de apertura
 - [x] Respetar reduced motion y evitar duplicados
 - [x] Validar typecheck, tests y lint
+
+## Preferencia de respuesta háptica
+
+- [x] Añadir estado persistente de hápticos
+- [x] Aplicar la preferencia a los helpers de feedback
+- [x] Crear interruptor accesible en Ajustes
+- [x] Validar persistencia, typecheck, tests y lint
