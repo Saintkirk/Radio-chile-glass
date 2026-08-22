@@ -4,8 +4,8 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { AudioEqualizer } from "@/components/audio-equalizer";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -15,9 +15,10 @@ import { useThemeContext } from "@/lib/theme-provider";
 
 export default function RadioDetailScreen() {
   const router = useRouter();
-  const { id, originX, originY, originWidth, originHeight, containerX, containerY, containerWidth, containerHeight } = useLocalSearchParams<{ id: string; originX?: string; originY?: string; originWidth?: string; originHeight?: string; containerX?: string; containerY?: string; containerWidth?: string; containerHeight?: string }>();
+  const { id, originX, originY, originWidth, originHeight, containerX, containerY, containerWidth, containerHeight, viewportWidth, viewportHeight } = useLocalSearchParams<{ id: string; originX?: string; originY?: string; originWidth?: string; originHeight?: string; containerX?: string; containerY?: string; containerWidth?: string; containerHeight?: string; viewportWidth?: string; viewportHeight?: string }>();
   const { radios, currentRadio, isPlaying, isLoading, playRadio, toggleFavorite, isFavorite } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const lightMode = colorScheme === "light";
   const radio = radios.find((item) => item.id === id);
@@ -27,20 +28,24 @@ export default function RadioDetailScreen() {
   const [entryOrigin, setEntryOrigin] = useState({ scale: 0.52, translateX: 0, translateY: 210 });
   const hasMeasuredOrigin = [originX, originY, originWidth, originHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const hasMeasuredContainer = [containerX, containerY, containerWidth, containerHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
-  const measureArtworkOrigin = () => {
+  const sourceViewportWidth = Number(viewportWidth) || windowWidth;
+  const sourceViewportHeight = Number(viewportHeight) || windowHeight;
+  const viewportScaleX = sourceViewportWidth > 0 ? windowWidth / sourceViewportWidth : 1;
+  const viewportScaleY = sourceViewportHeight > 0 ? windowHeight / sourceViewportHeight : 1;
+  const measureArtworkOrigin = useCallback(() => {
     artworkRef.current?.measureInWindow((targetX, targetY, targetWidth, targetHeight) => {
       if (!hasMeasuredOrigin) return;
-      const sourceX = Number(originX);
-      const sourceY = Number(originY);
-      const sourceWidth = Number(originWidth);
-      const sourceHeight = Number(originHeight);
+      const sourceX = Number(originX) * viewportScaleX;
+      const sourceY = Number(originY) * viewportScaleY;
+      const sourceWidth = Number(originWidth) * viewportScaleX;
+      const sourceHeight = Number(originHeight) * viewportScaleY;
       setEntryOrigin({
         scale: Math.min(sourceWidth / targetWidth, sourceHeight / targetHeight),
         translateX: sourceX + sourceWidth / 2 - (targetX + targetWidth / 2),
         translateY: sourceY + sourceHeight / 2 - (targetY + targetHeight / 2),
       });
     });
-  };
+  }, [hasMeasuredOrigin, originHeight, originWidth, originX, originY, viewportScaleX, viewportScaleY]);
   useEffect(() => {
     if (!hasMeasuredOrigin) {
       const animation = Animated.timing(entryProgress, { toValue: 1, duration: 300, useNativeDriver: true });
@@ -49,6 +54,10 @@ export default function RadioDetailScreen() {
     }
     return undefined;
   }, [entryProgress, hasMeasuredOrigin]);
+  useEffect(() => {
+    if (!hasMeasuredOrigin) return;
+    measureArtworkOrigin();
+  }, [hasMeasuredOrigin, measureArtworkOrigin, windowWidth, windowHeight]);
   useEffect(() => {
     if (!hasMeasuredOrigin) return;
     const animation = Animated.timing(entryProgress, { toValue: 1, duration: 300, useNativeDriver: true });
@@ -76,7 +85,7 @@ export default function RadioDetailScreen() {
   if (!radio) return <ScreenContainer containerClassName="bg-[#090B12]" className="px-5 pt-3"><Pressable onPress={() => router.back()} style={styles.back}><IconSymbol name="chevron.left" size={22} color="#F5F3EE" /></Pressable><View style={styles.notFound}><Text style={styles.notFoundTitle}>Radio no encontrada</Text><Text style={styles.notFoundText}>La emisora pudo haber cambiado en la última actualización.</Text></View></ScreenContainer>;
 
   const active = currentRadio?.id === radio.id && isPlaying;
-  const containerStyle = hasMeasuredContainer ? { left: Number(containerX), top: Number(containerY) - insets.top, width: Number(containerWidth), height: Number(containerHeight), borderRadius: 20 } : null;
+  const containerStyle = hasMeasuredContainer ? { left: Number(containerX) * viewportScaleX, top: Number(containerY) * viewportScaleY - insets.top, width: Number(containerWidth) * viewportScaleX, height: Number(containerHeight) * viewportScaleY, borderRadius: 20 } : null;
   const openOfficialSite = async () => { if (radio.homepage) await WebBrowser.openBrowserAsync(radio.homepage); };
   return <ScreenContainer containerClassName="bg-[#090B12]" className="px-5 pt-3"><Animated.View {...panResponder.panHandlers} style={{ flex: 1, opacity: dismissY.interpolate({ inputRange: [0, 160], outputRange: [1, 0.72], extrapolate: "clamp" }), transform: [{ translateY: dismissY }] }}>{containerStyle && <Animated.View pointerEvents="none" style={[styles.ghostMini, containerStyle, { opacity: entryProgress.interpolate({ inputRange: [0, 1], outputRange: [0.96, 0], extrapolate: "clamp" }) }]} />}
 {radio.favicon ? <Image source={{ uri: radio.favicon }} style={styles.dynamicBackground} contentFit="cover" cachePolicy="disk" /> : <LinearGradient colors={[`${radio.accent}55`, "#090B12"]} style={styles.dynamicBackground} />}{radio.favicon && <BlurView intensity={78} tint="dark" experimentalBlurMethod="dimezisBlurView" style={styles.dynamicBackground} />}<LinearGradient colors={["#090B12B8", "#090B12F5"]} style={styles.backgroundOverlay} pointerEvents="none" /><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}><View style={styles.header}><Pressable onPress={() => router.back()} style={styles.back}><IconSymbol name="chevron.left" size={22} color="#F5F3EE" /></Pressable><Pressable onPress={() => toggleFavorite(radio.id)} style={styles.back}><IconSymbol name={isFavorite(radio.id) ? "heart.fill" : "heart"} size={20} color={isFavorite(radio.id) ? "#FF6B5F" : "#F5F3EE"} /></Pressable></View><Animated.View style={{ transform: [{ scale: entryProgress.interpolate({ inputRange: [0, 1], outputRange: [entryOrigin.scale, 1], extrapolate: "clamp" }) }, { translateX: entryProgress.interpolate({ inputRange: [0, 1], outputRange: [entryOrigin.translateX, 0], extrapolate: "clamp" }) }, { translateY: entryProgress.interpolate({ inputRange: [0, 1], outputRange: [entryOrigin.translateY, 0], extrapolate: "clamp" }) }, { scale: dismissY.interpolate({ inputRange: [0, 420], outputRange: [1, 0.52], extrapolate: "clamp" }) }, { translateY: dismissY.interpolate({ inputRange: [0, 420], outputRange: [0, 210], extrapolate: "clamp" }) }] }}><View ref={artworkRef} collapsable={false} onLayout={measureArtworkOrigin} style={[styles.artwork, { backgroundColor: `${radio.accent}${lightMode ? "18" : "32"}` }, lightMode && styles.artworkLight]}><View style={[styles.artGlow, { backgroundColor: `${radio.accent}${lightMode ? "35" : "55"}` }]} /><StationLogo radio={radio} size={156} radius={42} /></View></Animated.View><AudioEqualizer playing={active} color={lightMode ? "#C2413E" : radio.accent} /><Text style={styles.eyebrow}>ESTÁS ESCUCHANDO</Text><Text style={styles.name}>{radio.name}</Text><Text style={styles.meta}>{radio.frequency}  ·  {radio.city}  ·  {radio.genre}</Text><View style={styles.actions}><Pressable onPress={() => playRadio(radio)} style={({ pressed }) => [styles.playButton, pressed && { transform: [{ scale: 0.97 }] }]}><IconSymbol name={active ? "pause.fill" : "play.fill"} size={24} color="#090B12" /><Text style={styles.playText}>{isLoading ? "Conectando" : active ? "Pausar" : "Reproducir"}</Text></Pressable><Pressable onPress={openOfficialSite} disabled={!radio.homepage} style={({ pressed }) => [styles.siteButton, !radio.homepage && styles.disabled, pressed && { opacity: 0.75 }]}><IconSymbol name="globe" size={20} color="#F5F3EE" /><Text style={styles.siteText}>Web oficial</Text></Pressable></View><View style={styles.infoCard}><Text style={styles.infoLabel}>SOBRE LA EMISORA</Text><Text style={styles.description}>{radio.description}</Text>{radio.homepage ? <Text style={styles.url} numberOfLines={1}>{radio.homepage.replace(/^https?:\/\//, "").replace(/\/$/, "")}</Text> : <Text style={styles.unavailable}>Página oficial no disponible</Text>}</View></ScrollView></Animated.View></ScreenContainer>;

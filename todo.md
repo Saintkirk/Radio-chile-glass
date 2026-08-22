@@ -216,3 +216,10 @@
 - [x] Transferir las métricas del contenedor al detalle
 - [x] Coordinar el desvanecimiento con la expansión de la carátula
 - [x] Validar apertura, fallback y continuidad de reproducción
+
+## Adaptación para tabletas y orientación
+
+- [x] Recalcular métricas al cambiar las dimensiones de la ventana
+- [x] Adaptar offsets a áreas seguras y layouts amplios
+- [x] Mantener la transición estable al rotar la pantalla
+- [x] Validar teléfono, tableta y orientación dinámica

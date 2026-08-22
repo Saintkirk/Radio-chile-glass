@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Animated, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Animated, FlatList, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
@@ -34,6 +34,7 @@ export default function HomeScreen() {
   const { currentRadio, isPlaying, isLoading, playRadio, togglePlay, toggleFavorite, isFavorite, radios, refreshCatalog, isRefreshingCatalog, catalogSource } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
   const lightMode = colorScheme === "light";
+  const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
   const [query, setQuery] = useState("");
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
   const [miniRadio, setMiniRadio] = useState<Radio | null>(currentRadio);
@@ -60,7 +61,7 @@ export default function HomeScreen() {
   const openMiniDetail = (radio: Radio) => {
     miniContainerRef.current?.measureInWindow((containerX, containerY, containerWidth, containerHeight) => {
       miniLogoRef.current?.measureInWindow((x, y, width, height) => {
-        router.push({ pathname: "/radio/[id]", params: { id: radio.id, originX: x.toFixed(2), originY: y.toFixed(2), originWidth: width.toFixed(2), originHeight: height.toFixed(2), containerX: containerX.toFixed(2), containerY: containerY.toFixed(2), containerWidth: containerWidth.toFixed(2), containerHeight: containerHeight.toFixed(2) } });
+        router.push({ pathname: "/radio/[id]", params: { id: radio.id, originX: x.toFixed(2), originY: y.toFixed(2), originWidth: width.toFixed(2), originHeight: height.toFixed(2), containerX: containerX.toFixed(2), containerY: containerY.toFixed(2), containerWidth: containerWidth.toFixed(2), containerHeight: containerHeight.toFixed(2), viewportWidth: viewportWidth.toFixed(2), viewportHeight: viewportHeight.toFixed(2) } });
       });
     });
   };
