@@ -484,3 +484,10 @@
 - [x] Hacer que el cambio actualice la emisora activa y el audio global
 - [x] Mantener Play, mini-player, logo y metadatos sincronizados
 - [x] Validar botones, gestos, typecheck, tests, lint, preview y checkpoint
+
+## Carrusel horizontal de portadas
+
+- [x] Revisar la animación lateral actual y sus disparadores
+- [x] Convertir el cambio de emisora en un movimiento horizontal tipo carrusel
+- [x] Coordinar dirección, portada, metadatos y audio activo
+- [x] Respetar reduced motion y validar typecheck, tests, lint, preview y checkpoint
