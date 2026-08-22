@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 
-type AudioEqualizerProps = { playing: boolean; color?: string; barCount?: number };
+type AudioEqualizerProps = { playing: boolean; color?: string; barCount?: number; compact?: boolean };
 
 const LEVELS = [0.35, 0.72, 0.48, 0.9, 0.58, 0.8, 0.4];
 
-export function AudioEqualizer({ playing, color = "#FF8C7F", barCount = 7 }: AudioEqualizerProps) {
+export function AudioEqualizer({ playing, color = "#FF8C7F", barCount = 7, compact = false }: AudioEqualizerProps) {
   const levels = useRef(Array.from({ length: barCount }, (_, index) => new Animated.Value(playing ? LEVELS[index % LEVELS.length] : 0.22))).current;
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function AudioEqualizer({ playing, color = "#FF8C7F", barCount = 7 }: Aud
     return () => animations.forEach((animation) => animation.stop());
   }, [levels, playing]);
 
-  return <View accessibilityLabel={playing ? "Ecualizador activo" : "Ecualizador en pausa"} style={styles.container}>{levels.map((level, index) => <Animated.View key={index} style={[styles.bar, { backgroundColor: color, transform: [{ scaleY: level }] }]} />)}</View>;
+  return <View accessibilityLabel={playing ? "Ecualizador activo" : "Ecualizador en pausa"} style={[styles.container, compact && styles.compactContainer]}>{levels.map((level, index) => <Animated.View key={index} style={[styles.bar, compact && styles.compactBar, { backgroundColor: color, transform: [{ scaleY: level }] }]} />)}</View>;
 }
 
-const styles = StyleSheet.create({ container: { height: 30, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4 }, bar: { width: 4, height: 26, borderRadius: 4, opacity: 0.9 }, });
+const styles = StyleSheet.create({ container: { height: 30, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4 }, compactContainer: { height: 24, width: 34, gap: 3 }, bar: { width: 4, height: 26, borderRadius: 4, opacity: 0.9 }, compactBar: { width: 3, height: 18 }, });

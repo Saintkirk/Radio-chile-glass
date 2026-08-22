@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { StationLogo } from "@/components/station-logo";
+import { AudioEqualizer } from "@/components/audio-equalizer";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 
@@ -58,7 +59,7 @@ export default function HomeScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />
-      {currentRadio && <Pressable onPress={togglePlay} style={styles.miniPlayer}><View style={[styles.miniArtwork, { backgroundColor: `${currentRadio.accent}CC` }]}><Text style={styles.miniInitials}>{currentRadio.initials}</Text></View><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable>}
+      {currentRadio && <Pressable onPress={togglePlay} style={styles.miniPlayer}><View style={[styles.miniArtwork, { backgroundColor: `${currentRadio.accent}CC` }]}><Text style={styles.miniInitials}>{currentRadio.initials}</Text></View><View style={{ flex: 1 }}><Text style={styles.miniName}>{currentRadio.name}</Text><Text style={styles.miniMeta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View><AudioEqualizer playing={isPlaying} color={currentRadio.accent} barCount={5} compact /><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" /></Pressable>}
     </ScreenContainer>
   );
 }

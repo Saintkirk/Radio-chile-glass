@@ -60,3 +60,9 @@
 - [x] Reaccionar al estado reproduciendo/pausado de la radio
 - [x] Integrar el ecualizador en la pantalla de detalle
 - [x] Validar animación y typecheck en mobile
+
+## Ecualizador en mini reproductor
+
+- [x] Añadir variante compacta del ecualizador al mini reproductor
+- [x] Sincronizarlo con la radio activa y el estado de pausa
+- [x] Validar que no desborde el mini reproductor en mobile
