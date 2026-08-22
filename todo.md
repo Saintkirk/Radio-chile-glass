@@ -279,3 +279,10 @@
 - [x] Verificar conexión de los streams priorizados
 - [x] Reordenar la portada según la selección principal
 - [x] Mantener catálogo ampliado disponible en Explorar y validar cambios
+
+## Logos oficiales y streams definitivos
+
+- [x] Recopilar favicon o logo oficial verificable para cada emisora editorial
+- [x] Confirmar URL HTTPS de streaming y tipo de audio
+- [x] Actualizar el catálogo con logos remotos y streams definitivos
+- [x] Validar carga de logos, fallbacks, conectividad, typecheck, tests y lint
