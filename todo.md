@@ -78,3 +78,9 @@
 - [x] Reemplazar iniciales fijas por StationLogo en la carátula compacta
 - [x] Mantener fallback de iniciales y acento cuando falle el logo
 - [x] Validar carga remota, navegación y layout móvil
+
+## Logo en carátula principal
+
+- [x] Mostrar StationLogo ampliado en la carátula hero de Inicio
+- [x] Mantener fallback de iniciales y acento en la carátula hero
+- [x] Validar contraste, composición y layout móvil

@@ -48,7 +48,7 @@ export default function HomeScreen() {
             <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "Catálogo actualizado" : "Modo sin conexión"}</Text></View>
             <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, pressed && styles.pressed]}>
               <LinearGradient colors={[`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-              <View style={styles.heroOrb} /><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={styles.liveText}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={styles.heroFreq}>{featured.frequency}</Text></View>
+              <View style={styles.heroOrb} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={styles.liveText}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={styles.heroFreq}>{featured.frequency}</Text></View>
               <View style={styles.heroBottom}><Text style={styles.heroName}>{featured.name}</Text><Text style={styles.heroGenre}>{featured.city}  ·  {featured.genre}</Text></View>
               <Pressable onPress={togglePlay} style={styles.heroPlay}><IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={25} color="#090B12" /></Pressable>
             </Pressable>
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   syncText: { color: "#76E0B5", fontSize: 10, fontWeight: "600", marginBottom: 12 },
   hero: { height: 210, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
+  heroLogo: { position: "absolute", right: 18, top: 54, opacity: 0.96 },
   heroOrb: { position: "absolute", width: 190, height: 190, borderRadius: 100, right: -35, top: -48, backgroundColor: "#FFFFFF0B", borderWidth: 1, borderColor: "#FFFFFF10" },
   heroTop: { flexDirection: "row", alignItems: "center" },
   liveDot: { width: 8, height: 8, borderRadius: 5, marginRight: 8 },
