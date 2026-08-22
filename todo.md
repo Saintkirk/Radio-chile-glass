@@ -174,3 +174,10 @@
 - [x] Coordinar opacidad y desplazamiento vertical
 - [x] Respetar reduced motion y áreas seguras
 - [x] Validar aparición, ocultamiento y navegación en mobile
+
+## Expansión del mini reproductor
+
+- [x] Definir o reutilizar la vista de reproducción a pantalla completa
+- [x] Añadir transición fluida al tocar el mini reproductor
+- [x] Mantener estado, logo y ecualizador sincronizados durante la expansión
+- [x] Validar apertura, cierre y layout móvil

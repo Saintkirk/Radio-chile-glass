@@ -89,6 +89,15 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="oauth/callback" />
+            <Stack.Screen
+              name="radio/[id]"
+              options={{
+                presentation: "modal",
+                animation: "slide_from_bottom",
+                gestureEnabled: true,
+                gestureDirection: "vertical",
+              }}
+            />
           </Stack>
           <StatusBar style="auto" />
         </QueryClientProvider>
