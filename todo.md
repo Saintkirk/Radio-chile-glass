@@ -84,3 +84,20 @@
 - [x] Mostrar StationLogo ampliado en la carátula hero de Inicio
 - [x] Mantener fallback de iniciales y acento en la carátula hero
 - [x] Validar contraste, composición y layout móvil
+
+## Habilidad: pruebas y CI/CD
+
+- [x] Documentar pirámide de pruebas para catálogo, audio, caché y navegación
+- [x] Documentar mocks deterministas de red, audio, imágenes y AsyncStorage
+- [x] Añadir estrategia de pruebas de integración y build Android
+- [x] Añadir pipeline CI/CD con gates de typecheck, tests, lint y Expo
+- [x] Documentar manejo de secretos, artefactos y fallos del pipeline
+- [x] Validar la habilidad actualizada
+
+## Estrategia push y pantalla de bloqueo
+
+- [x] Diseñar arquitectura de controles multimedia para reproducción en segundo plano
+- [x] Definir notificación persistente y acciones play/pause/stop
+- [x] Definir estrategia de push para avisos editoriales opt-in
+- [x] Documentar permisos Android, backend, tokens y privacidad
+- [x] Definir pruebas nativas y criterios de aceptación
