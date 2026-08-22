@@ -550,3 +550,11 @@
 - [x] Coordinar apertura del detalle, reproducción, favoritos y mini reproductor
 - [x] Respetar gestos, reduced motion, accesibilidad y safe areas
 - [x] Validar typecheck, tests, lint y preview móvil
+
+## Carrusel Cover Flow inspirado en iPod touch 7.ª generación
+
+- [x] Diseñar portada central dominante y logos anterior/siguiente en perspectiva lateral
+- [x] Integrar navegación por flechas y deslizamiento horizontal con animación Cover Flow
+- [x] Mantener sincronizados radio activa, audio, metadatos y mini reproductor
+- [x] Validar accesibilidad, reduced motion, responsive y contraste
+- [x] Ejecutar typecheck, tests, lint y preview móvil

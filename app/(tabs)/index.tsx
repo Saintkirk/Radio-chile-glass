@@ -1,10 +1,9 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
-import { StationLogo } from "@/components/station-logo";
 import { ItunesRadioCard } from "@/components/itunes-radio-card";
+import { CoverFlowCarousel } from "@/components/cover-flow-carousel";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
@@ -76,12 +75,7 @@ export default function HomeScreen() {
             <View style={styles.searchWrap}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor="#7F8799" style={styles.searchInput} /></View>
             <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
             <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></View>
-            <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, lightMode && styles.heroLight, pressed && styles.pressed]}>
-              <LinearGradient colors={lightMode ? [`${featured.accent}CC`, "#EEF2FF", "#F8FAFC"] : [`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-              <View style={[styles.heroOrb, lightMode && styles.heroOrbLight]} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#1ED760" : "#B3B3B3" }]} /><Text style={[styles.liveText, lightMode && styles.heroTextLight]}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={[styles.heroFreq, lightMode && styles.heroTextLight]}>{featured.frequency}</Text></View>
-              <View style={styles.heroNav}><Pressable onPress={(event) => { event.stopPropagation(); browseFeatured(-1); }} accessibilityRole="button" accessibilityLabel="Radio anterior" style={({ pressed }) => [styles.heroNavButton, pressed && styles.controlPressed]}><IconSymbol name="chevron.left" size={18} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable><Text style={styles.heroNavLabel}>{filtered.length ? `${featuredIndex + 1} / ${filtered.length}` : "0 / 0"}</Text><Pressable onPress={(event) => { event.stopPropagation(); browseFeatured(1); }} accessibilityRole="button" accessibilityLabel="Radio siguiente" style={({ pressed }) => [styles.heroNavButton, pressed && styles.controlPressed]}><IconSymbol name="chevron.right" size={18} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable></View><View style={styles.heroBottom}><Text style={[styles.heroName, lightMode && styles.heroTextLight]}>{featured.name}</Text><Text style={[styles.heroGenre, lightMode && styles.heroSubtextLight]}>{featured.city}  ·  {featured.genre}</Text></View>
-              <Pressable onPress={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} accessibilityRole="button" accessibilityLabel={currentRadio?.id === featured.id && isPlaying ? `Pausar ${featured.name}` : `Reproducir ${featured.name}`} style={[styles.heroPlay, lightMode && styles.heroPlayLight]}><IconSymbol name={currentRadio?.id === featured.id && isPlaying ? "pause.fill" : "play.fill"} size={25} color={lightMode ? "#F8FAFC" : "#0B0B0B"} /></Pressable>
-            </Pressable>
+            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
