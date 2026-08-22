@@ -590,3 +590,11 @@
 - [x] Añadir perspectiva 3D visible y reflejos laterales
 - [x] Mantener Slide direccional, flechas, gestos y audio sincronizado
 - [x] Validar en móvil con preview, typecheck, tests y lint
+
+## Unificación Cover Flow Inicio–Reproductor
+
+- [x] Reutilizar exactamente la composición de tres carátulas del Inicio en el reproductor
+- [x] Igualar posiciones, escalas, perspectiva, reflejos y visibilidad lateral
+- [x] Compartir la misma transición Slide direccional al cambiar de estación
+- [x] Mantener sincronizados audio, metadatos, flechas, gestos y control circular
+- [x] Validar preview móvil, typecheck, tests y lint
