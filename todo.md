@@ -470,3 +470,10 @@
 - [x] Descargar e integrar los recursos locales faltantes sin romper el bundling
 - [x] Validar todas las tarjetas, fallbacks, typecheck, tests, lint y preview
 - [x] Guardar checkpoint con el catálogo completo de logos
+
+## Iluminación al pasar el cursor sobre tarjetas
+
+- [x] Identificar el componente compartido de tarjeta de emisora
+- [x] Añadir halo y elevación sutil solo en hover web
+- [x] Mantener intacta la interacción táctil y la legibilidad
+- [x] Validar reduced motion, typecheck, tests, lint, preview y checkpoint

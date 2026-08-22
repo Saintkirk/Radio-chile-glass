@@ -16,7 +16,7 @@ const prefetchedFeaturedLogos = new Set<string>();
 
 function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.radioRow, lightMode && styles.radioRowLight, pressed && styles.pressed]}>
+    <Pressable onPress={onOpen} style={({ pressed, hovered }) => [styles.radioRow, lightMode && styles.radioRowLight, hovered && styles.radioRowHovered, pressed && styles.pressed]}>
       <StationLogo radio={radio} size={54} radius={16} />
       <View style={styles.radioInfo}>
         <Text style={[styles.radioName, lightMode && styles.radioNameLight]}>{radio.name}</Text>
@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
   controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#1DB9541C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#15883E" },
   radioRowLight: { backgroundColor: "#FFFFFFD9", borderColor: "#D9E0EC" }, radioNameLight: { color: "#172033" }, radioMetaLight: { color: "#5B667B" }, playMiniLight: { backgroundColor: "#172033" },
   radioRow: { minHeight: 75, borderRadius: 19, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
+  radioRowHovered: { backgroundColor: "#1ED76016", borderColor: "#1ED76066", shadowColor: "#1ED760", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 4, transform: [{ translateY: -1 }] },
   radioInfo: { flex: 1, marginLeft: 13 },
   radioName: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
   radioMeta: { color: "#8D95A7", fontSize: 12, marginTop: 5 },
