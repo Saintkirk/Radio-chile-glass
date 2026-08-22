@@ -511,3 +511,10 @@
 - [x] Auditar el bloque actions que hereda stationMotionStyle
 - [x] Mantener Pausar/Reproducir y Web oficial estáticos
 - [x] Conservar navegación, audio, accesibilidad y validar preview, pruebas y checkpoint
+
+## Carrusel derecha a izquierda refinado
+
+- [x] Auditar la dirección actual del movimiento de portada
+- [x] Hacer más claro el desplazamiento de derecha a izquierda al avanzar
+- [x] Mantener dirección inversa al retroceder y controles fijos
+- [x] Validar gestos, accesibilidad, typecheck, tests, preview y checkpoint
