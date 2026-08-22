@@ -362,3 +362,11 @@
 - [x] Añadir animaciones de alto impacto con reduced motion
 - [x] Optimizar superficies, navegación y layouts para Android 16
 - [x] Validar accesibilidad, rendimiento, typecheck, tests y lint
+
+## Rediseño visual premium aplicado
+
+- [x] Aplicar jerarquía visual premium visible en Inicio
+- [x] Rediseñar carátula y tarjetas con lenguaje editorial de streaming
+- [x] Actualizar Explorar con composición más compacta y destacada
+- [x] Añadir animaciones perceptibles y respetar reduced motion
+- [x] Validar visual, accesibilidad, funcionalidad, typecheck, tests y lint

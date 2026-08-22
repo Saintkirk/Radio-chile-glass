@@ -36,6 +36,7 @@ export default function HomeScreen() {
   const lightMode = colorScheme === "light";
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
   const [query, setQuery] = useState("");
+  const [activeGenre, setActiveGenre] = useState("Todo");
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
   const [miniRadio, setMiniRadio] = useState<Radio | null>(currentRadio);
   const miniProgress = useRef(new Animated.Value(currentRadio ? 1 : 0)).current;
@@ -57,7 +58,11 @@ export default function HomeScreen() {
     return () => { active = false; };
   }, [currentRadio, miniProgress]);
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
-  const filtered = useMemo(() => radios.filter((radio) => `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase())), [query, radios]);
+  const filtered = useMemo(() => radios.filter((radio) => {
+    const matchesQuery = `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase());
+    const matchesGenre = activeGenre === "Todo" || radio.genre.toLowerCase().includes(activeGenre.toLowerCase());
+    return matchesQuery && matchesGenre;
+  }), [activeGenre, query, radios]);
   const openMiniDetail = (radio: Radio) => {
     miniContainerRef.current?.measureInWindow((containerX, containerY, containerWidth, containerHeight) => {
       miniLogoRef.current?.measureInWindow((x, y, width, height) => {
@@ -81,7 +86,8 @@ export default function HomeScreen() {
               <Pressable onPress={() => refreshCatalog()} style={styles.settingsButton}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
             </View>
             <View style={styles.searchWrap}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor="#7F8799" style={styles.searchInput} /></View>
-            <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "Catálogo actualizado" : "Modo sin conexión"}</Text></View>
+            <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
+            <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></View>
             <Pressable onPress={() => playRadio(featured)} style={({ pressed }) => [styles.hero, lightMode && styles.heroLight, pressed && styles.pressed]}>
               <LinearGradient colors={lightMode ? [`${featured.accent}CC`, "#EEF2FF", "#F8FAFC"] : [`${featured.accent}AA`, "#1A2033", "#101522"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
               <View style={[styles.heroOrb, lightMode && styles.heroOrbLight]} /><View style={styles.heroLogo}><StationLogo radio={featured} size={104} radius={30} /></View><View style={styles.heroTop}><View style={[styles.liveDot, { backgroundColor: isPlaying ? "#76E0B5" : "#FFB86B" }]} /><Text style={[styles.liveText, lightMode && styles.heroTextLight]}>{isPlaying ? "EN VIVO" : "LISTA PARA ESCUCHAR"}</Text><Text style={[styles.heroFreq, lightMode && styles.heroTextLight]}>{featured.frequency}</Text></View>
@@ -111,8 +117,8 @@ const styles = StyleSheet.create({
   sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   syncText: { color: "#76E0B5", fontSize: 10, fontWeight: "600", marginBottom: 12 },
-  heroLight: { borderColor: "#CBD5E1" }, hero: { height: 210, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
-  heroLogo: { position: "absolute", right: 18, top: 54, opacity: 0.96 },
+  heroLight: { borderColor: "#CBD5E1" }, hero: { height: 244, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
+  heroLogo: { position: "absolute", right: 24, top: 48, opacity: 0.98, transform: [{ rotate: "3deg" }] },
   heroTextLight: { color: "#172033" }, heroSubtextLight: { color: "#46536B" }, heroPlayLight: { backgroundColor: "#172033" },
   heroOrbLight: { backgroundColor: "#FFFFFF55", borderColor: "#FFFFFFAA" }, heroOrb: { position: "absolute", width: 190, height: 190, borderRadius: 100, right: -35, top: -48, backgroundColor: "#FFFFFF0B", borderWidth: 1, borderColor: "#FFFFFF10" },
   heroTop: { flexDirection: "row", alignItems: "center" },
@@ -123,6 +129,7 @@ const styles = StyleSheet.create({
   heroName: { color: "#F5F3EE", fontSize: 27, fontWeight: "700", letterSpacing: -0.5 },
   heroGenre: { color: "#D0D3DD", fontSize: 13, marginTop: 5 },
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
+  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipActive: { backgroundColor: "#FF6B5F", borderColor: "#FF6B5F" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextActive: { color: "#160F14" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   seeAll: { color: "#FF8C7F", fontSize: 13, fontWeight: "600", marginBottom: 12 },
   controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#FF6B5F1C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#D64E4A" },
