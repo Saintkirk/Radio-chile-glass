@@ -4,6 +4,7 @@ import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, useWind
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
+import { NowPlayingLabel } from "@/components/now-playing-label";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
@@ -55,7 +56,7 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
     <Animated.View ref={containerRef} collapsable={false} style={[styles.container, { bottom, opacity: progress, transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}>
       <Pressable onPress={() => openDetail(miniRadio)} accessibilityRole="button" accessibilityLabel={`Abrir reproductor de ${miniRadio.name}`} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
         <View ref={logoRef} collapsable={false}><StationLogo radio={miniRadio} size={48} radius={14} /></View>
-        <View style={styles.info}><Text numberOfLines={1} style={styles.name}>{miniRadio.name}</Text><Text style={styles.meta}>{isLoading ? "Conectando..." : isPlaying ? "Reproduciendo ahora" : "En pausa"}</Text></View>
+        <View style={styles.info}><Text numberOfLines={1} style={styles.name}>{miniRadio.name}</Text>{isLoading ? <Text style={styles.meta}>Conectando...</Text> : <NowPlayingLabel streamUrl={miniRadio.streamUrl} compact />}</View>
         <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : miniRadio.accent} barCount={5} compact />
       </Pressable>
       <Pressable onPress={togglePlay} accessibilityRole="button" accessibilityLabel={isPlaying ? `Pausar ${miniRadio.name}` : `Reproducir ${miniRadio.name}`} style={({ pressed }) => [styles.control, pressed && styles.pressed]}>

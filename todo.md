@@ -606,3 +606,12 @@
 - [x] Sincronizar la respiración de luz con el estado reproduciendo
 - [x] Mantener legibilidad, reduced motion y visibilidad de carátulas laterales
 - [x] Validar preview móvil, typecheck, tests y lint
+
+## Metadatos “Ahora suena”
+
+- [x] Revisar soporte de metadatos ICY y limitaciones de expo-audio
+- [x] Añadir endpoint público con timeout para leer StreamTitle
+- [x] Mostrar artista y pista en el detalle de emisora
+- [x] Mostrar now playing de forma compacta en el mini reproductor
+- [x] Añadir fallback cuando la emisora no publica metadatos
+- [x] Validar typecheck, tests, lint y preview móvil
