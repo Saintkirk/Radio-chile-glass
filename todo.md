@@ -566,3 +566,11 @@
 - [x] Añadir inclinación 3D, profundidad y reflejo inferior de las carátulas
 - [x] Mantener deslizamiento, flechas, audio activo y accesibilidad
 - [x] Validar preview móvil, typecheck, tests y lint
+
+## Flow Cover en pantalla de reproducción
+
+- [x] Reutilizar la composición Flow Cover del Inicio en el detalle de emisora
+- [x] Mostrar carátulas anterior y siguiente junto a la portada activa
+- [x] Sincronizar carrusel, navegación, audio, metadatos y control circular
+- [x] Validar gestos, accesibilidad, reduced motion y layout móvil
+- [x] Ejecutar typecheck, tests, lint y preview
