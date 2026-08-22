@@ -413,3 +413,9 @@
 - [x] Optimizar el renderizado y escalado de StationLogo
 - [x] Añadir fallback nítido cuando el recurso remoto no tenga resolución suficiente
 - [x] Validar nitidez en móvil, typecheck, tests, lint, preview y checkpoint
+
+## Iconos para navegación de emisoras
+
+- [x] Reemplazar textos Anterior y Siguiente por iconos compactos
+- [x] Mantener etiquetas accesibles y contador central
+- [x] Validar visual móvil, typecheck, tests, lint, preview y checkpoint
