@@ -181,3 +181,10 @@
 - [x] Añadir transición fluida al tocar el mini reproductor
 - [x] Mantener estado, logo y ecualizador sincronizados durante la expansión
 - [x] Validar apertura, cierre y layout móvil
+
+## Gesto de cierre de reproducción
+
+- [x] Añadir gesto vertical de deslizamiento hacia abajo en el detalle
+- [x] Definir umbral, resistencia y animación de cancelación
+- [x] Cerrar la ruta y volver al mini reproductor al completar el gesto
+- [x] Validar scroll, botón atrás y layout móvil
