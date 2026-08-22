@@ -258,3 +258,10 @@
 - [x] Añadir salida animada al toast
 - [x] Mantener accesibilidad y desmontaje correcto
 - [x] Validar typecheck, tests y lint
+
+## Cancelación del temporizador del toast
+
+- [x] Guardar la referencia del temporizador activo
+- [x] Cancelar el temporizador anterior antes de mostrar un nuevo mensaje
+- [x] Reiniciar la duración del toast en cada guardado
+- [x] Limpiar el temporizador al desmontar y validar typecheck, tests y lint

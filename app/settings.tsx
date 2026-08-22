@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -21,7 +21,9 @@ export default function SettingsScreen() {
   const [haptics, setHaptics] = useState<HapticPreferences>(DEFAULT_HAPTICS);
   const [permission, setPermission] = useState<Notifications.PermissionStatus | null>(null);
   const [hapticsNotice, setHapticsNotice] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, [toastTimer]);
   useEffect(() => {
     AsyncStorage.getItem("radio-push-preferences").then((value) => { if (value) setPush({ ...DEFAULT_PUSH, ...JSON.parse(value) }); }).catch(() => undefined);
     Notifications.getPermissionsAsync().then(({ status }) => setPermission(status)).catch(() => setPermission(null));
@@ -29,7 +31,7 @@ export default function SettingsScreen() {
   }, []);
 
   const savePush = (next: PushPreferences) => { setPush(next); AsyncStorage.setItem("radio-push-preferences", JSON.stringify(next)).catch(() => undefined); };
-  const toggleHaptics = async (kind: keyof HapticPreferences, enabled: boolean) => { setHaptics((current) => ({ ...current, [kind]: enabled })); const saved = await setHapticsPreference(kind, enabled); setHapticsNotice(saved ? "Preferencia háptica guardada" : "No se pudo guardar la preferencia"); setTimeout(() => setHapticsNotice(null), 1700); };
+  const toggleHaptics = async (kind: keyof HapticPreferences, enabled: boolean) => { setHaptics((current) => ({ ...current, [kind]: enabled })); const saved = await setHapticsPreference(kind, enabled); if (toastTimer.current) clearTimeout(toastTimer.current); setHapticsNotice(saved ? "Preferencia háptica guardada" : "No se pudo guardar la preferencia"); toastTimer.current = setTimeout(() => { setHapticsNotice(null); toastTimer.current = null; }, 1700); };
   const requestPushPermission = async () => {
     const result = await Notifications.requestPermissionsAsync();
     setPermission(result.status);
