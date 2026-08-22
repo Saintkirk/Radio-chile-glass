@@ -426,3 +426,10 @@
 - [x] Cambiar a emisora anterior o siguiente según la dirección
 - [x] Evitar conflictos con el gesto vertical de cierre y el ScrollView
 - [x] Añadir feedback accesible y validar typecheck, tests, lint, preview y checkpoint
+
+## Transición lateral al cambiar de emisora
+
+- [x] Añadir animación lateral suave al cambiar de emisora
+- [x] Aplicarla a botones y gestos sin duplicar cambios de audio
+- [x] Respetar reduced motion y sincronizar logo, texto y ecualizador
+- [x] Validar typecheck, tests, lint, preview y checkpoint
