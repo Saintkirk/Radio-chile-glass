@@ -378,3 +378,10 @@
 - [x] Añadir play/pausa y apertura del detalle
 - [x] Respetar safe areas, accesibilidad y navegación entre pestañas
 - [x] Validar typecheck, tests, lint y preview
+
+## Play funcional
+
+- [x] Auditar controles Play de Inicio, tarjetas y mini reproductor
+- [x] Conectar correctamente iniciar y pausar con el reproductor global
+- [x] Mostrar estados de carga, error y reproducción activa
+- [x] Validar sincronización entre vistas, typecheck, tests, lint y preview
