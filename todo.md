@@ -534,3 +534,11 @@
 - [x] Corregir pausa y reanudación del stream activo
 - [x] Sincronizar tarjeta hero, detalle y mini-player
 - [x] Añadir regresión automatizada y validar preview, lint y checkpoint
+
+## Rediseño premium del reproductor
+
+- [x] Auditar el layout actual y sus capas animadas
+- [x] Rediseñar el fondo, portada y jerarquía visual al estilo de la referencia
+- [x] Añadir control circular premium adaptado a radio en vivo
+- [x] Conservar navegación, gestos, favoritos, pausa y accesibilidad
+- [x] Validar móvil, typecheck, tests, lint, preview y checkpoint
