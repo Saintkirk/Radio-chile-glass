@@ -110,3 +110,10 @@
 - [x] Mostrar y solicitar estado de permisos de notificaciones
 - [x] Añadir acceso a configuración del sistema cuando el permiso esté bloqueado
 - [x] Validar estados, persistencia y layout móvil
+
+## Selector de tema visual
+
+- [x] Añadir opciones claro, oscuro y sistema en Ajustes
+- [x] Persistir la preferencia de tema localmente
+- [x] Conectar la selección con ThemeProvider
+- [x] Validar legibilidad, persistencia y layout móvil

@@ -3,17 +3,23 @@ import { Appearance, View, useColorScheme as useSystemColorScheme } from "react-
 import { colorScheme as nativewindColorScheme, vars } from "nativewind";
 
 import { SchemeColors, type ColorScheme } from "@/constants/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export type ThemePreference = ColorScheme | "system";
 
 type ThemeContextValue = {
   colorScheme: ColorScheme;
+  preference: ThemePreference;
   setColorScheme: (scheme: ColorScheme) => void;
+  setThemePreference: (preference: ThemePreference) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useSystemColorScheme() ?? "light";
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(systemScheme);
+  const [preference, setPreference] = useState<ThemePreference>("system");
+  const colorScheme = preference === "system" ? systemScheme : preference;
 
   const applyScheme = useCallback((scheme: ColorScheme) => {
     nativewindColorScheme.set(scheme);
@@ -30,9 +36,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setColorScheme = useCallback((scheme: ColorScheme) => {
-    setColorSchemeState(scheme);
-    applyScheme(scheme);
-  }, [applyScheme]);
+    setPreference(scheme);
+    AsyncStorage.setItem("radio-theme-preference", scheme).catch(() => undefined);
+  }, []);
+
+  const setThemePreference = useCallback((next: ThemePreference) => {
+    setPreference(next);
+    AsyncStorage.setItem("radio-theme-preference", next).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem("radio-theme-preference").then((saved) => {
+      if (saved === "light" || saved === "dark" || saved === "system") setPreference(saved);
+    }).catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     applyScheme(colorScheme);
@@ -57,9 +74,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       colorScheme,
+      preference,
       setColorScheme,
+      setThemePreference,
     }),
-    [colorScheme, setColorScheme],
+    [colorScheme, preference, setColorScheme, setThemePreference],
   );
   console.log(value, themeVariables)
 
