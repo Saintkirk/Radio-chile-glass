@@ -505,3 +505,9 @@
 - [x] Animar solo carátula, flechas y controles de reproducción
 - [x] Mantener fondo, encabezado, metadatos e información estáticos
 - [x] Validar gestos, accesibilidad, typecheck, tests, preview y checkpoint
+
+## Controles principales fijos durante el carrusel
+
+- [x] Auditar el bloque actions que hereda stationMotionStyle
+- [x] Mantener Pausar/Reproducir y Web oficial estáticos
+- [x] Conservar navegación, audio, accesibilidad y validar preview, pruebas y checkpoint
