@@ -188,3 +188,10 @@
 - [x] Definir umbral, resistencia y animación de cancelación
 - [x] Cerrar la ruta y volver al mini reproductor al completar el gesto
 - [x] Validar scroll, botón atrás y layout móvil
+
+## Transición compartida de carátula
+
+- [x] Añadir estado de cierre compartido entre detalle y mini reproductor
+- [x] Reducir y desplazar la carátula hacia la posición inferior
+- [x] Coordinar la aparición del mini reproductor con la carátula
+- [x] Validar gesto, fallback y continuidad de audio
