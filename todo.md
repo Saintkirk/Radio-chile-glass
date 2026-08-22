@@ -72,3 +72,9 @@
 - [x] Abrir el detalle al tocar el contenido del mini reproductor
 - [x] Mantener el botón de reproducción/pausa como acción independiente
 - [x] Validar la ruta de la emisora activa y el layout móvil
+
+## Logo en carátula del mini reproductor
+
+- [x] Reemplazar iniciales fijas por StationLogo en la carátula compacta
+- [x] Mantener fallback de iniciales y acento cuando falle el logo
+- [x] Validar carga remota, navegación y layout móvil
