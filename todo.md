@@ -53,3 +53,10 @@
 - [x] Aplicar overlay oscuro y gradiente para asegurar legibilidad
 - [x] Mantener fallback visual cuando no exista favicon remoto
 - [x] Validar el detalle en mobile y actualizar checkpoint
+
+## Ecualizador visual
+
+- [x] Crear componente de barras ecualizadoras animadas
+- [x] Reaccionar al estado reproduciendo/pausado de la radio
+- [x] Integrar el ecualizador en la pantalla de detalle
+- [x] Validar animación y typecheck en mobile
