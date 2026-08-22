@@ -558,3 +558,11 @@
 - [x] Mantener sincronizados radio activa, audio, metadatos y mini reproductor
 - [x] Validar accesibilidad, reduced motion, responsive y contraste
 - [x] Ejecutar typecheck, tests, lint y preview móvil
+
+## Fidelidad Cover Flow a referencia iPod
+
+- [x] Hacer visible la carátula completa anterior y siguiente a ambos costados
+- [x] Reemplazar el contenedor claro por escenario negro continuo tipo Cover Flow
+- [x] Añadir inclinación 3D, profundidad y reflejo inferior de las carátulas
+- [x] Mantener deslizamiento, flechas, audio activo y accesibilidad
+- [x] Validar preview móvil, typecheck, tests y lint
