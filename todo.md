@@ -195,3 +195,10 @@
 - [x] Reducir y desplazar la carátula hacia la posición inferior
 - [x] Coordinar la aparición del mini reproductor con la carátula
 - [x] Validar gesto, fallback y continuidad de audio
+
+## Transición inversa de carátula
+
+- [x] Definir el origen visual de la carátula en el mini reproductor
+- [x] Expandir y desplazar la carátula al abrir el detalle
+- [x] Coordinar la animación con la entrada del contenido y el mini reproductor
+- [x] Validar apertura, cierre, reduced motion y continuidad de audio
