@@ -717,3 +717,9 @@
 - [x] Ajustar escala, solapamiento y perspectiva de las tres carátulas
 - [x] Reforzar tema oscuro cinematográfico, reflejos y controles luminosos
 - [x] Validar navegación lateral, gestos, contraste, typecheck, tests, lint y preview
+
+## Skills externas de Saintkirk
+
+- [x] Revisar la estructura del repositorio indicado
+- [x] Evaluar animate-expo y skills de diseño relevantes
+- [x] Documentar recomendaciones aplicables sin ejecutar contenido no confiable
