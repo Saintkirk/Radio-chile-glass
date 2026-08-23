@@ -882,4 +882,4 @@
 - [x] Medir el tamaño actual de la APK y el tiempo de cada fase del pipeline
 - [x] Reducir peso de dependencias, assets y arquitecturas sin perder reproducción ni glasmorfismo
 - [x] Optimizar EAS y CI/CD con caché, validaciones rápidas y límites de tiempo seguros
-- [ ] Generar y verificar una APK optimizada desde el commit correcto de GitHub
+- [x] Generar y verificar una APK optimizada desde el commit correcto de GitHub
