@@ -896,3 +896,10 @@
 - [x] Auditar la tarjeta expandida y localizar la divergencia con el Cover Flow de Inicio
 - [x] Unificar animación horizontal, capas laterales y navegación por gesto
 - [x] Validar la transición en móvil, reduced motion y controles de reproducción
+
+## Limpieza de warnings de CI/CD
+
+- [x] Declarar explícitamente el modo ESM de Node para eliminar el warning de ESLint
+- [x] Actualizar subdependencias obsoletas de pnpm sin romper Expo SDK 54
+- [x] Ajustar la configuración del workflow para eliminar el warning de PNPM_HOME
+- [x] Validar seguridad, tests, typecheck, lint y build desde GitHub
