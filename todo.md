@@ -736,3 +736,10 @@
 - [x] Inspeccionar el repositorio Saintkirk/taste-skill
 - [x] Evaluar sus principios de diseño para Radio Chile Glass
 - [x] Documentar recomendaciones y decidir integración segura
+
+## Mejoras seleccionadas 1/2/3
+
+- [x] Auditar el Cover Flow con los criterios de taste-skill
+- [x] Generar referencias visuales móviles adicionales para Android
+- [x] Migrar la animación crítica del carrusel a Reanimated
+- [x] Validar rendimiento, reduced motion, typecheck, tests, lint y preview

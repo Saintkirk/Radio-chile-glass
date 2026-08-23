@@ -1,35 +1,102 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Easing, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { AccessibilityInfo, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  cancelAnimation,
+  type SharedValue,
+} from "react-native-reanimated";
 
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
 
+type Side = -1 | 0 | 1;
+
+function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, reduceMotion: boolean) {
+  return useAnimatedStyle(() => {
+    const dir = direction.get();
+    if (reduceMotion) {
+      return {
+        opacity: 1,
+        transform: [
+          { perspective: 900 },
+          { translateX: 0 },
+          { translateY: 0 },
+          { scale: side === 0 ? 1 : 0.82 },
+          { rotateY: "0deg" },
+        ],
+      };
+    }
+
+    const startX = side === 0 ? dir * 230 : side === -dir ? side * 156 : side * 190;
+    const endX = side === 0 ? 0 : side * 8;
+    const startRotation = side === 0 ? (dir > 0 ? -28 : 28) : side === -dir ? 0 : side === -1 ? 42 : -42;
+    const targetRotation = side === -1 ? 34 : side === 1 ? -34 : 0;
+    const progress = motion.get();
+
+    return {
+      opacity: side === 0 ? interpolate(progress, [0, 0.7, 1], [0.35, 0.8, 1], Extrapolation.CLAMP) : interpolate(progress, [0, 1], [0.35, 0.85], Extrapolation.CLAMP),
+      transform: [
+        { perspective: 900 },
+        { translateX: interpolate(progress, [0, 1], [startX, endX], Extrapolation.CLAMP) },
+        { translateY: interpolate(progress, [0, 1], side === 0 ? [8, 0] : [12, 4], Extrapolation.CLAMP) },
+        { scale: side === 0 ? interpolate(progress, [0, 0.72, 1], [0.84, 0.96, 1], Extrapolation.CLAMP) : interpolate(progress, [0, 1], [0.68, 0.82], Extrapolation.CLAMP) },
+        { rotateY: `${interpolate(progress, [0, 1], [startRotation, targetRotation], Extrapolation.CLAMP)}deg` },
+      ],
+    };
+  }, [direction, motion, reduceMotion, side]);
+}
+
 export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPlaying, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onChange: (direction: number) => void; onPlay: () => void; isPlaying: boolean; currentRadioId?: string; lightMode?: boolean }) {
-  const motion = useRef(new Animated.Value(1)).current;
-  const glow = useRef(new Animated.Value(0)).current;
+  const motion = useSharedValue(1);
+  const glow = useSharedValue(0);
+  const direction = useSharedValue(1);
+  const directionRef = useRef(1);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const direction = useRef(1);
   const active = radios[activeIndex];
   const previous = radios.length ? radios[(activeIndex - 1 + radios.length) % radios.length] : undefined;
   const next = radios.length ? radios[(activeIndex + 1) % radios.length] : undefined;
+  const centerStyle = useCardAnimatedStyle(0, motion, direction, reduceMotion);
+  const previousStyle = useCardAnimatedStyle(-1, motion, direction, reduceMotion);
+  const nextStyle = useCardAnimatedStyle(1, motion, direction, reduceMotion);
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glow.get(), [0, 1], [0.12, 0.32], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(glow.get(), [0, 1], [0.94, 1.08], Extrapolation.CLAMP) }],
+  }), [glow]);
+  const innerGlowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glow.get(), [0, 1], [0.08, 0.18], Extrapolation.CLAMP),
+  }), [glow]);
 
   useEffect(() => {
-    motion.stopAnimation();
+    cancelAnimation(motion);
     if (reduceMotion) {
-      motion.setValue(1);
+      motion.set(1);
       return undefined;
     }
-    motion.setValue(0);
-    const transition = Animated.timing(motion, {
-      toValue: 1,
-      duration: 460,
-      easing: Easing.bezier(0.22, 1, 0.36, 1),
-      useNativeDriver: true,
-    });
-    transition.start();
-    return () => transition.stop();
+    motion.set(0);
+    motion.set(withTiming(1, { duration: 460, easing: Easing.bezier(0.22, 1, 0.36, 1) }));
+    return undefined;
   }, [activeIndex, motion, reduceMotion]);
+
+  useEffect(() => {
+    cancelAnimation(glow);
+    if (reduceMotion || !isPlaying || !active || currentRadioId !== active.id) {
+      glow.set(0);
+      return undefined;
+    }
+    glow.set(withRepeat(withSequence(
+      withTiming(1, { duration: 1250 }),
+      withTiming(0, { duration: 1250 }),
+    ), -1, false));
+    return undefined;
+  }, [active, currentRadioId, glow, isPlaying, reduceMotion]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion).catch(() => undefined);
@@ -37,63 +104,30 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
     return () => subscription.remove();
   }, []);
 
-  useEffect(() => {
-    glow.stopAnimation();
-    if (reduceMotion || !isPlaying || currentRadioId !== active.id) {
-      glow.setValue(0);
-      return undefined;
-    }
-    const pulse = Animated.loop(Animated.sequence([
-      Animated.timing(glow, { toValue: 1, duration: 1250, useNativeDriver: true }),
-      Animated.timing(glow, { toValue: 0, duration: 1250, useNativeDriver: true }),
-    ]));
-    pulse.start();
-    return () => pulse.stop();
-  }, [active.id, currentRadioId, glow, isPlaying, reduceMotion]);
-
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > Math.abs(gesture.dy) && Math.abs(gesture.dx) > 8,
     onPanResponderRelease: (_, gesture) => {
       if (Math.abs(gesture.dx) < 48 || Math.abs(gesture.dx) < Math.abs(gesture.dy) * 1.15) return;
-      direction.current = gesture.dx < 0 ? 1 : -1;
-      onChange(direction.current);
+      const nextDirection = gesture.dx < 0 ? 1 : -1;
+      directionRef.current = nextDirection;
+      direction.set(nextDirection);
+      onChange(nextDirection);
     },
-  }), [onChange]);
+  }), [direction, onChange]);
 
   if (!active) return null;
 
   const requestChange = (nextDirection: number) => {
-    direction.current = nextDirection < 0 ? -1 : 1;
-    onChange(direction.current);
+    const normalized = nextDirection < 0 ? -1 : 1;
+    directionRef.current = normalized;
+    direction.set(normalized);
+    onChange(normalized);
   };
 
-  const cardStyle = (side: -1 | 0 | 1) => {
-    // Las ranuras laterales ya están posicionadas en los extremos del escenario.
-    // El movimiento final debe ser sutil para conservar las tres carátulas visibles.
-    const endX = side === 0 ? 0 : side * 8;
-    const startX = side === 0 ? direction.current * 230 : side === -direction.current ? side * 156 : side * 190;
-    const targetRotation = side === -1 ? "34deg" : side === 1 ? "-34deg" : "0deg";
-    const startRotation = side === 0
-      ? (direction.current > 0 ? "-28deg" : "28deg")
-      : side === -direction.current
-        ? "0deg"
-        : (side === -1 ? "42deg" : "-42deg");
-    return {
-    opacity: side === 0 ? motion.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.35, 0.8, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.85] }),
-    transform: [
-      { perspective: 900 },
-      { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [startX, endX] }) },
-      { translateY: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [12, 4] }) },
-      { scale: side === 0 ? motion.interpolate({ inputRange: [0, 0.72, 1], outputRange: [0.84, 0.96, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.68, 0.82] }) },
-      { rotateY: motion.interpolate({ inputRange: [0, 1], outputRange: [startRotation, targetRotation] }) },
-    ],
-    };
-  };
-
-  const sideCard = (radio: Radio | undefined, side: -1 | 1) => radio ? (
+  const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
-      <Animated.View style={[styles.cover, styles.sideCover, cardStyle(side), { backgroundColor: `${radio.accent}32` }]}>
+      <Animated.View style={[styles.cover, styles.sideCover, animatedStyle, { backgroundColor: `${radio.accent}32` }]}>
         <StationLogo radio={radio} size={124} radius={20} />
         <View style={styles.sideShade} />
       </Animated.View>
@@ -104,11 +138,11 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   return (
     <View {...panResponder.panHandlers} style={[styles.root, lightMode && styles.rootLight]} accessibilityLabel="Carrusel de emisoras">
       <View style={styles.stage}>
-        {sideCard(previous, -1)}
-        <Animated.View style={[styles.centerSlot, cardStyle(0)]}>
-          <Animated.View pointerEvents="none" style={[styles.outerGlow, { backgroundColor: active.accent, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.12, 0.32] }), transform: [{ scale: glow.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.08] }) }] }]} />
+        {sideCard(previous, -1, previousStyle)}
+        <Animated.View style={[styles.centerSlot, centerStyle]}>
+          <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
           <View style={[styles.cover, styles.centerCover, { backgroundColor: `${active.accent}32` }]}>
-            <Animated.View pointerEvents="none" style={[styles.innerGlow, { backgroundColor: active.accent, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.08, 0.18] }) }]} />
+            <Animated.View pointerEvents="none" style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }]} />
             <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
               <StationLogo radio={active} size={184} radius={27} />
               <View pointerEvents="none" style={styles.diagonalSheen} />
@@ -117,7 +151,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
           </View>
           <View style={styles.centerReflection}><StationLogo radio={active} size={184} radius={27} /></View>
         </Animated.View>
-        {sideCard(next, 1)}
+        {sideCard(next, 1, nextStyle)}
       </View>
       <View style={styles.captionRow}>
         <Pressable onPress={() => requestChange(-1)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={20} color="#F5F3EE" /></Pressable>
@@ -154,7 +188,7 @@ const styles = StyleSheet.create({
   stationNameLight: { color: "#F5F3EE" },
   stationMeta: { color: "#B7C0D0", fontSize: 12, marginTop: 5 },
   stationMetaLight: { color: "#B7C0D0" },
-  counter: { color: "#1ED760", fontSize: 10, fontWeight: "700", marginTop: 6 },
+  counter: { color: "#FF6B5A", fontSize: 10, fontWeight: "700", marginTop: 6 },
   arrow: { width: 38, height: 38, borderRadius: 19, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#FFFFFF1C" },
   pressed: { opacity: 0.62, transform: [{ scale: 0.93 }] },
   dots: { flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 9 },
