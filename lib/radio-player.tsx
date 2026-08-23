@@ -3,6 +3,7 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
+import { toggleFavoriteId } from "./player-utils";
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -45,7 +46,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     finally { setIsLoading(false); }
   };
   const togglePlay = () => { if (!playerRef.current) return; if (isPlaying) { playerRef.current.pause(); setIsPlaying(false); } else { playerRef.current.play(); setIsPlaying(true); } };
-  const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = previous.includes(radioId) ? previous.filter((id) => id !== radioId) : [...previous, radioId]; saveFavoriteIds(next).catch(() => undefined); return next; }); };
+  const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = toggleFavoriteId(previous, radioId); saveFavoriteIds(next).catch(() => undefined); return next; }); };
   const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled]);
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }

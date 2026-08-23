@@ -756,3 +756,10 @@
 - [x] Añadir pruebas para streams caídos, logos ausentes y textos largos
 - [x] Crear DESIGN.md con la identidad visual compartida
 - [x] Validar robustez, typecheck, tests, lint y preview
+
+## Mejoras seleccionadas 1/2/3 — integración final
+
+- [x] Extender DESIGN.md y tokens visuales a Explorar y Favoritos
+- [x] Añadir pruebas de interacción para reproducción y favoritos
+- [x] Documentar y preparar validación Android de audio en segundo plano y pantalla de bloqueo
+- [x] Validar typecheck, tests, lint y preview

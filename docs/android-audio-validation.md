@@ -1,0 +1,25 @@
+# Validación Android — audio en segundo plano y pantalla de bloqueo
+
+## Alcance
+
+La configuración actual habilita `shouldPlayInBackground` mediante `expo-audio` y mantiene el estado de reproducción en el proveedor global. La validación definitiva requiere un APK o development build Android real; la preview web no puede confirmar controles multimedia del sistema.
+
+## Checklist manual
+
+| Caso | Resultado esperado |
+|---|---|
+| Iniciar FM Latina y bloquear la pantalla | El audio continúa reproduciéndose. |
+| Pulsar pausa desde la notificación o pantalla de bloqueo | El audio se pausa y la interfaz se sincroniza. |
+| Reanudar desde controles del sistema | El audio continúa desde la radio activa. |
+| Cambiar de aplicación | La señal sigue activa si la preferencia está habilitada. |
+| Desactivar reproducción en segundo plano | La siguiente salida de la app no mantiene audio en background. |
+| Stream caído | Se muestra estado de error o listo para reintentar, sin dejar un loading infinito. |
+| Logo ausente | Se muestra el fallback de iniciales con contraste suficiente. |
+
+## Preparación
+
+Generar el build Android desde el flujo de Publish/Build de la plataforma y probar en al menos un teléfono Android físico. No se considera suficiente la ejecución en navegador ni una captura estática. Registrar versión, dispositivo, versión Android, emisora, resultado y logs de audio.
+
+## Criterios de aceptación
+
+El audio debe sobrevivir al bloqueo y al cambio de aplicación cuando la preferencia está activada. La pantalla de bloqueo debe representar la radio activa y permitir al menos play/pause. Los errores de stream deben ser recuperables y los logos ausentes no deben romper la composición.
