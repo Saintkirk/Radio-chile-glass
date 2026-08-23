@@ -18,6 +18,11 @@ describe("catálogo de radios chilenas", () => {
     });
   });
 
+  it("mantiene una selección amplia de emisoras destacadas para Inicio", () => {
+    expect(RADIOS.filter((radio) => radio.featured).length).toBeGreaterThanOrEqual(15);
+    expect(RADIOS.filter((radio) => radio.featured && radio.favicon).length).toBeGreaterThanOrEqual(12);
+  });
+
   it("incluye emisoras adicionales verificadas de Santiago", () => {
     expect(RADIOS.map((radio) => radio.id)).toEqual(expect.arrayContaining(["play-fm", "conquistador", "rock-pop", "la-clave", "13c", "la-mexicana", "carnaval-la-serena"]));
     expect(RADIOS.some((radio) => radio.id === "radio-maria")).toBe(false);

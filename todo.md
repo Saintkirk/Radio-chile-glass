@@ -688,3 +688,10 @@
 
 - [x] Sustituir fondos dinámicos no detectables por clases de tema tokenizadas
 - [x] Validar que el fondo y el texto cambien juntos en modo Claro
+
+## Más estaciones en el menú principal
+
+- [x] Auditar cuántas estaciones editoriales aparecen actualmente en Inicio
+- [x] Seleccionar y verificar estaciones adicionales con logo y streaming funcional
+- [x] Ampliar la selección visible del menú principal sin duplicados
+- [x] Validar reproducción, favoritos, filtros, typecheck, tests, lint y preview

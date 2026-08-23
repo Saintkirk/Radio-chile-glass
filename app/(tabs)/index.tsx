@@ -43,11 +43,14 @@ export default function HomeScreen() {
     if (pendingLogos.length) void Promise.allSettled(pendingLogos.map((uri) => prefetchLogo(uri)));
   }, [radios]);
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
-  const filtered = useMemo(() => radios.filter((radio) => {
-    const matchesQuery = `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase());
-    const matchesGenre = activeGenre === "Todo" || radio.genre.toLowerCase().includes(activeGenre.toLowerCase());
-    return matchesQuery && matchesGenre;
-  }), [activeGenre, query, radios]);
+  const filtered = useMemo(() => {
+    const matching = radios.filter((radio) => {
+      const matchesQuery = `${radio.name} ${radio.genre} ${radio.city}`.toLowerCase().includes(query.toLowerCase());
+      const matchesGenre = activeGenre === "Todo" || radio.genre.toLowerCase().includes(activeGenre.toLowerCase());
+      return matchesQuery && matchesGenre;
+    });
+    return matching.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
+  }, [activeGenre, query, radios]);
   useEffect(() => { setFeaturedIndex((index) => filtered.length ? index % filtered.length : 0); }, [filtered.length]);
   const browseFeatured = (direction: number) => {
     const total = filtered.length;
@@ -76,7 +79,7 @@ export default function HomeScreen() {
             <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
             <View style={[styles.syncRow, lightMode && styles.syncRowLight]}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
             <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
-            <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
+            <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>EMISORAS DESTACADAS</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
         renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => currentRadio?.id === item.id ? togglePlay() : playRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
