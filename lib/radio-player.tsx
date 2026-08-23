@@ -7,7 +7,7 @@ import { toggleFavoriteId } from "./player-utils";
 
 export { RADIOS, type Radio } from "./radios";
 
-type PlayerContextValue = { currentRadio: Radio | null; isPlaying: boolean; isLoading: boolean; favorites: string[]; radios: Radio[]; catalogUpdatedAt: string | null; catalogSource: "remote" | "cache" | "local"; isRefreshingCatalog: boolean; backgroundPlaybackEnabled: boolean; setBackgroundPlaybackEnabled: (enabled: boolean) => void; refreshCatalog: () => Promise<void>; playRadio: (radio: Radio) => Promise<void>; togglePlay: () => void; toggleFavorite: (radioId: string) => void; isFavorite: (radioId: string) => boolean };
+type PlayerContextValue = { currentRadio: Radio | null; isPlaying: boolean; isLoading: boolean; playbackError: string | null; favorites: string[]; radios: Radio[]; catalogUpdatedAt: string | null; catalogSource: "remote" | "cache" | "local"; isRefreshingCatalog: boolean; backgroundPlaybackEnabled: boolean; setBackgroundPlaybackEnabled: (enabled: boolean) => void; refreshCatalog: () => Promise<void>; playRadio: (radio: Radio) => Promise<void>; togglePlay: () => void; toggleFavorite: (radioId: string) => void; isFavorite: (radioId: string) => boolean };
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
@@ -15,6 +15,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [currentRadio, setCurrentRadio] = useState<Radio | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>(["fmlatina"]);
   const [radios, setRadios] = useState<Radio[]>(RADIOS);
   const [catalogUpdatedAt, setCatalogUpdatedAt] = useState<string | null>(null);
@@ -41,13 +42,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
   const playRadio = async (radio: Radio) => {
     setIsLoading(true);
+    setPlaybackError(null);
     try { if (currentRadio?.id !== radio.id) { playerRef.current?.remove(); playerRef.current = createAudioPlayer({ uri: radio.streamUrl }); setCurrentRadio(radio); } playerRef.current?.play(); setIsPlaying(true); }
-    catch { setIsPlaying(false); }
+    catch { setIsPlaying(false); setPlaybackError(`No se pudo conectar con ${radio.name}`); }
     finally { setIsLoading(false); }
   };
   const togglePlay = () => { if (!playerRef.current) return; if (isPlaying) { playerRef.current.pause(); setIsPlaying(false); } else { playerRef.current.play(); setIsPlaying(true); } };
   const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = toggleFavoriteId(previous, radioId); saveFavoriteIds(next).catch(() => undefined); return next; }); };
-  const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled]);
+  const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled]);
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
 export function useRadioPlayer() { const value = useContext(PlayerContext); if (!value) throw new Error("useRadioPlayer must be used inside RadioPlayerProvider"); return value; }

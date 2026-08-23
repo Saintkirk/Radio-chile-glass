@@ -14,3 +14,8 @@ export function playbackStatus(isLoading: boolean, isPlaying: boolean): "connect
   if (isLoading) return "connecting";
   return isPlaying ? "playing" : "ready";
 }
+
+export function adjacentRadioIndex(length: number, currentIndex: number, direction: -1 | 1): number {
+  if (length < 1 || currentIndex < 0) return -1;
+  return (currentIndex + direction + length) % length;
+}

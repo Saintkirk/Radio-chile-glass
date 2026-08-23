@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRadioPlaying, playbackStatus, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, isRadioPlaying, playbackStatus, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -34,5 +34,11 @@ describe("player interaction utilities", () => {
     expect(playbackStatus(true, false)).toBe("connecting");
     expect(playbackStatus(false, true)).toBe("playing");
     expect(playbackStatus(false, false)).toBe("ready");
+  });
+
+  it("wraps previous and next navigation around the radio catalog", () => {
+    expect(adjacentRadioIndex(4, 0, -1)).toBe(3);
+    expect(adjacentRadioIndex(4, 3, 1)).toBe(0);
+    expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
   });
 });

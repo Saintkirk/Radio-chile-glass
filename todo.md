@@ -763,3 +763,10 @@
 - [x] Añadir pruebas de interacción para reproducción y favoritos
 - [x] Documentar y preparar validación Android de audio en segundo plano y pantalla de bloqueo
 - [x] Validar typecheck, tests, lint y preview
+
+## Mejoras seleccionadas 1/2/3 — reproducción y validación Android
+
+- [x] Añadir estado visual de reconexión y error recuperable para streams caídos
+- [x] Añadir pruebas de navegación y reproducción del reproductor
+- [x] Preparar checklist ejecutable para audio en segundo plano y pantalla de bloqueo Android
+- [x] Validar typecheck, tests, lint y preview
