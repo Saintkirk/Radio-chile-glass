@@ -810,3 +810,11 @@
 - [x] Conectar el remoto de GitHub al nuevo repositorio radio-chile-glass
 - [x] Publicar la rama principal y los workflows
 - [x] Verificar los archivos publicados y entregar el enlace
+
+## Corrección de CI de GitHub Actions
+
+- [x] Identificar el job y mensaje exacto de la ejecución fallida de CI
+- [x] Reproducir localmente el fallo de CI
+- [x] Aplicar una corrección mínima al workflow o al proyecto
+- [x] Validar typecheck, tests y lint localmente
+- [x] Publicar la corrección y verificar una ejecución exitosa de CI

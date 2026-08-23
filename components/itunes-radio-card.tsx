@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { StationLogo } from "@/components/station-logo";
@@ -22,6 +22,7 @@ export function ItunesRadioCard({
 }) {
   const progress = useRef(new Animated.Value(0)).current;
   const leaving = useRef(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => () => progress.stopAnimation(), [progress]);
 
@@ -45,9 +46,11 @@ export function ItunesRadioCard({
     <Animated.View style={cardTransform}>
       <Pressable
         onPress={openWithCoverFlow}
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
         accessibilityRole="button"
         accessibilityLabel={`Abrir ${radio.name}`}
-        style={({ pressed, hovered }) => [
+        style={({ pressed }) => [
           styles.card,
           lightMode && styles.cardLight,
           hovered && styles.cardHovered,
