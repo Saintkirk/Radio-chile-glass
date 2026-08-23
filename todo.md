@@ -791,3 +791,22 @@
 - [x] Crear workflow de EAS para generar y publicar el APK como artefacto
 - [x] Documentar configuración de EXPO_TOKEN y ejecución manual o por tags
 - [x] Validar workflows, script de descarga y proyecto
+
+## Conexión GitHub y build preview
+
+- [x] Revisar archivos sensibles antes de publicar el repositorio
+- [x] Crear un repositorio privado y conectar el proyecto local
+- [x] Publicar el código y verificar que los workflows estén disponibles
+- [x] Dejar instrucciones para añadir EXPO_TOKEN y ejecutar preview
+
+## Conexión con GitHub del usuario
+
+- [x] Inspeccionar repositorios accesibles y permisos de escritura
+- [x] Conectar Radio Chile Glass al repositorio destino
+- [x] Publicar workflows y verificar su disponibilidad
+
+## Repositorio nuevo confirmado
+
+- [x] Conectar el remoto de GitHub al nuevo repositorio radio-chile-glass
+- [x] Publicar la rama principal y los workflows
+- [x] Verificar los archivos publicados y entregar el enlace
