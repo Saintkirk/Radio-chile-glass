@@ -942,3 +942,11 @@
 - [x] Redactar matriz manual Android para reproducción, navegación y estabilidad
 - [x] Documentar pruebas de segundo plano, pantalla bloqueada, foco y metadatos ICY
 - [x] Documentar pruebas automatizadas, evidencias, severidades y criterios de aceptación
+
+## Corrección de navegación y reproducción única
+
+- [x] Garantizar que el stream anterior se detenga y libere antes de iniciar el siguiente
+- [x] Sincronizar cambio de emisora entre Inicio, tarjeta principal y mini reproductor
+- [x] Añadir navegación anterior/siguiente al mini reproductor
+- [x] Conectar anterior/siguiente de emisora con los controles multimedia de Android
+- [x] Añadir pruebas deterministas para no superponer streams y navegar estaciones

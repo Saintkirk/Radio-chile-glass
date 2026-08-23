@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -40,6 +40,11 @@ describe("player interaction utilities", () => {
     expect(adjacentRadioIndex(4, 0, -1)).toBe(3);
     expect(adjacentRadioIndex(4, 3, 1)).toBe(0);
     expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
+  });
+
+  it("ignores stale playback callbacks after a newer station request", () => {
+    expect(isCurrentPlaybackRequest(4, 4)).toBe(true);
+    expect(isCurrentPlaybackRequest(3, 4)).toBe(false);
   });
 
   it("maps Android audio focus transitions to safe player actions", () => {

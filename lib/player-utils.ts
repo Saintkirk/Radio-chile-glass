@@ -17,6 +17,10 @@ export function playbackStatus(isLoading: boolean, isPlaying: boolean): "connect
 
 export const MAX_PLAYBACK_RETRIES = 3;
 
+export function isCurrentPlaybackRequest(requestId: number, currentRequestId: number): boolean {
+  return requestId === currentRequestId;
+}
+
 export function retryDelayMs(attempt: number): number {
   return [0, 800, 1800, 3500][Math.max(0, Math.min(attempt, MAX_PLAYBACK_RETRIES))];
 }

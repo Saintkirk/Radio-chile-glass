@@ -14,7 +14,7 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
-  const { currentRadio, isPlaying, isLoading, playbackError, playRadio, togglePlay } = useRadioPlayer();
+  const { currentRadio, isPlaying, isLoading, playbackError, playRadio, playAdjacent, togglePlay } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
   const colors = useColors(colorScheme);
   const [miniRadio, setMiniRadio] = useState<Radio | null>(currentRadio);
@@ -61,9 +61,11 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
         <View style={styles.info}><Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{miniRadio.name}</Text>{isLoading ? <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text> : playbackError ? <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text> : <NowPlayingLabel streamUrl={miniRadio.streamUrl} compact />}</View>
         <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : miniRadio.accent} barCount={5} compact />
       </Pressable>
+      <Pressable onPress={() => void playAdjacent(-1, miniRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
       <Pressable onPress={() => playbackError ? playRadio(miniRadio) : togglePlay()} accessibilityRole="button" accessibilityLabel={playbackError ? `Reintentar ${miniRadio.name}` : isPlaying ? `Pausar ${miniRadio.name}` : `Reproducir ${miniRadio.name}`} style={({ pressed }) => [styles.control, pressed && styles.pressed]}>
         {isLoading ? <ActivityIndicator size="small" color={lightMode ? "#172033" : "#F5F3EE"} /> : <IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color={lightMode ? "#172033" : "#F5F3EE"} />}
       </Pressable>
+      <Pressable onPress={() => void playAdjacent(1, miniRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora siguiente" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.right" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
     </Animated.View>
   );
 }
@@ -75,5 +77,6 @@ const styles = StyleSheet.create({
   name: { color: "#F5F3EE", fontSize: 14, fontWeight: "700" },
   meta: { color: "#9AA2B3", fontSize: 11, marginTop: 4 },
   control: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF14" },
+  skip: { width: 28, height: 38, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0A" },
   pressed: { opacity: 0.72, transform: [{ scale: 0.97 }] },
 });

@@ -52,13 +52,23 @@ export default function HomeScreen() {
     return matching.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
   }, [activeGenre, query, radios]);
   useEffect(() => { setFeaturedIndex((index) => filtered.length ? index % filtered.length : 0); }, [filtered.length]);
+  useEffect(() => {
+    if (!currentRadio) return;
+    const activeIndex = filtered.findIndex((radio) => radio.id === currentRadio.id);
+    if (activeIndex >= 0) setFeaturedIndex(activeIndex);
+  }, [currentRadio, filtered]);
+  const selectAndPlayRadio = (radio: Radio) => {
+    const nextIndex = filtered.findIndex((item) => item.id === radio.id);
+    if (nextIndex >= 0) setFeaturedIndex(nextIndex);
+    void playRadio(radio);
+  };
   const browseFeatured = (direction: number) => {
     const total = filtered.length;
     if (!total) return;
     const nextIndex = (featuredIndex + direction + total) % total;
     const nextRadio = filtered[nextIndex];
     setFeaturedIndex(nextIndex);
-    void playRadio(nextRadio);
+    selectAndPlayRadio(nextRadio);
   };
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
@@ -80,11 +90,11 @@ export default function HomeScreen() {
             <View style={[styles.searchWrap, lightMode && styles.searchWrapLight]}><IconSymbol name="magnifyingglass" size={18} color={lightMode ? "#667085" : "#A8B0C2"} /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor={lightMode ? "#667085" : "#7F8799"} style={[styles.searchInput, lightMode && styles.searchInputLight]} /></View>
             <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
             <View style={[styles.syncRow, lightMode && styles.syncRowLight]}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
-            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
+            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : selectAndPlayRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
             <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>EMISORAS DESTACADAS</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
-        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => currentRadio?.id === item.id ? togglePlay() : playRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
+        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => currentRadio?.id === item.id ? togglePlay() : selectAndPlayRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 96 : 24 }} />}
       />

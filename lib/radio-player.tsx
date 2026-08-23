@@ -1,24 +1,46 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Platform } from "react-native";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, type LockScreenMetadata } from "./player-utils";
+import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
+import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
 
 export { RADIOS, type Radio } from "./radios";
 
-type PlayerContextValue = { currentRadio: Radio | null; isPlaying: boolean; isLoading: boolean; playbackError: string | null; favorites: string[]; radios: Radio[]; catalogUpdatedAt: string | null; catalogSource: "remote" | "cache" | "local"; isRefreshingCatalog: boolean; backgroundPlaybackEnabled: boolean; setBackgroundPlaybackEnabled: (enabled: boolean) => void; updateLockScreenMetadata: (metadata: LockScreenMetadata) => void; refreshCatalog: () => Promise<void>; playRadio: (radio: Radio) => Promise<void>; togglePlay: () => void; toggleFavorite: (radioId: string) => void; isFavorite: (radioId: string) => boolean };
+type PlayerContextValue = {
+  currentRadio: Radio | null;
+  isPlaying: boolean;
+  isLoading: boolean;
+  playbackError: string | null;
+  favorites: string[];
+  radios: Radio[];
+  catalogUpdatedAt: string | null;
+  catalogSource: "remote" | "cache" | "local";
+  isRefreshingCatalog: boolean;
+  backgroundPlaybackEnabled: boolean;
+  setBackgroundPlaybackEnabled: (enabled: boolean) => void;
+  updateLockScreenMetadata: (metadata: LockScreenMetadata) => void;
+  refreshCatalog: () => Promise<void>;
+  playRadio: (radio: Radio) => Promise<void>;
+  playAdjacent: (direction: -1 | 1, fromId?: string) => Promise<void>;
+  togglePlay: () => void;
+  toggleFavorite: (radioId: string) => void;
+  isFavorite: (radioId: string) => boolean;
+};
+
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
   const playerStatusSubscriptionRef = useRef<{ remove: () => void } | null>(null);
+  const playRequestRef = useRef(0);
   const [currentRadio, setCurrentRadio] = useState<Radio | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
-  const playRequestRef = useRef(0);
   const [favorites, setFavorites] = useState<string[]>(["fmlatina"]);
   const [radios, setRadios] = useState<Radio[]>(RADIOS);
   const [catalogUpdatedAt, setCatalogUpdatedAt] = useState<string | null>(null);
@@ -27,35 +49,150 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [backgroundPlaybackEnabled, setBackgroundPlaybackEnabled] = useState(true);
   const resumeAfterFocusGainRef = useRef(false);
 
-  const syncLockScreenControls = (player: ReturnType<typeof createAudioPlayer>, radio: Radio, enabled: boolean) => {
-    try {
-      if (!enabled) {
-        player.clearLockScreenControls();
-        return;
-      }
-      player.setActiveForLockScreen(true, lockScreenMetadata(radio), {
-        showSeekForward: true,
-        showSeekBackward: true,
-      });
-    } catch {
-      // Lock screen controls are only available in a native build; web stays functional without them.
-    }
-  };
-
-  const disposeCurrentPlayer = () => {
+  const disposeCurrentPlayer = useCallback(() => {
     playerStatusSubscriptionRef.current?.remove();
     playerStatusSubscriptionRef.current = null;
-    try { playerRef.current?.clearLockScreenControls(); } catch { /* no-op on web */ }
-    playerRef.current?.remove();
+    const player = playerRef.current;
     playerRef.current = null;
+    if (player) {
+      try { player.pause(); } catch { /* no-op */ }
+      try { player.clearLockScreenControls(); } catch { /* no-op on Android custom session */ }
+      try { player.remove(); } catch { /* no-op */ }
+    }
+    clearNativeMediaSession();
     abandonAudioFocus();
-  };
+  }, []);
 
-  const refreshCatalog = async () => {
+  const refreshCatalog = useCallback(async () => {
     setIsRefreshingCatalog(true);
-    try { const result = await loadCatalog(); setRadios(result.radios); setCatalogUpdatedAt(result.updatedAt); setCatalogSource(result.source); }
-    finally { setIsRefreshingCatalog(false); }
-  };
+    try {
+      const result = await loadCatalog();
+      setRadios(result.radios);
+      setCatalogUpdatedAt(result.updatedAt);
+      setCatalogSource(result.source);
+    } finally {
+      setIsRefreshingCatalog(false);
+    }
+  }, []);
+
+  const syncLockScreenControls = useCallback((player: ReturnType<typeof createAudioPlayer>, radio: Radio, enabled: boolean, playing: boolean) => {
+    const metadata = lockScreenMetadata(radio);
+    if (!enabled) {
+      clearNativeMediaSession();
+      try { player.clearLockScreenControls(); } catch { /* no-op on unsupported builds */ }
+      return;
+    }
+    if (Platform.OS === "android") {
+      setNativeMediaSession(metadata, playing);
+      return;
+    }
+    try {
+      player.setActiveForLockScreen(true, metadata, { showSeekForward: true, showSeekBackward: true });
+    } catch {
+      // Lock-screen controls are optional on unsupported builds.
+    }
+  }, []);
+
+  const playRadio = useCallback(async (radio: Radio) => {
+    const requestId = ++playRequestRef.current;
+    disposeCurrentPlayer();
+    setCurrentRadio(radio);
+    setIsPlaying(false);
+    setIsLoading(true);
+    setPlaybackError(null);
+
+    for (let attempt = 0; attempt <= MAX_PLAYBACK_RETRIES; attempt += 1) {
+      if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+      const delay = retryDelayMs(attempt);
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+      if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+      let candidate: ReturnType<typeof createAudioPlayer> | null = null;
+      try {
+        const focusResult = requestAudioFocus();
+        if (focusResult === "failed") throw new Error("Audio focus unavailable");
+        candidate = createAudioPlayer({ uri: radio.streamUrl });
+        if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
+          try { candidate.pause(); } catch { /* no-op */ }
+          candidate.remove();
+          return;
+        }
+        playerRef.current = candidate;
+        syncLockScreenControls(candidate, radio, backgroundPlaybackEnabled, false);
+        playerStatusSubscriptionRef.current = candidate.addListener("playbackStatusUpdate", (status) => {
+          if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+          setIsPlaying(status.playing);
+          updateNativeMediaState(status.playing);
+        });
+        candidate.play();
+        if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
+          try { candidate.pause(); } catch { /* no-op */ }
+          try { candidate.remove(); } catch { /* no-op */ }
+          return;
+        }
+        setIsPlaying(true);
+        updateNativeMediaState(true);
+        setPlaybackError(null);
+        setIsLoading(false);
+        return;
+      } catch {
+        if (candidate && candidate !== playerRef.current) {
+          try { candidate.pause(); } catch { /* no-op */ }
+          try { candidate.remove(); } catch { /* no-op */ }
+        }
+        if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+        if (attempt === MAX_PLAYBACK_RETRIES) {
+          setIsPlaying(false);
+          setPlaybackError(`No se pudo conectar con ${radio.name}`);
+          setIsLoading(false);
+          clearNativeMediaSession();
+        }
+      }
+    }
+  }, [backgroundPlaybackEnabled, disposeCurrentPlayer, syncLockScreenControls]);
+
+  const playAdjacent = useCallback(async (direction: -1 | 1, fromId?: string) => {
+    const sourceId = fromId ?? currentRadio?.id;
+    const currentIndex = radios.findIndex((radio) => radio.id === sourceId);
+    if (currentIndex < 0 || radios.length < 2) return;
+    const nextIndex = (currentIndex + direction + radios.length) % radios.length;
+    await playRadio(radios[nextIndex]);
+  }, [currentRadio?.id, playRadio, radios]);
+
+  const setPlayingState = useCallback((shouldPlay: boolean) => {
+    const player = playerRef.current;
+    if (!player) return;
+    if (!shouldPlay) {
+      player.pause();
+      setIsPlaying(false);
+      updateNativeMediaState(false);
+      return;
+    }
+    const focusResult = requestAudioFocus();
+    if (focusResult === "failed") return;
+    player.play();
+    setIsPlaying(true);
+    updateNativeMediaState(true);
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    setPlayingState(!isPlaying);
+  }, [isPlaying, setPlayingState]);
+
+  const updateBackgroundPlayback = useCallback((enabled: boolean) => {
+    setBackgroundPlaybackEnabled(enabled);
+    if (!enabled) clearNativeMediaSession();
+    if (enabled && playerRef.current && currentRadio) syncLockScreenControls(playerRef.current, currentRadio, true, isPlaying);
+    AsyncStorage.setItem("radio-background-playback", String(enabled)).catch(() => undefined);
+  }, [currentRadio, isPlaying, syncLockScreenControls]);
+
+  const updateLockScreenMetadata = useCallback((metadata: LockScreenMetadata) => {
+    if (!backgroundPlaybackEnabled) return;
+    if (Platform.OS === "android") {
+      updateNativeMediaMetadata(metadata);
+      return;
+    }
+    try { playerRef.current?.updateLockScreenMetadata(metadata); } catch { /* no-op */ }
+  }, [backgroundPlaybackEnabled]);
 
   useEffect(() => {
     loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
@@ -63,9 +200,11 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
     refreshCatalog().catch(() => undefined);
     return () => disposeCurrentPlayer();
-  }, []);
+  }, [disposeCurrentPlayer, refreshCatalog]);
 
-  useEffect(() => { setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled }).catch(() => undefined); }, [backgroundPlaybackEnabled]);
+  useEffect(() => {
+    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled }).catch(() => undefined);
+  }, [backgroundPlaybackEnabled]);
 
   useEffect(() => {
     const subscription = addAudioFocusChangeListener(({ change }) => {
@@ -76,6 +215,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         resumeAfterFocusGainRef.current = isPlaying;
         player.pause();
         setIsPlaying(false);
+        updateNativeMediaState(false);
       } else if (action === "duck") {
         player.volume = 0.35;
       } else if (action === "restore") {
@@ -85,67 +225,56 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     });
     return () => subscription.remove();
   }, [isPlaying]);
-  const updateBackgroundPlayback = (enabled: boolean) => {
-    setBackgroundPlaybackEnabled(enabled);
-    if (playerRef.current && currentRadio) syncLockScreenControls(playerRef.current, currentRadio, enabled);
-    AsyncStorage.setItem("radio-background-playback", String(enabled)).catch(() => undefined);
-  };
-  const updateLockScreenMetadata = useCallback((metadata: LockScreenMetadata) => {
-    if (!backgroundPlaybackEnabled || !playerRef.current) return;
-    try { playerRef.current.updateLockScreenMetadata(metadata); } catch { /* no-op when native controls are unavailable */ }
-  }, [backgroundPlaybackEnabled]);
 
-  const playRadio = async (radio: Radio) => {
-    const requestId = ++playRequestRef.current;
-    disposeCurrentPlayer();
-    setIsPlaying(false);
-    setIsLoading(true);
-    setPlaybackError(null);
-    for (let attempt = 0; attempt <= MAX_PLAYBACK_RETRIES; attempt += 1) {
-      if (requestId !== playRequestRef.current) return;
-      const delay = retryDelayMs(attempt);
-      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
-      try {
-        if (requestId !== playRequestRef.current) return;
-        const focusResult = requestAudioFocus();
-        if (focusResult === "failed") throw new Error("Audio focus unavailable");
+  useEffect(() => {
+    const subscription = subscribeToNativeMediaActions((action) => {
+      if (action === "next") void playAdjacent(1);
+      else if (action === "previous") void playAdjacent(-1);
+      else if (action === "play") setPlayingState(true);
+      else if (action === "pause") setPlayingState(false);
+      else if (action === "stop") {
         disposeCurrentPlayer();
-        const player = createAudioPlayer({ uri: radio.streamUrl });
-        playerRef.current = player;
-        setCurrentRadio(radio);
-        syncLockScreenControls(player, radio, backgroundPlaybackEnabled);
-        playerStatusSubscriptionRef.current = player.addListener("playbackStatusUpdate", (status) => {
-          setIsPlaying(status.playing);
-        });
-        player.play();
-        setIsPlaying(true);
-        setPlaybackError(null);
+        setIsPlaying(false);
         setIsLoading(false);
-        return;
-      } catch {
-        if (requestId !== playRequestRef.current) return;
-        if (attempt === MAX_PLAYBACK_RETRIES) {
-          setIsPlaying(false);
-          setPlaybackError(`No se pudo conectar con ${radio.name}`);
-          setIsLoading(false);
-        }
       }
-    }
-  };
-  const togglePlay = () => {
-    if (!playerRef.current) return;
-    if (isPlaying) {
-      playerRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      const focusResult = requestAudioFocus();
-      if (focusResult === "failed") return;
-      playerRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-  const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = toggleFavoriteId(previous, radioId); saveFavoriteIds(next).catch(() => undefined); return next; }); };
-  const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, updateLockScreenMetadata, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, updateLockScreenMetadata]);
+    });
+    return () => subscription.remove();
+  }, [disposeCurrentPlayer, playAdjacent, setPlayingState]);
+
+  const toggleFavorite = useCallback((radioId: string) => {
+    setFavorites((previous) => {
+      const next = toggleFavoriteId(previous, radioId);
+      saveFavoriteIds(next).catch(() => undefined);
+      return next;
+    });
+  }, []);
+
+  const value = useMemo<PlayerContextValue>(() => ({
+    currentRadio,
+    isPlaying,
+    isLoading,
+    playbackError,
+    favorites,
+    radios,
+    catalogUpdatedAt,
+    catalogSource,
+    isRefreshingCatalog,
+    backgroundPlaybackEnabled,
+    setBackgroundPlaybackEnabled: updateBackgroundPlayback,
+    updateLockScreenMetadata,
+    refreshCatalog,
+    playRadio,
+    playAdjacent,
+    togglePlay,
+    toggleFavorite,
+    isFavorite: (id: string) => favorites.includes(id),
+  }), [backgroundPlaybackEnabled, catalogSource, catalogUpdatedAt, currentRadio, favorites, isLoading, isPlaying, isRefreshingCatalog, playAdjacent, playRadio, playbackError, radios, refreshCatalog, toggleFavorite, togglePlay, updateBackgroundPlayback, updateLockScreenMetadata]);
+
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
-export function useRadioPlayer() { const value = useContext(PlayerContext); if (!value) throw new Error("useRadioPlayer must be used inside RadioPlayerProvider"); return value; }
+
+export function useRadioPlayer() {
+  const value = useContext(PlayerContext);
+  if (!value) throw new Error("useRadioPlayer must be used inside RadioPlayerProvider");
+  return value;
+}
