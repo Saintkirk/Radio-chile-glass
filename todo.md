@@ -910,3 +910,9 @@
 - [x] Comparar versiones objetivo y compatibilidad con módulos Android usados
 - [x] Estimar impacto en audio, navegación, EAS, tamaño y tiempo de build
 - [x] Documentar una recomendación reversible sin migrar todavía
+
+## Corrección ESM de Metro para APK
+
+- [x] Convertir metro.config.js a una configuración compatible con el modo ESM
+- [x] Validar Expo/Metro, typecheck, tests y lint después del cambio
+- [ ] Regenerar el APK y confirmar que el workflow Android termina correctamente

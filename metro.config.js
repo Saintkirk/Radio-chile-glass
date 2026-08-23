@@ -1,11 +1,14 @@
-const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require("nativewind/metro");
+import { getDefaultConfig } from "expo/metro-config.js";
+import { withNativeWind } from "nativewind/dist/metro/index.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const config = getDefaultConfig(__dirname);
 
-module.exports = withNativeWind(config, {
+export default withNativeWind(config, {
   input: "./global.css",
-  // Force write CSS to file system instead of virtual modules
-  // This fixes iOS styling issues in development mode
+  // Force write CSS to file system instead of virtual modules.
   forceWriteFileSystem: true,
 });
