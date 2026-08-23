@@ -24,12 +24,16 @@ export default function RadioDetailScreen() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const lightMode = colorScheme === "light";
-  const radio = radios.find((item) => item.id === id);
+  const [selectedRadioId, setSelectedRadioId] = useState(id);
+  const radio = radios.find((item) => item.id === selectedRadioId);
   const dismissY = useRef(new Animated.Value(0)).current;
   const entryProgress = useRef(new Animated.Value(0)).current;
   const artworkRef = useRef<View>(null);
   const entryHapticSent = useRef(false);
   const [entryOrigin, setEntryOrigin] = useState({ scale: 0.52, translateX: 0, translateY: 210 });
+  useEffect(() => {
+    if (id) setSelectedRadioId(id);
+  }, [id]);
   const hasMeasuredOrigin = [originX, originY, originWidth, originHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const hasMeasuredContainer = [containerX, containerY, containerWidth, containerHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const sourceViewportWidth = Number(viewportWidth) || windowWidth;
@@ -83,9 +87,9 @@ export default function RadioDetailScreen() {
     if (radios.length < 2 || currentIndex < 0) return;
     const nextIndex = adjacentRadioIndex(radios.length, currentIndex, direction === -1 ? -1 : 1);
     const nextRadio = radios[nextIndex];
-    playRadio(nextRadio);
-    router.replace(`/radio/${nextRadio.id}`);
-  }, [currentIndex, playRadio, radios, router]);
+    setSelectedRadioId(nextRadio.id);
+    void playRadio(nextRadio);
+  }, [currentIndex, playRadio, radios]);
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 10 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
     onPanResponderGrant: () => dismissY.stopAnimation(),

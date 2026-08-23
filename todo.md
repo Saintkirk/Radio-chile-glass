@@ -890,3 +890,9 @@
 - [x] Ajustar Cover Flow para mostrar emisoras anterior y siguiente con profundidad visible
 - [x] Rediseñar tarjetas, controles, fondos y navegación inferior con glassmorfismo premium
 - [x] Verificar responsive móvil, contraste, interacción y regresiones
+
+## Corrección Cover Flow en reproducción
+
+- [x] Auditar la tarjeta expandida y localizar la divergencia con el Cover Flow de Inicio
+- [x] Unificar animación horizontal, capas laterales y navegación por gesto
+- [x] Validar la transición en móvil, reduced motion y controles de reproducción
