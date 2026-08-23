@@ -956,4 +956,4 @@
 - [x] Identificar por qué el APK queda detenido en la pantalla de splash
 - [x] Validar configuración de splash, entrada de Expo Router y carga inicial
 - [x] Corregir el bloqueo sin perder reproducción en segundo plano ni controles multimedia
-- [ ] Generar y verificar un APK que llegue a Inicio correctamente
+- [x] Generar y verificar un APK que llegue a Inicio correctamente
