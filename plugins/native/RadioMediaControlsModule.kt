@@ -4,6 +4,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.facebook.react.bridge.Arguments
+import kotlin.LazyThreadSafetyMode
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -12,22 +13,23 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
 class RadioMediaControlsModule(
   private val reactContext: ReactApplicationContext,
 ) : ReactContextBaseJavaModule(reactContext) {
-  private val mediaSession = MediaSessionCompat(reactContext, "RadioChileGlass")
-  private var active = false
-
-  init {
-    mediaSession.setFlags(
-      MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
-        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS,
-    )
-    mediaSession.setCallback(object : MediaSessionCompat.Callback() {
-      override fun onPlay() = emit("play")
-      override fun onPause() = emit("pause")
-      override fun onSkipToNext() = emit("next")
-      override fun onSkipToPrevious() = emit("previous")
-      override fun onStop() = emit("stop")
-    })
+  private val mediaSessionDelegate = lazy(LazyThreadSafetyMode.NONE) {
+    MediaSessionCompat(reactContext, "RadioChileGlass").apply {
+      setFlags(
+        MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+          MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS,
+      )
+      setCallback(object : MediaSessionCompat.Callback() {
+        override fun onPlay() = emit("play")
+        override fun onPause() = emit("pause")
+        override fun onSkipToNext() = emit("next")
+        override fun onSkipToPrevious() = emit("previous")
+        override fun onStop() = emit("stop")
+      })
+    }
   }
+  private val mediaSession: MediaSessionCompat get() = mediaSessionDelegate.value
+  private var active = false
 
   override fun getName(): String = NAME
 
@@ -71,7 +73,9 @@ class RadioMediaControlsModule(
 
   @ReactMethod
   fun deactivate() {
-    mediaSession.isActive = false
+    if (mediaSessionDelegate.isInitialized()) {
+      mediaSession.isActive = false
+    }
     active = false
   }
 

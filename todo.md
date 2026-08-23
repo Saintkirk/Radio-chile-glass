@@ -950,3 +950,10 @@
 - [x] Añadir navegación anterior/siguiente al mini reproductor
 - [x] Conectar anterior/siguiente de emisora con los controles multimedia de Android
 - [x] Añadir pruebas deterministas para no superponer streams y navegar estaciones
+
+## Bloqueo en pantalla de arranque del APK
+
+- [x] Identificar por qué el APK queda detenido en la pantalla de splash
+- [x] Validar configuración de splash, entrada de Expo Router y carga inicial
+- [x] Corregir el bloqueo sin perder reproducción en segundo plano ni controles multimedia
+- [ ] Generar y verificar un APK que llegue a Inicio correctamente
