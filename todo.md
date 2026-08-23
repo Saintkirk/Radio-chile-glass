@@ -842,3 +842,12 @@
 - [x] Añadir pruebas deterministas para metadatos disponibles y ausentes
 - [x] Validar typecheck, tests, lint, documentación y CI
 - [ ] Validar visualmente los metadatos en un APK Android físico
+
+## Listener nativo de foco de audio Android
+
+- [x] Definir eventos para pérdida permanente, pérdida transitoria, ducking y recuperación
+- [x] Crear módulo Android con AudioManager.OnAudioFocusChangeListener
+- [x] Exponer eventos y request/abandon focus al puente JavaScript
+- [x] Integrar pausa, ducking y recuperación manual con RadioPlayer
+- [x] Añadir pruebas deterministas del contrato de eventos y documentar la matriz de interrupciones
+- [x] Validar typecheck, tests, lint y CI; APK Android físico pendiente

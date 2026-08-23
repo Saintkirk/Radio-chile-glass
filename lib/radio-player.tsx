@@ -3,7 +3,8 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, type LockScreenMetadata } from "./player-utils";
+import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, type LockScreenMetadata } from "./player-utils";
+import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/modules/expo-audio-focus/src";
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -24,6 +25,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [catalogSource, setCatalogSource] = useState<"remote" | "cache" | "local">("local");
   const [isRefreshingCatalog, setIsRefreshingCatalog] = useState(false);
   const [backgroundPlaybackEnabled, setBackgroundPlaybackEnabled] = useState(true);
+  const resumeAfterFocusGainRef = useRef(false);
 
   const syncLockScreenControls = (player: ReturnType<typeof createAudioPlayer>, radio: Radio, enabled: boolean) => {
     try {
@@ -46,6 +48,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     try { playerRef.current?.clearLockScreenControls(); } catch { /* no-op on web */ }
     playerRef.current?.remove();
     playerRef.current = null;
+    abandonAudioFocus();
   };
 
   const refreshCatalog = async () => {
@@ -63,6 +66,25 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => { setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled }).catch(() => undefined); }, [backgroundPlaybackEnabled]);
+
+  useEffect(() => {
+    const subscription = addAudioFocusChangeListener(({ change }) => {
+      const action = audioFocusAction(change);
+      const player = playerRef.current;
+      if (!player) return;
+      if (action === "pause") {
+        resumeAfterFocusGainRef.current = isPlaying;
+        player.pause();
+        setIsPlaying(false);
+      } else if (action === "duck") {
+        player.volume = 0.35;
+      } else if (action === "restore") {
+        player.volume = 1;
+        resumeAfterFocusGainRef.current = false;
+      }
+    });
+    return () => subscription.remove();
+  }, [isPlaying]);
   const updateBackgroundPlayback = (enabled: boolean) => {
     setBackgroundPlaybackEnabled(enabled);
     if (playerRef.current && currentRadio) syncLockScreenControls(playerRef.current, currentRadio, enabled);
@@ -83,6 +105,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
       try {
         if (requestId !== playRequestRef.current) return;
+        const focusResult = requestAudioFocus();
+        if (focusResult === "failed") throw new Error("Audio focus unavailable");
         disposeCurrentPlayer();
         const player = createAudioPlayer({ uri: radio.streamUrl });
         playerRef.current = player;
@@ -111,6 +135,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       playerRef.current.pause();
       setIsPlaying(false);
     } else {
+      const focusResult = requestAudioFocus();
+      if (focusResult === "failed") return;
       playerRef.current.play();
       setIsPlaying(true);
     }

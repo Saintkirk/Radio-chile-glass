@@ -21,6 +21,16 @@ export function retryDelayMs(attempt: number): number {
   return [0, 800, 1800, 3500][Math.max(0, Math.min(attempt, MAX_PLAYBACK_RETRIES))];
 }
 
+export type AudioFocusEventName = "gain" | "loss" | "loss_transient" | "loss_transient_can_duck" | "unknown";
+export type AudioFocusAction = "restore" | "pause" | "duck" | "none";
+
+export function audioFocusAction(change: AudioFocusEventName): AudioFocusAction {
+  if (change === "gain") return "restore";
+  if (change === "loss" || change === "loss_transient") return "pause";
+  if (change === "loss_transient_can_duck") return "duck";
+  return "none";
+}
+
 export function adjacentRadioIndex(length: number, currentIndex: number, direction: -1 | 1): number {
   if (length < 1 || currentIndex < 0) return -1;
   return (currentIndex + direction + length) % length;

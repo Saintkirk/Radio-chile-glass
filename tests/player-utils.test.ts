@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -40,6 +40,14 @@ describe("player interaction utilities", () => {
     expect(adjacentRadioIndex(4, 0, -1)).toBe(3);
     expect(adjacentRadioIndex(4, 3, 1)).toBe(0);
     expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
+  });
+
+  it("maps Android audio focus transitions to safe player actions", () => {
+    expect(audioFocusAction("gain")).toBe("restore");
+    expect(audioFocusAction("loss")).toBe("pause");
+    expect(audioFocusAction("loss_transient")).toBe("pause");
+    expect(audioFocusAction("loss_transient_can_duck")).toBe("duck");
+    expect(audioFocusAction("unknown")).toBe("none");
   });
 
   it("uses bounded progressive retry delays", () => {

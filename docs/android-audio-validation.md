@@ -21,6 +21,17 @@ La configuración actual habilita `shouldPlayInBackground` mediante `expo-audio`
 
 Generar el build Android desde el flujo de Publish/Build de la plataforma y probar en al menos un teléfono Android físico. No se considera suficiente la ejecución en navegador ni una captura estática. Registrar versión, dispositivo, versión Android, emisora, resultado y logs de audio.
 
+## Matriz de foco de audio Android
+
+| Evento de foco | Acción de Radio Chile Glass | Reanudación automática |
+|---|---|---|
+| `AUDIOFOCUS_LOSS` | Pausa y conserva la emisora seleccionada | No; requiere acción del usuario |
+| `AUDIOFOCUS_LOSS_TRANSIENT` | Pausa mientras dura la llamada o interrupción | No; evita iniciar audio inesperadamente |
+| `AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK` | Reduce el volumen al 35% | Sí, restaura el volumen al recuperar el foco |
+| `AUDIOFOCUS_GAIN` | Restaura el volumen normal y notifica el foco recuperado | No reanuda una pausa originada por una llamada |
+
+El listener nativo solicita `AUDIOFOCUS_GAIN` con `USAGE_MEDIA` y `CONTENT_TYPE_MUSIC`, usa `setWillPauseWhenDucked(true)` y abandona el foco al detener o cambiar la emisora. Android 8+ utiliza `AudioFocusRequest`; versiones anteriores usan la API compatible. La política evita que una llamada o una app multimedia sea interrumpida por una reanudación automática.
+
 ## Criterios de aceptación
 
 El audio debe sobrevivir al bloqueo y al cambio de aplicación cuando la preferencia está activada. La pantalla de bloqueo debe representar la radio activa, actualizar canción y artista desde StreamTitle ICY cuando estén disponibles, mostrar artwork y permitir al menos play/pause. Los errores de stream deben ser recuperables y los logos ausentes no deben romper la composición.
