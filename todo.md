@@ -695,3 +695,10 @@
 - [x] Seleccionar y verificar estaciones adicionales con logo y streaming funcional
 - [x] Ampliar la selección visible del menú principal sin duplicados
 - [x] Validar reproducción, favoritos, filtros, typecheck, tests, lint y preview
+
+## Dirección visual B — Chile Sunset Editorial
+
+- [x] Definir la paleta editorial coral, ámbar y violeta
+- [x] Aplicar la nueva dirección a Inicio y Cover Flow
+- [x] Adaptar reproductor, mini reproductor y navegación sin perder contraste
+- [x] Validar interacción, temas, typecheck, tests, lint y preview

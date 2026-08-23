@@ -21,7 +21,7 @@ function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, play
     onPlay={onPlay}
     playing={playing}
     lightMode={lightMode}
-    trailing={<Pressable onPress={(event) => { event.stopPropagation(); onFavorite(); }} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}><AnimatedFavoriteIcon active={favorite} color={favorite ? "#15883E" : lightMode ? "#667085" : "#A8B0C2"} /></Pressable>}
+    trailing={<Pressable onPress={(event) => { event.stopPropagation(); onFavorite(); }} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}><AnimatedFavoriteIcon active={favorite} color={favorite ? "#B83E46" : lightMode ? "#667085" : "#A8B0C2"} /></Pressable>}
   />;
 }
 
@@ -93,14 +93,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 },
-  eyebrow: { color: "#1ED760", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
+  eyebrow: { color: "#FF6B5A", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
   title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 }, titleLight: { color: "#172033" },
   settingsButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },
   searchWrap: { height: 48, borderRadius: 16, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF14", flexDirection: "row", alignItems: "center", paddingHorizontal: 15, marginBottom: 28 }, searchWrapLight: { backgroundColor: "#FFFFFF", borderColor: "#D9E0EC" },
   searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 }, searchInputLight: { color: "#172033" },
   sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 }, sectionLabelLight: { color: "#5B667B" },
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }, syncRowLight: { },
-  syncButton: { marginBottom: 12 }, syncText: { color: "#1ED760", fontSize: 10, fontWeight: "600" },
+  syncButton: { marginBottom: 12 }, syncText: { color: "#FF6B5A", fontSize: 10, fontWeight: "600" },
   heroLight: { borderColor: "#CBD5E1" }, hero: { height: 244, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
   heroLogo: { position: "absolute", right: 24, top: 48, opacity: 0.98, transform: [{ rotate: "3deg" }] },
   heroTextLight: { color: "#172033" }, heroSubtextLight: { color: "#46536B" }, heroPlayLight: { backgroundColor: "#172033" },
@@ -114,13 +114,13 @@ const styles = StyleSheet.create({
   heroName: { color: "#F5F3EE", fontSize: 27, fontWeight: "700", letterSpacing: -0.5 },
   heroGenre: { color: "#D0D3DD", fontSize: 13, marginTop: 5 },
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
-  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipLight: { borderColor: "#D9E0EC", backgroundColor: "#FFFFFF" }, genreChipActive: { backgroundColor: "#1DB954", borderColor: "#1DB954" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextLight: { color: "#5B667B" }, genreChipTextActive: { color: "#160F14" },
+  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipLight: { borderColor: "#D9E0EC", backgroundColor: "#FFFFFF" }, genreChipActive: { backgroundColor: "#D94B4B", borderColor: "#D94B4B" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextLight: { color: "#5B667B" }, genreChipTextActive: { color: "#160F14" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  seeAll: { color: "#1ED760", fontSize: 13, fontWeight: "600", marginBottom: 12 },
-  controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#1DB9541C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#15883E" },
+  seeAll: { color: "#FF6B5A", fontSize: 13, fontWeight: "600", marginBottom: 12 },
+  controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#D94B4B1C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#B83E46" },
   radioRowLight: { backgroundColor: "#FFFFFFD9", borderColor: "#D9E0EC" }, radioNameLight: { color: "#172033" }, radioMetaLight: { color: "#5B667B" }, playMiniLight: { backgroundColor: "#172033" },
   radioRow: { minHeight: 75, borderRadius: 19, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
-  radioRowHovered: { backgroundColor: "#1ED76016", borderColor: "#1ED76066", shadowColor: "#1ED760", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 4, transform: [{ translateY: -1 }] },
+  radioRowHovered: { backgroundColor: "#FF6B5A16", borderColor: "#FF6B5A66", shadowColor: "#FF6B5A", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 4, transform: [{ translateY: -1 }] },
   radioInfo: { flex: 1, marginLeft: 13 },
   radioName: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
   radioMeta: { color: "#8D95A7", fontSize: 12, marginTop: 5 },
