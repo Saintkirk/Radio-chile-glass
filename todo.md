@@ -656,3 +656,11 @@
 - [x] Mejorar la transición Slide con easing, profundidad y continuidad visual
 - [x] Mantener gestos, flechas, audio sincronizado y reduced motion
 - [x] Validar typecheck, tests, lint y preview móvil
+
+## Igualar carrusel Inicio–Reproductor
+
+- [x] Confirmar que Inicio y Reproductor usan el mismo componente Cover Flow
+- [x] Igualar composición, escala, perspectiva, reflejos y carátulas laterales
+- [x] Igualar la transición Slide y la dirección del desplazamiento
+- [x] Mantener audio, flechas, gestos, metadatos y control de reproducción
+- [x] Validar typecheck, tests, lint y preview móvil
