@@ -930,3 +930,15 @@
 - [x] Evitar claves o estados que reinicien fondo, controles y metadatos
 - [x] Animar únicamente el carrusel Cover Flow horizontal
 - [x] Validar estabilidad visual, gestos y reproducción
+
+## APK actualizado de tarjeta estable
+
+- [x] Publicar en GitHub la revisión 02b3e1d3 de la tarjeta estable
+- [x] Ejecutar el workflow Android APK desde la revisión correcta
+- [x] Recuperar y verificar el artefacto APK actualizado
+
+## Reporte integral de pruebas del reproductor
+
+- [x] Redactar matriz manual Android para reproducción, navegación y estabilidad
+- [x] Documentar pruebas de segundo plano, pantalla bloqueada, foco y metadatos ICY
+- [x] Documentar pruebas automatizadas, evidencias, severidades y criterios de aceptación
