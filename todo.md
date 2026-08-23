@@ -864,4 +864,15 @@
 
 - [x] Diagnosticar el cierre inesperado de Radio Chile Glass en Android a partir de logs y configuración nativa
 - [x] Aplicar una corrección de arranque/audio y añadir una prueba de regresión
-- [ ] Generar y verificar un nuevo APK Android después de la corrección
+- [x] Generar y verificar un nuevo APK Android después de la corrección
+
+## Segundo cierre Android reportado
+
+- [ ] Obtener o reproducir el stack trace nativo del APK corregido
+- [ ] Identificar y corregir la causa restante del cierre al iniciar Android
+- [ ] Generar y verificar otro APK con instalación limpia
+
+## Diagnóstico sin computador
+
+- [ ] Revisar y endurecer todos los puntos nativos del arranque sin requerir acciones externas del usuario
+- [ ] Generar una versión simplificada del APK para instalación directa desde el teléfono
