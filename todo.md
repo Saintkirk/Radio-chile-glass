@@ -664,3 +664,15 @@
 - [x] Igualar la transición Slide y la dirección del desplazamiento
 - [x] Mantener audio, flechas, gestos, metadatos y control de reproducción
 - [x] Validar typecheck, tests, lint y preview móvil
+
+## Botón de configuración de Inicio
+
+- [x] Conectar el botón de configuración con la pantalla de Ajustes
+- [x] Separar la actualización del catálogo en una acción independiente
+- [x] Validar navegación, actualización del catálogo, typecheck, tests, lint y preview
+
+## Botón de configuración de Inicio
+
+- [x] Conectar el botón de configuración con la pantalla de Ajustes
+- [x] Separar la actualización del catálogo en una acción independiente
+- [x] Validar navegación, actualización del catálogo, typecheck, tests, lint y preview

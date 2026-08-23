@@ -70,11 +70,11 @@ export default function HomeScreen() {
           <>
             <View style={styles.topBar}>
               <View><Text style={styles.eyebrow}>RADIO CHILE</Text><Text style={styles.title}>Escucha lo que{`\n`}te mueve.</Text></View>
-              <Pressable onPress={() => refreshCatalog()} style={styles.settingsButton}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
+              <Pressable onPress={() => router.push("/settings")} accessibilityRole="button" accessibilityLabel="Abrir ajustes" style={({ pressed }) => [styles.settingsButton, pressed && styles.controlPressed]}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
             </View>
             <View style={styles.searchWrap}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor="#7F8799" style={styles.searchInput} /></View>
             <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
-            <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></View>
+            <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
             <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
             <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 },
   sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  syncText: { color: "#1ED760", fontSize: 10, fontWeight: "600", marginBottom: 12 },
+  syncButton: { marginBottom: 12 }, syncText: { color: "#1ED760", fontSize: 10, fontWeight: "600" },
   heroLight: { borderColor: "#CBD5E1" }, hero: { height: 244, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
   heroLogo: { position: "absolute", right: 24, top: 48, opacity: 0.98, transform: [{ rotate: "3deg" }] },
   heroTextLight: { color: "#172033" }, heroSubtextLight: { color: "#46536B" }, heroPlayLight: { backgroundColor: "#172033" },
