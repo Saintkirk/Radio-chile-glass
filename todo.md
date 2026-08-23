@@ -683,3 +683,8 @@
 - [x] Corregir persistencia y restauración de la preferencia de tema
 - [x] Ajustar estilos dependientes del tema en Ajustes e Inicio
 - [x] Validar cambio visual, persistencia, typecheck, tests, lint y preview
+
+## Corrección adicional de superficie de tema
+
+- [x] Sustituir fondos dinámicos no detectables por clases de tema tokenizadas
+- [x] Validar que el fondo y el texto cambien juntos en modo Claro

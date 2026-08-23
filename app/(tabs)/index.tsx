@@ -60,7 +60,7 @@ export default function HomeScreen() {
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
   return (
-    <ScreenContainer containerClassName={lightMode ? "bg-[#F5F7FB]" : "bg-[#0B0B0B]"} className="px-5 pt-3">
+    <ScreenContainer containerClassName="bg-background" className="px-5 pt-3">
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
