@@ -69,8 +69,10 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   };
 
   const cardStyle = (side: -1 | 0 | 1) => {
-    const endX = side * 112;
-    const startX = side === 0 ? direction.current * 230 : side === -direction.current ? 0 : side * 228;
+    // Las ranuras laterales ya están posicionadas en los extremos del escenario.
+    // El movimiento final debe ser sutil para conservar las tres carátulas visibles.
+    const endX = side === 0 ? 0 : side * 8;
+    const startX = side === 0 ? direction.current * 230 : side === -direction.current ? side * 156 : side * 190;
     return {
     opacity: side === 0 ? motion.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.35, 0.8, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.85] }),
     transform: [
@@ -122,27 +124,27 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
 }
 
 const styles = StyleSheet.create({
-  root: { height: 356, borderRadius: 0, overflow: "hidden", backgroundColor: "#000000", borderWidth: 1, borderColor: "#171717", marginBottom: 28, paddingTop: 4 },
-  rootLight: { backgroundColor: "#0A0A0A", borderColor: "#1A1A1A" },
-  stage: { height: 262, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
-  sideSlot: { position: "absolute", top: 24, width: 150, height: 222, zIndex: 1, alignItems: "center" },
-  sideLeft: { left: -4 },
-  sideRight: { right: -4 },
-  centerSlot: { width: 204, height: 242, zIndex: 3, alignItems: "center" },
-  outerGlow: { position: "absolute", width: 236, height: 236, borderRadius: 28, shadowColor: "#FFFFFF", shadowOpacity: 0.9, shadowRadius: 30, shadowOffset: { width: 0, height: 0 }, elevation: 14 },
+  root: { height: 388, borderRadius: 0, overflow: "hidden", backgroundColor: "#090A10", borderWidth: 1, borderColor: "#29202F", marginBottom: 28, paddingTop: 4 },
+  rootLight: { backgroundColor: "#090A10", borderColor: "#29202F" },
+  stage: { height: 286, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
+  sideSlot: { position: "absolute", top: 36, width: 128, height: 222, zIndex: 1, alignItems: "center" },
+  sideLeft: { left: 6 },
+  sideRight: { right: 6 },
+  centerSlot: { width: 218, height: 250, zIndex: 3, alignItems: "center" },
+  outerGlow: { position: "absolute", width: 246, height: 246, borderRadius: 28, shadowColor: "#FF5E67", shadowOpacity: 0.9, shadowRadius: 30, shadowOffset: { width: 0, height: 0 }, elevation: 14 },
   cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF45", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.62, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 10 },
-  sideCover: { width: 150, height: 202, borderRadius: 4 },
-  centerCover: { width: 204, height: 224, borderRadius: 4, shadowRadius: 30, shadowOpacity: 0.78 },
+  sideCover: { width: 128, height: 210, borderRadius: 12 },
+  centerCover: { width: 218, height: 232, borderRadius: 18, shadowRadius: 30, shadowOpacity: 0.78 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
   diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
-  reflection: { position: "absolute", top: 206, width: 150, height: 62, opacity: 0.18, transform: [{ scaleY: -1 }], overflow: "hidden" },
-  centerReflection: { width: 204, height: 72, opacity: 0.15, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  reflection: { position: "absolute", top: 212, width: 128, height: 52, opacity: 0.18, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  centerReflection: { width: 218, height: 72, opacity: 0.15, transform: [{ scaleY: -1 }], overflow: "hidden" },
   captionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, marginTop: 4 },
   caption: { flex: 1, alignItems: "center", paddingHorizontal: 12 },
-  stationName: { color: "#F5F3EE", fontSize: 20, fontWeight: "700", letterSpacing: -0.4 },
+  stationName: { color: "#F5F3EE", fontSize: 22, fontWeight: "700", letterSpacing: -0.4 },
   stationNameLight: { color: "#F5F3EE" },
   stationMeta: { color: "#B7C0D0", fontSize: 12, marginTop: 5 },
   stationMetaLight: { color: "#B7C0D0" },
@@ -151,5 +153,5 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.62, transform: [{ scale: 0.93 }] },
   dots: { flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 9 },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#687184" },
-  dotActive: { width: 18, backgroundColor: "#1ED760" },
+  dotActive: { width: 18, backgroundColor: "#FF6B5A" },
 });

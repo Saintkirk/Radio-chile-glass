@@ -710,3 +710,10 @@
 - [x] Rediseñar tarjetas glassmorphism y navegación inferior activa
 - [x] Alinear reproductor con la misma composición visual
 - [x] Validar contraste, interacción, typecheck, tests, lint y preview
+
+## Corrección de fidelidad visual respecto a la referencia
+
+- [x] Hacer visibles las carátulas anterior y siguiente como tarjetas completas
+- [x] Ajustar escala, solapamiento y perspectiva de las tres carátulas
+- [x] Reforzar tema oscuro cinematográfico, reflejos y controles luminosos
+- [x] Validar navegación lateral, gestos, contraste, typecheck, tests, lint y preview
