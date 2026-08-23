@@ -983,4 +983,4 @@
 - [x] Crear workflow GitHub Actions sin EAS usando Expo prebuild y Gradle
 - [x] Configurar Java, Android SDK, caché de Gradle y dependencias reproducibles
 - [x] Validar integridad, versión, paquete y procedencia del APK generado
-- [ ] Ejecutar el workflow nativo y documentar el tipo de firma del APK
+- [x] Ejecutar el workflow nativo y documentar el tipo de firma del APK

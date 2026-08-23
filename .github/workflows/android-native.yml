@@ -104,6 +104,7 @@ jobs:
             echo "profile=release"
             echo "version=1.0.2"
             echo "package=com.app.radiochileglass"
+            echo "signing=debug-keystore-testing-only"
             stat -c 'size_bytes=%s' "$APK"
           } | tee android/app/build/outputs/apk/release/build-info.txt
 
