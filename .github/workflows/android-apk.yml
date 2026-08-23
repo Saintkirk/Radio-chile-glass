@@ -51,8 +51,19 @@ jobs:
       - name: Verify project before build
         run: pnpm check && pnpm test && pnpm lint
 
+      - name: Verify revision and Expo config
+        run: |
+          set -euo pipefail
+          echo "Building commit: $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          pnpm exec expo config --type public --json > .expo-config.json
+          node -e 'const fs=require("fs"); const c=JSON.parse(fs.readFileSync(".expo-config.json","utf8")); if(c.version !== "1.0.2") throw new Error(`Unexpected app version: ${c.version}`); if(c.android?.package !== "com.app.radiochileglass") throw new Error("Unexpected Android package"); console.log(`Expo config OK: ${c.name} ${c.version} ${c.android.package}`);'
+
       - name: Setup EAS CLI
         run: pnpm dlx eas-cli@latest --version
+
+      - name: Validate Android prebuild
+        run: pnpm exec expo prebuild --platform android --no-install --non-interactive
 
       - name: Build APK with EAS
         env:
@@ -61,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -f .eas-build.json
-          pnpm dlx eas-cli@latest build --platform android --profile "$EAS_PROFILE" --non-interactive --wait --json > .eas-build.json
+          pnpm dlx eas-cli@latest build --platform android --profile "$EAS_PROFILE" --clear-cache --non-interactive --wait --json > .eas-build.json
           test -s .eas-build.json
 
       - name: Download APK
@@ -71,10 +82,25 @@ jobs:
           node scripts/download-eas-artifact.mjs .eas-build.json dist/android/Radio-Chile-Glass.apk
           test -s dist/android/Radio-Chile-Glass.apk
 
+      - name: Verify APK integrity and provenance
+        run: |
+          set -euo pipefail
+          test -s dist/android/Radio-Chile-Glass.apk
+          unzip -t dist/android/Radio-Chile-Glass.apk >/dev/null
+          unzip -l dist/android/Radio-Chile-Glass.apk | grep -q 'classes.dex'
+          sha256sum dist/android/Radio-Chile-Glass.apk | tee dist/android/SHA256SUMS.txt
+          {
+            echo "commit=${GITHUB_SHA}"
+            echo "workflow_run=${GITHUB_RUN_ID}"
+            echo "profile=${EAS_PROFILE}"
+            echo "version=1.0.2"
+            stat -c 'size_bytes=%s' dist/android/Radio-Chile-Glass.apk
+          } | tee dist/android/build-info.txt
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
-          name: radio-chile-glass-${{ env.EAS_PROFILE }}-${{ github.sha }}
-          path: dist/android/Radio-Chile-Glass.apk
+          name: radio-chile-glass-v1.0.2-${{ env.EAS_PROFILE }}-${{ github.sha }}
+          path: dist/android/
           if-no-files-found: error
           retention-days: 14

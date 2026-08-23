@@ -970,3 +970,10 @@
 - [x] Ejecutar el workflow Android desde main con el indicador de buffering
 - [x] Verificar que el workflow termine correctamente y descargar el APK
 - [x] Entregar el APK actualizado para instalación en Android
+
+## Bloqueo persistente del APK y mejora del build
+
+- [ ] Reproducir o aislar por qué el APK instalado permanece en el logo
+- [ ] Revisar logs de arranque y eliminar inicializaciones nativas bloqueantes
+- [x] Fortalecer CI/CD con validación de configuración, bundle y artefacto APK
+- [ ] Generar un APK de prueba y documentar exactamente la validación pendiente en dispositivo
