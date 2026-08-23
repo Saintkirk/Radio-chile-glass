@@ -964,3 +964,9 @@
 - [x] Mantener visible el estado de carga en el mini reproductor sin cambiar su tamaño
 - [x] Diferenciar carga, reproducción, pausa y error de conexión
 - [x] Validar accesibilidad, reduced motion, typecheck, tests y lint
+
+## Generación del APK con buffering
+
+- [x] Ejecutar el workflow Android desde main con el indicador de buffering
+- [x] Verificar que el workflow termine correctamente y descargar el APK
+- [x] Entregar el APK actualizado para instalación en Android
