@@ -810,6 +810,7 @@
 - [x] Conectar el remoto de GitHub al nuevo repositorio radio-chile-glass
 - [x] Publicar la rama principal y los workflows
 - [x] Verificar los archivos publicados y entregar el enlace
+<<<<<<< HEAD
 
 ## Corrección de CI de GitHub Actions
 
@@ -851,3 +852,16 @@
 - [x] Integrar pausa, ducking y recuperación manual con RadioPlayer
 - [x] Añadir pruebas deterministas del contrato de eventos y documentar la matriz de interrupciones
 - [x] Validar typecheck, tests, lint y CI; APK Android físico pendiente
+
+## Corrección del build EAS
+
+- [x] Configurar un `projectId` estable de Expo/EAS para el proyecto
+- [x] Actualizar `app.config.ts` y `eas.json` para build no interactivo
+- [x] Ajustar el workflow Android APK y validar la configuración local
+- [ ] Ejecutar CI y build EAS de prueba hasta obtener un artefacto APK
+
+## Diagnóstico de cierre Android
+
+- [x] Diagnosticar el cierre inesperado de Radio Chile Glass en Android a partir de logs y configuración nativa
+- [x] Aplicar una corrección de arranque/audio y añadir una prueba de regresión
+- [ ] Generar y verificar un nuevo APK Android después de la corrección

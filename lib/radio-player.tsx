@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, type LockScreenMetadata } from "./player-utils";
-import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/modules/expo-audio-focus/src";
+import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
 
 export { RADIOS, type Radio } from "./radios";
 

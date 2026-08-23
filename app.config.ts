@@ -30,6 +30,7 @@ const env = {
   // App branding - update these values directly (do not use env vars)
   appName: "Radio Chile Glass",
   appSlug: "radio-chile-glass",
+  owner: "saintkirk",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
   logoUrl: "/manus-storage/radio-chile-glass-icon_db7867b6.png",
@@ -41,6 +42,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
+  owner: env.owner,
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
@@ -121,6 +123,11 @@ const config: ExpoConfig = {
       },
     ],
   ],
+  extra: {
+    eas: {
+      projectId: "8ddbb9a9-6b5b-4431-b300-a2c90506e8be",
+    },
+  },
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
