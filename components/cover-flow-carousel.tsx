@@ -73,6 +73,12 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
     // El movimiento final debe ser sutil para conservar las tres carátulas visibles.
     const endX = side === 0 ? 0 : side * 8;
     const startX = side === 0 ? direction.current * 230 : side === -direction.current ? side * 156 : side * 190;
+    const targetRotation = side === -1 ? "34deg" : side === 1 ? "-34deg" : "0deg";
+    const startRotation = side === 0
+      ? (direction.current > 0 ? "-28deg" : "28deg")
+      : side === -direction.current
+        ? "0deg"
+        : (side === -1 ? "42deg" : "-42deg");
     return {
     opacity: side === 0 ? motion.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.35, 0.8, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.85] }),
     transform: [
@@ -80,7 +86,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
       { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [startX, endX] }) },
       { translateY: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [12, 4] }) },
       { scale: side === 0 ? motion.interpolate({ inputRange: [0, 0.72, 1], outputRange: [0.84, 0.96, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.68, 0.82] }) },
-      { rotateY: side === -1 ? "34deg" : side === 1 ? "-34deg" : "0deg" },
+      { rotateY: motion.interpolate({ inputRange: [0, 1], outputRange: [startRotation, targetRotation] }) },
     ],
     };
   };

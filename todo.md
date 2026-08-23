@@ -723,3 +723,10 @@
 - [x] Revisar la estructura del repositorio indicado
 - [x] Evaluar animate-expo y skills de diseño relevantes
 - [x] Documentar recomendaciones aplicables sin ejecutar contenido no confiable
+
+## Rotación 3D del carrusel
+
+- [x] Añadir rotación 3D direccional al cambiar de emisora
+- [x] Sincronizar rotación con desplazamiento horizontal y perspectiva
+- [x] Mantener gestos, flechas, reduced motion y accesibilidad
+- [x] Validar typecheck, tests, lint y preview
