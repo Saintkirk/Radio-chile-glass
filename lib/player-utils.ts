@@ -25,3 +25,19 @@ export function adjacentRadioIndex(length: number, currentIndex: number, directi
   if (length < 1 || currentIndex < 0) return -1;
   return (currentIndex + direction + length) % length;
 }
+
+export type LockScreenMetadata = {
+  title: string;
+  artist: string;
+  albumTitle: string;
+  artworkUrl?: string;
+};
+
+export function lockScreenMetadata(radio: Radio): LockScreenMetadata {
+  return {
+    title: radio.name,
+    artist: `${radio.frequency} · ${radio.genre}`,
+    albumTitle: "Radio Chile Glass",
+    ...(radio.favicon ? { artworkUrl: radio.favicon } : {}),
+  };
+}

@@ -824,3 +824,12 @@
 - [x] Auditar las versiones de actions/checkout, setup-node y pnpm/action-setup
 - [x] Actualizar workflows y documentación para evitar acciones basadas en Node.js 20
 - [x] Validar sintaxis y ejecución exitosa de CI tras la actualización
+
+## Controles multimedia en pantalla de bloqueo
+
+- [x] Revisar la API nativa de expo-audio para lock screen y servicio multimedia Android
+- [x] Activar metadatos de emisora, artwork remoto y acciones play/pausa en AudioPlayer
+- [x] Sincronizar los cambios de reproducción originados desde los controles del sistema
+- [x] Respetar la preferencia de reproducción en segundo plano y limpiar la sesión al cambiar de emisora
+- [x] Añadir prueba determinista de metadatos y ampliar el checklist Android
+- [ ] Validar controles en pantalla de bloqueo con un APK instalado en un dispositivo Android físico

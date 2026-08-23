@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, isRadioPlaying, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -48,5 +48,14 @@ describe("player interaction utilities", () => {
     expect(retryDelayMs(2)).toBe(1800);
     expect(retryDelayMs(3)).toBe(3500);
     expect(retryDelayMs(99)).toBe(3500);
+  });
+
+  it("builds lock screen metadata from the active station", () => {
+    expect(lockScreenMetadata({ ...radio, favicon: "https://example.com/logo.png" })).toEqual({
+      title: "FM Latina",
+      artist: "89.1 FM · Pop latino",
+      albumTitle: "Radio Chile Glass",
+      artworkUrl: "https://example.com/logo.png",
+    });
   });
 });

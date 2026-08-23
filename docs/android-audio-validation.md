@@ -10,6 +10,7 @@ La configuración actual habilita `shouldPlayInBackground` mediante `expo-audio`
 |---|---|
 | Iniciar FM Latina y bloquear la pantalla | El audio continúa reproduciéndose. |
 | Pulsar pausa desde la notificación o pantalla de bloqueo | El audio se pausa y la interfaz se sincroniza. |
+| Ver la tarjeta multimedia bloqueada | Muestra nombre de la emisora, frecuencia/género y logo remoto o fallback. |
 | Reanudar desde controles del sistema | El audio continúa desde la radio activa. |
 | Cambiar de aplicación | La señal sigue activa si la preferencia está habilitada. |
 | Desactivar reproducción en segundo plano | La siguiente salida de la app no mantiene audio en background. |
@@ -22,7 +23,7 @@ Generar el build Android desde el flujo de Publish/Build de la plataforma y prob
 
 ## Criterios de aceptación
 
-El audio debe sobrevivir al bloqueo y al cambio de aplicación cuando la preferencia está activada. La pantalla de bloqueo debe representar la radio activa y permitir al menos play/pause. Los errores de stream deben ser recuperables y los logos ausentes no deben romper la composición.
+El audio debe sobrevivir al bloqueo y al cambio de aplicación cuando la preferencia está activada. La pantalla de bloqueo debe representar la radio activa, mostrar sus metadatos visuales y permitir al menos play/pause. Los errores de stream deben ser recuperables y los logos ausentes no deben romper la composición.
 
 ## Validación adicional de reconexión y navegación
 
