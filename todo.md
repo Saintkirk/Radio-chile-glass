@@ -876,3 +876,10 @@
 
 - [ ] Revisar y endurecer todos los puntos nativos del arranque sin requerir acciones externas del usuario
 - [ ] Generar una versión simplificada del APK para instalación directa desde el teléfono
+
+## APK ligera y CI/CD rápido
+
+- [x] Medir el tamaño actual de la APK y el tiempo de cada fase del pipeline
+- [x] Reducir peso de dependencias, assets y arquitecturas sin perder reproducción ni glasmorfismo
+- [x] Optimizar EAS y CI/CD con caché, validaciones rápidas y límites de tiempo seguros
+- [ ] Generar y verificar una APK optimizada desde el commit correcto de GitHub
