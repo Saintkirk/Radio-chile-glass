@@ -991,3 +991,11 @@
 - [x] Confirmar que todos los gates y Gradle terminen correctamente
 - [x] Descargar y verificar el APK con hash, versión y procedencia
 - [x] Entregar el APK para prueba real en el dispositivo Android
+
+## Restauración de controles multimedia Android
+
+- [x] Diagnosticar por qué el APK nativo no muestra notificación ni reproductor de pantalla bloqueada
+- [x] Restaurar la sesión multimedia y la notificación persistente sin bloquear el arranque
+- [x] Sincronizar play, pausa, detener, anterior, siguiente y metadatos
+- [ ] Validar permisos, servicio foreground y compilación nativa
+- [ ] Generar APK corregido y probarlo en dispositivo Android

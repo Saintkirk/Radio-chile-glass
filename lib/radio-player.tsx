@@ -1,12 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Platform } from "react-native";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
-import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
+import { clearNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaState } from "@/lib/radio-media-controls";
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -82,10 +81,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       try { player.clearLockScreenControls(); } catch { /* no-op on unsupported builds */ }
       return;
     }
-    if (Platform.OS === "android") {
-      setNativeMediaSession(metadata, playing);
-      return;
-    }
+    // Use expo-audio's Android Media3 foreground service. It owns the
+    // notification and MediaSession lifecycle, including lock-screen controls.
+    // The custom bridge remains available for future station actions, but must
+    // not create a second competing MediaSession on Android.
     try {
       player.setActiveForLockScreen(true, metadata, { showSeekForward: true, showSeekBackward: true });
     } catch {
@@ -187,10 +186,6 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
   const updateLockScreenMetadata = useCallback((metadata: LockScreenMetadata) => {
     if (!backgroundPlaybackEnabled) return;
-    if (Platform.OS === "android") {
-      updateNativeMediaMetadata(metadata);
-      return;
-    }
     try { playerRef.current?.updateLockScreenMetadata(metadata); } catch { /* no-op */ }
   }, [backgroundPlaybackEnabled]);
 
