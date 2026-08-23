@@ -648,3 +648,11 @@
 - [x] Actualizar pruebas y referencias que esperen Radio María
 - [x] Validar que Explorar y el catálogo remoto no la reincorporen
 - [x] Ejecutar typecheck, tests y lint
+
+## Radio Rock & Pop y carrusel mejorado
+
+- [x] Verificar homepage, logo y stream de Radio Rock & Pop
+- [x] Añadir Radio Rock & Pop al catálogo sin duplicados
+- [x] Mejorar la transición Slide con easing, profundidad y continuidad visual
+- [x] Mantener gestos, flechas, audio sincronizado y reduced motion
+- [x] Validar typecheck, tests, lint y preview móvil

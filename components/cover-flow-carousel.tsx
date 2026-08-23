@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { AccessibilityInfo, Animated, Easing, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -15,9 +15,21 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   const next = radios.length ? radios[(activeIndex + 1) % radios.length] : undefined;
 
   useEffect(() => {
+    motion.stopAnimation();
+    if (reduceMotion) {
+      motion.setValue(1);
+      return undefined;
+    }
     motion.setValue(0);
-    Animated.timing(motion, { toValue: 1, duration: 360, useNativeDriver: true }).start();
-  }, [activeIndex, motion]);
+    const transition = Animated.timing(motion, {
+      toValue: 1,
+      duration: 460,
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+      useNativeDriver: true,
+    });
+    transition.start();
+    return () => transition.stop();
+  }, [activeIndex, motion, reduceMotion]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion).catch(() => undefined);
@@ -62,8 +74,10 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
     return {
     opacity: side === 0 ? motion.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.35, 0.8, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.85] }),
     transform: [
+      { perspective: 900 },
       { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [startX, endX] }) },
-      { scale: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [0.84, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.68, 0.82] }) },
+      { translateY: side === 0 ? motion.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [12, 4] }) },
+      { scale: side === 0 ? motion.interpolate({ inputRange: [0, 0.72, 1], outputRange: [0.84, 0.96, 1] }) : motion.interpolate({ inputRange: [0, 1], outputRange: [0.68, 0.82] }) },
       { rotateY: side === -1 ? "34deg" : side === 1 ? "-34deg" : "0deg" },
     ],
     };

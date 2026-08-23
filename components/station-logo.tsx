@@ -23,6 +23,7 @@ const LOCAL_LOGOS: Record<string, number> = {
   agricultura: require("@/assets/images/radios/agricultura.jpg"),
   duna: require("@/assets/images/radios/duna.jpg"),
   beethoven: require("@/assets/images/radios/beethoven.png"),
+  "rock-pop": require("@/assets/images/rock-and-pop.jpg"),
   festival: require("@/assets/images/radios/festival.jpg"),
   carolina: require("@/assets/images/radios/carolina.png"),
   sonar: require("@/assets/images/radios/sonar.png"),

@@ -65,3 +65,9 @@ La página oficial de Radio Portales corresponde a la señal de Valparaíso, con
 La página oficial de Radio Recuerdos expone un reproductor Lunaradio activo y publica el texto dinámico `ANTONIO ZABALETA - Que daría yo - ANTONIO ZABALETA`, lo que confirma que la emisora entrega metadata de pista en su reproductor web. Falta localizar el endpoint directo de audio para incorporarla de forma nativa; no se agregará mientras el stream no esté confirmado.
 
 La fuente oficial alternativa `fmdelosrecuerdos.cl` confirma logo en `logohead.png` y una página propia `/senal-en-vivo/` para escuchar online. La señal se presenta como emisora solo por internet, por lo que su ciudad se mantendrá como Santiago/Región Metropolitana solo si el endpoint directo se confirma; la homepage y el logo sí son verificables.
+
+## Radio Rock & Pop
+
+Rock & Pop Chile se confirmó en `rockandpop.cl` como una emisora de Santiago en 94.1 FM, con programación de rock, pop, actualidad y tendencias. La API pública de Radio Browser devolvió el endpoint AAC `https://playerservices.streamtheworld.com/api/livestream-redirect/ROCK_AND_POPAAC_SC`; la respuesta entregó audio AAC+ y cabeceras ICY con el nombre `ROCK_AND_POP`, por lo que se incorporó al catálogo. Se añadió un logo local cuadrado para evitar pixelación en las carátulas.
+
+La animación del Flow Cover ahora usa easing cúbico suave, 460 ms de duración, perspectiva 3D y desplazamiento vertical ligero durante la entrada. La transición sigue respetando reduced motion y mantiene la navegación y el audio sincronizados.

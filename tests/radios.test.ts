@@ -19,13 +19,13 @@ describe("catálogo de radios chilenas", () => {
   });
 
   it("incluye emisoras adicionales verificadas de Santiago", () => {
-    expect(RADIOS.map((radio) => radio.id)).toEqual(expect.arrayContaining(["play-fm", "conquistador", "la-clave", "13c", "la-mexicana", "carnaval-la-serena"]));
+    expect(RADIOS.map((radio) => radio.id)).toEqual(expect.arrayContaining(["play-fm", "conquistador", "rock-pop", "la-clave", "13c", "la-mexicana", "carnaval-la-serena"]));
     expect(RADIOS.some((radio) => radio.id === "radio-maria")).toBe(false);
     expect(RADIOS.filter((radio) => radio.city === "Santiago").length).toBeGreaterThanOrEqual(20);
   });
 
   it("mantiene homepage y logo verificable en las nuevas emisoras editoriales", () => {
-    ["13c", "la-mexicana", "carnaval-la-serena", "radio-recuerdos"].forEach((id) => {
+    ["13c", "la-mexicana", "carnaval-la-serena", "radio-recuerdos", "rock-pop"].forEach((id) => {
       const radio = RADIOS.find((item) => item.id === id);
       expect(radio?.homepage?.startsWith("http")).toBe(true);
       expect(radio?.favicon?.startsWith("http")).toBe(true);
