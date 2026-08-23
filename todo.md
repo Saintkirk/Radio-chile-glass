@@ -903,3 +903,10 @@
 - [x] Actualizar subdependencias obsoletas de pnpm sin romper Expo SDK 54
 - [x] Ajustar la configuración del workflow para eliminar el warning de PNPM_HOME
 - [x] Validar seguridad, tests, typecheck, lint y build desde GitHub
+
+## Evaluación de actualización Expo
+
+- [x] Auditar la versión Expo actual y el árbol de subdependencias heredadas
+- [x] Comparar versiones objetivo y compatibilidad con módulos Android usados
+- [x] Estimar impacto en audio, navegación, EAS, tamaño y tiempo de build
+- [x] Documentar una recomendación reversible sin migrar todavía
