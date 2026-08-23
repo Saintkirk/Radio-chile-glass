@@ -818,3 +818,9 @@
 - [x] Aplicar una corrección mínima al workflow o al proyecto
 - [x] Validar typecheck, tests y lint localmente
 - [x] Publicar la corrección y verificar una ejecución exitosa de CI
+
+## Actualización de GitHub Actions a Node.js 24
+
+- [x] Auditar las versiones de actions/checkout, setup-node y pnpm/action-setup
+- [x] Actualizar workflows y documentación para evitar acciones basadas en Node.js 20
+- [x] Validar sintaxis y ejecución exitosa de CI tras la actualización
