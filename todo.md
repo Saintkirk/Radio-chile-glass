@@ -784,3 +784,10 @@
 - [x] Preparar protocolo de prueba de pantalla de bloqueo en dispositivo físico
 - [x] Validar typecheck, tests y lint antes del build
 - [x] Entregar instrucciones para generar el build desde Publish/Build
+
+## GitHub Actions para Android
+
+- [x] Crear workflow de CI para typecheck, tests y lint
+- [x] Crear workflow de EAS para generar y publicar el APK como artefacto
+- [x] Documentar configuración de EXPO_TOKEN y ejecución manual o por tags
+- [x] Validar workflows, script de descarga y proyecto

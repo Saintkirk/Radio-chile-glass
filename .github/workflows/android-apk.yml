@@ -1,0 +1,69 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: EAS build profile
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - production-apk
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_PROFILE: ${{ github.event_name == 'push' && 'production-apk' || inputs.profile }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify project before build
+        run: pnpm check && pnpm test && pnpm lint
+
+      - name: Setup EAS CLI
+        run: pnpm dlx eas-cli@latest --version
+
+      - name: Build APK with EAS
+        run: pnpm dlx eas-cli@latest build --platform android --profile "$EAS_PROFILE" --non-interactive --wait --json > .eas-build.json
+
+      - name: Download APK
+        run: node scripts/download-eas-artifact.mjs .eas-build.json dist/android/Radio-Chile-Glass.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: radio-chile-glass-${{ env.EAS_PROFILE }}-${{ github.sha }}
+          path: dist/android/Radio-Chile-Glass.apk
+          if-no-files-found: error
+          retention-days: 14
