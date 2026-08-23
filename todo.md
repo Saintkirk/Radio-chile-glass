@@ -743,3 +743,9 @@
 - [x] Generar referencias visuales móviles adicionales para Android
 - [x] Migrar la animación crítica del carrusel a Reanimated
 - [x] Validar rendimiento, reduced motion, typecheck, tests, lint y preview
+
+## Revisión de impeccable
+
+- [x] Inspeccionar el repositorio Saintkirk/impeccable
+- [x] Evaluar prácticas aplicables a la interfaz móvil
+- [x] Documentar recomendaciones y límites de integración
