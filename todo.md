@@ -749,3 +749,10 @@
 - [x] Inspeccionar el repositorio Saintkirk/impeccable
 - [x] Evaluar prácticas aplicables a la interfaz móvil
 - [x] Documentar recomendaciones y límites de integración
+
+## Mejoras seleccionadas de impeccable
+
+- [x] Auditar el reproductor expandido con criterios de UX y diseño
+- [x] Añadir pruebas para streams caídos, logos ausentes y textos largos
+- [x] Crear DESIGN.md con la identidad visual compartida
+- [x] Validar robustez, typecheck, tests, lint y preview

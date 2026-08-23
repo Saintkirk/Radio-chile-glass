@@ -72,6 +72,23 @@ describe("catálogo de radios chilenas", () => {
     expect(result[0].favicon).toBe("https://radio.example.cl/favicon.ico");
   });
 
+  it("conserva un fallback de iniciales cuando falta el logo", () => {
+    const result = normalizeRemoteStations([
+      { stationuuid: "no-logo", name: "Radio Sin Logo", country: "Chile", url_resolved: "https://radio.example.cl/live", lastcheckok: 1 },
+    ]);
+    expect(result[0].favicon).toBeUndefined();
+    expect(result[0].initials).toBe("RS");
+  });
+
+  it("mantiene textos largos seguros para renderizar en tarjetas", () => {
+    const longName = "Radio Metropolitana de Noticias y Música en Vivo";
+    const result = normalizeRemoteStations([
+      { stationuuid: "long-text", name: longName, country: "Chile", url_resolved: "https://radio.example.cl/live", lastcheckok: 1 },
+    ]);
+    expect(result[0].name).toBe(longName);
+    expect(result[0].name.length).toBeGreaterThan(32);
+  });
+
   it("fusiona el remoto sin eliminar FM Latina", () => {
     const merged = mergeCatalog([{ id: "remote-1", name: "Nueva FM", frequency: "En línea", city: "Chile", genre: "Música", description: "", streamUrl: "https://new.example/live", initials: "NF", accent: "#64D8FF" }]);
     expect(merged.some((radio) => radio.id === "fmlatina")).toBe(true);
