@@ -916,3 +916,10 @@
 - [x] Convertir metro.config.js a una configuración compatible con el modo ESM
 - [x] Validar Expo/Metro, typecheck, tests y lint después del cambio
 - [x] Regenerar el APK y confirmar que el workflow Android termina correctamente
+
+## Reproducción única y controles multimedia
+
+- [x] Garantizar que al cambiar de emisora se detenga y libere el stream anterior
+- [x] Mantener sincronizados emisora activa, mini reproductor y pantalla bloqueada
+- [x] Añadir acciones anterior/siguiente a los controles multimedia Android
+- [x] Validar reproducción única, navegación y regresiones de audio

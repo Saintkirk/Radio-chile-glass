@@ -34,8 +34,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         return;
       }
       player.setActiveForLockScreen(true, lockScreenMetadata(radio), {
-        showSeekForward: false,
-        showSeekBackward: false,
+        showSeekForward: true,
+        showSeekBackward: true,
       });
     } catch {
       // Lock screen controls are only available in a native build; web stays functional without them.
@@ -97,6 +97,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
   const playRadio = async (radio: Radio) => {
     const requestId = ++playRequestRef.current;
+    disposeCurrentPlayer();
+    setIsPlaying(false);
     setIsLoading(true);
     setPlaybackError(null);
     for (let attempt = 0; attempt <= MAX_PLAYBACK_RETRIES; attempt += 1) {
@@ -121,6 +123,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
         return;
       } catch {
+        if (requestId !== playRequestRef.current) return;
         if (attempt === MAX_PLAYBACK_RETRIES) {
           setIsPlaying(false);
           setPlaybackError(`No se pudo conectar con ${radio.name}`);
