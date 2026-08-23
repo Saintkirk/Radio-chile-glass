@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, isRadioPlaying, playbackStatus, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, isRadioPlaying, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -40,5 +40,13 @@ describe("player interaction utilities", () => {
     expect(adjacentRadioIndex(4, 0, -1)).toBe(3);
     expect(adjacentRadioIndex(4, 3, 1)).toBe(0);
     expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
+  });
+
+  it("uses bounded progressive retry delays", () => {
+    expect(retryDelayMs(0)).toBe(0);
+    expect(retryDelayMs(1)).toBe(800);
+    expect(retryDelayMs(2)).toBe(1800);
+    expect(retryDelayMs(3)).toBe(3500);
+    expect(retryDelayMs(99)).toBe(3500);
   });
 });

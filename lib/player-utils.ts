@@ -15,6 +15,12 @@ export function playbackStatus(isLoading: boolean, isPlaying: boolean): "connect
   return isPlaying ? "playing" : "ready";
 }
 
+export const MAX_PLAYBACK_RETRIES = 3;
+
+export function retryDelayMs(attempt: number): number {
+  return [0, 800, 1800, 3500][Math.max(0, Math.min(attempt, MAX_PLAYBACK_RETRIES))];
+}
+
 export function adjacentRadioIndex(length: number, currentIndex: number, direction: -1 | 1): number {
   if (length < 1 || currentIndex < 0) return -1;
   return (currentIndex + direction + length) % length;

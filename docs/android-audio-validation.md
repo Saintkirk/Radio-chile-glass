@@ -23,3 +23,13 @@ Generar el build Android desde el flujo de Publish/Build de la plataforma y prob
 ## Criterios de aceptación
 
 El audio debe sobrevivir al bloqueo y al cambio de aplicación cuando la preferencia está activada. La pantalla de bloqueo debe representar la radio activa y permitir al menos play/pause. Los errores de stream deben ser recuperables y los logos ausentes no deben romper la composición.
+
+## Validación adicional de reconexión y navegación
+
+| Caso | Resultado esperado |
+|---|---|
+| Stream no disponible al iniciar | Se muestran reintentos progresivos y limitados, sin congelar la interfaz. |
+| Reintento manual después del límite | La emisora vuelve a intentar la conexión desde el detalle o el mini reproductor. |
+| Cambiar de emisora durante un reintento | La solicitud anterior se cancela y no reemplaza la emisora elegida. |
+| Pulsar anterior/siguiente en el reproductor | La navegación es circular y actualiza portada, nombre y señal activa. |
+| Bloquear pantalla durante la reconexión | La sesión conserva un estado coherente y permite reanudar cuando el stream vuelve. |

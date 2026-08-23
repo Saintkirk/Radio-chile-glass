@@ -3,7 +3,7 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { toggleFavoriteId } from "./player-utils";
+import { MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId } from "./player-utils";
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -16,6 +16,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const playRequestRef = useRef(0);
   const [favorites, setFavorites] = useState<string[]>(["fmlatina"]);
   const [radios, setRadios] = useState<Radio[]>(RADIOS);
   const [catalogUpdatedAt, setCatalogUpdatedAt] = useState<string | null>(null);
@@ -41,11 +42,31 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const updateBackgroundPlayback = (enabled: boolean) => { setBackgroundPlaybackEnabled(enabled); AsyncStorage.setItem("radio-background-playback", String(enabled)).catch(() => undefined); };
 
   const playRadio = async (radio: Radio) => {
+    const requestId = ++playRequestRef.current;
     setIsLoading(true);
     setPlaybackError(null);
-    try { if (currentRadio?.id !== radio.id) { playerRef.current?.remove(); playerRef.current = createAudioPlayer({ uri: radio.streamUrl }); setCurrentRadio(radio); } playerRef.current?.play(); setIsPlaying(true); }
-    catch { setIsPlaying(false); setPlaybackError(`No se pudo conectar con ${radio.name}`); }
-    finally { setIsLoading(false); }
+    for (let attempt = 0; attempt <= MAX_PLAYBACK_RETRIES; attempt += 1) {
+      if (requestId !== playRequestRef.current) return;
+      const delay = retryDelayMs(attempt);
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+      try {
+        if (requestId !== playRequestRef.current) return;
+        playerRef.current?.remove();
+        playerRef.current = createAudioPlayer({ uri: radio.streamUrl });
+        setCurrentRadio(radio);
+        playerRef.current.play();
+        setIsPlaying(true);
+        setPlaybackError(null);
+        setIsLoading(false);
+        return;
+      } catch {
+        if (attempt === MAX_PLAYBACK_RETRIES) {
+          setIsPlaying(false);
+          setPlaybackError(`No se pudo conectar con ${radio.name}`);
+          setIsLoading(false);
+        }
+      }
+    }
   };
   const togglePlay = () => { if (!playerRef.current) return; if (isPlaying) { playerRef.current.pause(); setIsPlaying(false); } else { playerRef.current.play(); setIsPlaying(true); } };
   const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = toggleFavoriteId(previous, radioId); saveFavoriteIds(next).catch(() => undefined); return next; }); };

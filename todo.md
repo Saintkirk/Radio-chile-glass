@@ -770,3 +770,10 @@
 - [x] Añadir pruebas de navegación y reproducción del reproductor
 - [x] Preparar checklist ejecutable para audio en segundo plano y pantalla de bloqueo Android
 - [x] Validar typecheck, tests, lint y preview
+
+## Mejoras seleccionadas 1/2/3 — reconexión avanzada y validación
+
+- [x] Implementar reintentos progresivos limitados para streams caídos
+- [x] Ampliar pruebas de navegación entre Inicio, Explorar, Favoritos y Reproductor
+- [x] Preparar validación Android de audio en segundo plano y pantalla de bloqueo
+- [x] Validar typecheck, tests, lint y preview
