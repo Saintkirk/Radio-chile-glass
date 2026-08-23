@@ -923,3 +923,10 @@
 - [x] Mantener sincronizados emisora activa, mini reproductor y pantalla bloqueada
 - [x] Añadir acciones anterior/siguiente a los controles multimedia Android
 - [x] Validar reproducción única, navegación y regresiones de audio
+
+## Tarjeta estable y carrusel aislado
+
+- [x] Mantener montado el contenedor completo de la tarjeta durante el cambio
+- [x] Evitar claves o estados que reinicien fondo, controles y metadatos
+- [x] Animar únicamente el carrusel Cover Flow horizontal
+- [x] Validar estabilidad visual, gestos y reproducción
