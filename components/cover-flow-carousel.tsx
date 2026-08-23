@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AccessibilityInfo, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { AccessibilityInfo, ActivityIndicator, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
   Extrapolation,
@@ -54,7 +54,7 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
   }, [direction, motion, reduceMotion, side]);
 }
 
-export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPlaying, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onChange: (direction: number) => void; onPlay: () => void; isPlaying: boolean; currentRadioId?: string; lightMode?: boolean }) {
+export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPlaying, isLoading, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onChange: (direction: number) => void; onPlay: () => void; isPlaying: boolean; isLoading: boolean; currentRadioId?: string; lightMode?: boolean }) {
   const motion = useSharedValue(1);
   const glow = useSharedValue(0);
   const direction = useSharedValue(1);
@@ -143,8 +143,9 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
           <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
           <View style={[styles.cover, styles.centerCover, { backgroundColor: `${active.accent}32` }]}>
             <Animated.View pointerEvents="none" style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }]} />
-            <Pressable onPress={onPlay} accessibilityRole="button" accessibilityLabel={currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
+            <Pressable disabled={isLoading} onPress={onPlay} accessibilityRole="button" accessibilityLabel={isLoading ? `Conectando con ${active.name}` : currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
               <StationLogo radio={active} size={184} radius={27} />
+              {isLoading && <View pointerEvents="none" style={styles.bufferingOverlay}><ActivityIndicator size="large" color="#F5F3EE" /><Text style={styles.bufferingText}>Conectando…</Text></View>}
               <View pointerEvents="none" style={styles.diagonalSheen} />
               <View pointerEvents="none" style={styles.centerGloss} />
             </Pressable>
@@ -176,6 +177,8 @@ const styles = StyleSheet.create({
   sideCover: { width: 128, height: 210, borderRadius: 12 },
   centerCover: { width: 218, height: 232, borderRadius: 18, shadowRadius: 30, shadowOpacity: 0.78 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
+  bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 8 },
+  bufferingText: { color: "#F5F3EE", fontSize: 11, fontWeight: "700", letterSpacing: 0.4 },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },

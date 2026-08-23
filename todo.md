@@ -957,3 +957,10 @@
 - [x] Validar configuración de splash, entrada de Expo Router y carga inicial
 - [x] Corregir el bloqueo sin perder reproducción en segundo plano ni controles multimedia
 - [x] Generar y verificar un APK que llegue a Inicio correctamente
+
+## Indicador de carga al cambiar de emisora
+
+- [x] Mostrar estado de buffering sobre la carátula central durante la conexión
+- [x] Mantener visible el estado de carga en el mini reproductor sin cambiar su tamaño
+- [x] Diferenciar carga, reproducción, pausa y error de conexión
+- [x] Validar accesibilidad, reduced motion, typecheck, tests y lint

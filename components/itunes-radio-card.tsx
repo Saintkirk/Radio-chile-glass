@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -9,14 +9,16 @@ export function ItunesRadioCard({
   radio,
   onOpen,
   onPlay,
-  playing,
-  lightMode = false,
+    playing,
+    loading = false,
+    lightMode = false,
   trailing,
 }: {
   radio: Radio;
   onOpen: () => void;
   onPlay: () => void;
   playing: boolean;
+  loading?: boolean;
   lightMode?: boolean;
   trailing?: React.ReactNode;
 }) {
@@ -69,10 +71,11 @@ export function ItunesRadioCard({
         <Pressable
           onPress={(event) => { event.stopPropagation(); onPlay(); }}
           accessibilityRole="button"
-          accessibilityLabel={playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`}
-          style={({ pressed }) => [styles.play, lightMode && styles.playLight, playing && styles.playActive, pressed && styles.controlPressed]}
+          disabled={loading}
+          accessibilityLabel={loading ? `Conectando con ${radio.name}` : playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`}
+          style={({ pressed }) => [styles.play, lightMode && styles.playLight, playing && styles.playActive, loading && styles.playLoading, pressed && styles.controlPressed]}
         >
-          <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color="#F5F3EE" />
+          {loading ? <ActivityIndicator size="small" color="#F5F3EE" /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color="#F5F3EE" />}
         </Pressable>
       </Pressable>
     </Animated.View>
@@ -94,5 +97,6 @@ const styles = StyleSheet.create({
   play: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", marginLeft: 8 },
   playLight: { backgroundColor: "#172033" },
   playActive: { backgroundColor: "#15883E" },
+  playLoading: { backgroundColor: "#D94B4B" },
   controlPressed: { opacity: 0.62, transform: [{ scale: 0.92 }] },
 });

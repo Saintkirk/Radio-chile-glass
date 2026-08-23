@@ -14,12 +14,13 @@ import { prefetchLogo } from "@/lib/logo-cache";
 
 const prefetchedFeaturedLogos = new Set<string>();
 
-function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
+function RadioRow({ radio, onOpen, onPlay, onFavorite, favorite, lightMode, loading, playing }: { radio: Radio; onOpen: () => void; onPlay: () => void; onFavorite: () => void; favorite: boolean; lightMode: boolean; loading: boolean; playing: boolean }) {
   return <ItunesRadioCard
     radio={radio}
     onOpen={onOpen}
     onPlay={onPlay}
     playing={playing}
+    loading={loading}
     lightMode={lightMode}
     trailing={<Pressable onPress={(event) => { event.stopPropagation(); onFavorite(); }} hitSlop={10} accessibilityRole="button" accessibilityLabel={favorite ? `Quitar ${radio.name} de favoritos` : `Guardar ${radio.name} en favoritos`} accessibilityState={{ selected: favorite }} style={({ pressed }) => [styles.iconButton, favorite && styles.iconButtonActive, pressed && styles.controlPressed]}><AnimatedFavoriteIcon active={favorite} color={favorite ? "#B83E46" : lightMode ? "#667085" : "#A8B0C2"} /></Pressable>}
   />;
@@ -90,7 +91,7 @@ export default function HomeScreen() {
             <View style={[styles.searchWrap, lightMode && styles.searchWrapLight]}><IconSymbol name="magnifyingglass" size={18} color={lightMode ? "#667085" : "#A8B0C2"} /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor={lightMode ? "#667085" : "#7F8799"} style={[styles.searchInput, lightMode && styles.searchInputLight]} /></View>
             <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
             <View style={[styles.syncRow, lightMode && styles.syncRowLight]}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
-            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : selectAndPlayRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
+            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : selectAndPlayRadio(featured)} isPlaying={isPlaying} isLoading={isLoading && currentRadio?.id === featured.id} currentRadioId={currentRadio?.id} lightMode={lightMode} />
             <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>EMISORAS DESTACADAS</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
