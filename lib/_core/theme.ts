@@ -1,12 +1,6 @@
 import { Platform } from "react-native";
 
-import importedThemeConfig from "@/theme.config.cjs";
-
-type ThemeConfig = {
-  themeColors: Record<string, { light: string; dark: string }>;
-};
-
-const themeConfig = importedThemeConfig as unknown as ThemeConfig;
+import themeConfig from "@/theme.config";
 
 export type ColorScheme = "light" | "dark";
 
