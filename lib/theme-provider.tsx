@@ -18,7 +18,9 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useSystemColorScheme() ?? "light";
-  const [preference, setPreference] = useState<ThemePreference>("system");
+  // La experiencia de Radio Chile Glass prioriza el escenario oscuro premium de la referencia.
+  // El usuario puede cambiarlo posteriormente desde Ajustes.
+  const [preference, setPreference] = useState<ThemePreference>("dark");
   const colorScheme = preference === "system" ? systemScheme : preference;
 
   const applyScheme = useCallback((scheme: ColorScheme) => {

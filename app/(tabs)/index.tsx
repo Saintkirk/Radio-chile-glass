@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { ItunesRadioCard } from "@/components/itunes-radio-card";
 import { CoverFlowCarousel } from "@/components/cover-flow-carousel";
@@ -64,7 +64,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenContainer containerClassName="bg-background" className="px-5 pt-3">
-      <View pointerEvents="none" style={styles.ambient}><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></View>
+      <View pointerEvents="none" style={styles.ambientLayer}><ImageBackground source={{ uri: "/manus-storage/santiago-radio-background_b74a8a21.jpg" }} resizeMode="cover" style={styles.ambient} imageStyle={styles.ambientImage}><View style={styles.ambientTint} /><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></ImageBackground></View>
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -94,7 +94,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
-  ambient: { ...StyleSheet.absoluteFillObject, overflow: "hidden" }, ambientCoral: { position: "absolute", width: 330, height: 240, borderRadius: 180, top: 80, left: -100, backgroundColor: "#B52F3C38", transform: [{ rotate: "-12deg" }] }, ambientViolet: { position: "absolute", width: 300, height: 260, borderRadius: 180, top: 110, right: -120, backgroundColor: "#6A35A53D", transform: [{ rotate: "18deg" }] }, ambientHorizon: { position: "absolute", left: -40, right: -40, top: 270, height: 2, backgroundColor: "#FF6B5A66", opacity: 0.45 },
+  ambientLayer: { ...StyleSheet.absoluteFillObject }, ambient: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#08090E" }, ambientImage: { opacity: 0.66 }, ambientTint: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B7A" }, ambientCoral: { position: "absolute", width: 330, height: 240, borderRadius: 180, top: 80, left: -100, backgroundColor: "#B52F3C38", transform: [{ rotate: "-12deg" }] }, ambientViolet: { position: "absolute", width: 300, height: 260, borderRadius: 180, top: 110, right: -120, backgroundColor: "#6A35A53D", transform: [{ rotate: "18deg" }] }, ambientHorizon: { position: "absolute", left: -40, right: -40, top: 270, height: 2, backgroundColor: "#FF6B5A66", opacity: 0.45 },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 22 },
   brandLockup: { alignItems: "center", flex: 1 }, brandLine: { flexDirection: "row", alignItems: "baseline" }, brandRadio: { color: "#FF6B5A", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandChile: { color: "#F5F3EE", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandChileLight: { color: "#241B24" }, brandGlass: { color: "#B66BFF", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandTagline: { color: "#C7B9C3", fontSize: 9, letterSpacing: 3.7, marginTop: 5 },
   headerButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },

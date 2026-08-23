@@ -883,3 +883,10 @@
 - [x] Reducir peso de dependencias, assets y arquitecturas sin perder reproducción ni glasmorfismo
 - [x] Optimizar EAS y CI/CD con caché, validaciones rápidas y límites de tiempo seguros
 - [x] Generar y verificar una APK optimizada desde el commit correcto de GitHub
+
+## Renovación visual inspirada en referencia
+
+- [x] Documentar el sistema visual oscuro premium y la jerarquía de la pantalla Inicio
+- [x] Ajustar Cover Flow para mostrar emisoras anterior y siguiente con profundidad visible
+- [x] Rediseñar tarjetas, controles, fondos y navegación inferior con glassmorfismo premium
+- [x] Verificar responsive móvil, contraste, interacción y regresiones
