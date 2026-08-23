@@ -676,3 +676,10 @@
 - [x] Conectar el botón de configuración con la pantalla de Ajustes
 - [x] Separar la actualización del catálogo en una acción independiente
 - [x] Validar navegación, actualización del catálogo, typecheck, tests, lint y preview
+
+## Corrección del selector de temas
+
+- [x] Auditar aplicación inmediata de Claro, Oscuro y Sistema
+- [x] Corregir persistencia y restauración de la preferencia de tema
+- [x] Ajustar estilos dependientes del tema en Ajustes e Inicio
+- [x] Validar cambio visual, persistencia, typecheck, tests, lint y preview

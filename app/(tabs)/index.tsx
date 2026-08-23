@@ -60,7 +60,7 @@ export default function HomeScreen() {
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
   return (
-    <ScreenContainer containerClassName="bg-[#0B0B0B]" className="px-5 pt-3">
+    <ScreenContainer containerClassName={lightMode ? "bg-[#F5F7FB]" : "bg-[#0B0B0B]"} className="px-5 pt-3">
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -69,14 +69,14 @@ export default function HomeScreen() {
         ListHeaderComponent={
           <>
             <View style={styles.topBar}>
-              <View><Text style={styles.eyebrow}>RADIO CHILE</Text><Text style={styles.title}>Escucha lo que{`\n`}te mueve.</Text></View>
+              <View><Text style={styles.eyebrow}>RADIO CHILE</Text><Text style={[styles.title, lightMode && styles.titleLight]}>Escucha lo que{`\n`}te mueve.</Text></View>
               <Pressable onPress={() => router.push("/settings")} accessibilityRole="button" accessibilityLabel="Abrir ajustes" style={({ pressed }) => [styles.settingsButton, pressed && styles.controlPressed]}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
             </View>
-            <View style={styles.searchWrap}><IconSymbol name="magnifyingglass" size={18} color="#A8B0C2" /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor="#7F8799" style={styles.searchInput} /></View>
-            <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
-            <View style={styles.syncRow}><Text style={styles.sectionLabel}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
+            <View style={[styles.searchWrap, lightMode && styles.searchWrapLight]}><IconSymbol name="magnifyingglass" size={18} color={lightMode ? "#667085" : "#A8B0C2"} /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor={lightMode ? "#667085" : "#7F8799"} style={[styles.searchInput, lightMode && styles.searchInputLight]} /></View>
+            <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
+            <View style={[styles.syncRow, lightMode && styles.syncRowLight]}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
             <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : playRadio(featured)} isPlaying={isPlaying} currentRadioId={currentRadio?.id} lightMode={lightMode} />
-            <View style={styles.sectionHeader}><Text style={styles.sectionLabel}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
+            <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>PARA TI</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
         renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => router.push(`/radio/${item.id}`)} onPlay={() => currentRadio?.id === item.id ? togglePlay() : playRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
@@ -91,12 +91,12 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 },
   eyebrow: { color: "#1ED760", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
-  title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 },
+  title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 }, titleLight: { color: "#172033" },
   settingsButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },
-  searchWrap: { height: 48, borderRadius: 16, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF14", flexDirection: "row", alignItems: "center", paddingHorizontal: 15, marginBottom: 28 },
-  searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 },
-  sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
-  syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  searchWrap: { height: 48, borderRadius: 16, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF14", flexDirection: "row", alignItems: "center", paddingHorizontal: 15, marginBottom: 28 }, searchWrapLight: { backgroundColor: "#FFFFFF", borderColor: "#D9E0EC" },
+  searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 }, searchInputLight: { color: "#172033" },
+  sectionLabel: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 }, sectionLabelLight: { color: "#5B667B" },
+  syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }, syncRowLight: { },
   syncButton: { marginBottom: 12 }, syncText: { color: "#1ED760", fontSize: 10, fontWeight: "600" },
   heroLight: { borderColor: "#CBD5E1" }, hero: { height: 244, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
   heroLogo: { position: "absolute", right: 24, top: 48, opacity: 0.98, transform: [{ rotate: "3deg" }] },
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   heroName: { color: "#F5F3EE", fontSize: 27, fontWeight: "700", letterSpacing: -0.5 },
   heroGenre: { color: "#D0D3DD", fontSize: 13, marginTop: 5 },
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
-  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipActive: { backgroundColor: "#1DB954", borderColor: "#1DB954" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextActive: { color: "#160F14" },
+  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipLight: { borderColor: "#D9E0EC", backgroundColor: "#FFFFFF" }, genreChipActive: { backgroundColor: "#1DB954", borderColor: "#1DB954" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextLight: { color: "#5B667B" }, genreChipTextActive: { color: "#160F14" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   seeAll: { color: "#1ED760", fontSize: 13, fontWeight: "600", marginBottom: 12 },
   controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#1DB9541C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#15883E" },
