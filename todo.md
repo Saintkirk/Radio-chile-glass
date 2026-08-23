@@ -984,3 +984,10 @@
 - [x] Configurar Java, Android SDK, caché de Gradle y dependencias reproducibles
 - [x] Validar integridad, versión, paquete y procedencia del APK generado
 - [x] Ejecutar el workflow nativo y documentar el tipo de firma del APK
+
+## Nuevo APK de validación
+
+- [x] Ejecutar el workflow Android APK (Native Gradle) desde main
+- [x] Confirmar que todos los gates y Gradle terminen correctamente
+- [x] Descargar y verificar el APK con hash, versión y procedencia
+- [x] Entregar el APK para prueba real en el dispositivo Android
