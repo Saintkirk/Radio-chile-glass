@@ -730,3 +730,9 @@
 - [x] Sincronizar rotación con desplazamiento horizontal y perspectiva
 - [x] Mantener gestos, flechas, reduced motion y accesibilidad
 - [x] Validar typecheck, tests, lint y preview
+
+## Revisión de taste-skill
+
+- [x] Inspeccionar el repositorio Saintkirk/taste-skill
+- [x] Evaluar sus principios de diseño para Radio Chile Glass
+- [x] Documentar recomendaciones y decidir integración segura
