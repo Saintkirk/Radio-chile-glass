@@ -777,3 +777,10 @@
 - [x] Ampliar pruebas de navegación entre Inicio, Explorar, Favoritos y Reproductor
 - [x] Preparar validación Android de audio en segundo plano y pantalla de bloqueo
 - [x] Validar typecheck, tests, lint y preview
+
+## Validación development build Android
+
+- [x] Verificar configuración nativa, permisos y reproducción en segundo plano
+- [x] Preparar protocolo de prueba de pantalla de bloqueo en dispositivo físico
+- [x] Validar typecheck, tests y lint antes del build
+- [x] Entregar instrucciones para generar el build desde Publish/Build
