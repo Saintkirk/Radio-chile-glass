@@ -915,4 +915,4 @@
 
 - [x] Convertir metro.config.js a una configuración compatible con el modo ESM
 - [x] Validar Expo/Metro, typecheck, tests y lint después del cambio
-- [ ] Regenerar el APK y confirmar que el workflow Android termina correctamente
+- [x] Regenerar el APK y confirmar que el workflow Android termina correctamente
