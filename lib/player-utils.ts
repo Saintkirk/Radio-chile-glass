@@ -33,10 +33,20 @@ export type LockScreenMetadata = {
   artworkUrl?: string;
 };
 
-export function lockScreenMetadata(radio: Radio): LockScreenMetadata {
+export type LockScreenNowPlaying = {
+  available?: boolean;
+  title?: string | null;
+  artist?: string | null;
+};
+
+export function lockScreenMetadata(radio: Radio, nowPlaying?: LockScreenNowPlaying): LockScreenMetadata {
+  const title = nowPlaying?.title?.trim();
+  const artist = nowPlaying?.artist?.trim();
+  const hasIcyMetadata = Boolean(nowPlaying?.available && (title || artist));
+
   return {
-    title: radio.name,
-    artist: `${radio.frequency} · ${radio.genre}`,
+    title: hasIcyMetadata && title ? title : radio.name,
+    artist: hasIcyMetadata && artist ? artist : `${radio.frequency} · ${radio.genre}`,
     albumTitle: "Radio Chile Glass",
     ...(radio.favicon ? { artworkUrl: radio.favicon } : {}),
   };

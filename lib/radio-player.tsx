@@ -1,13 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId } from "./player-utils";
+import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, type LockScreenMetadata } from "./player-utils";
 
 export { RADIOS, type Radio } from "./radios";
 
-type PlayerContextValue = { currentRadio: Radio | null; isPlaying: boolean; isLoading: boolean; playbackError: string | null; favorites: string[]; radios: Radio[]; catalogUpdatedAt: string | null; catalogSource: "remote" | "cache" | "local"; isRefreshingCatalog: boolean; backgroundPlaybackEnabled: boolean; setBackgroundPlaybackEnabled: (enabled: boolean) => void; refreshCatalog: () => Promise<void>; playRadio: (radio: Radio) => Promise<void>; togglePlay: () => void; toggleFavorite: (radioId: string) => void; isFavorite: (radioId: string) => boolean };
+type PlayerContextValue = { currentRadio: Radio | null; isPlaying: boolean; isLoading: boolean; playbackError: string | null; favorites: string[]; radios: Radio[]; catalogUpdatedAt: string | null; catalogSource: "remote" | "cache" | "local"; isRefreshingCatalog: boolean; backgroundPlaybackEnabled: boolean; setBackgroundPlaybackEnabled: (enabled: boolean) => void; updateLockScreenMetadata: (metadata: LockScreenMetadata) => void; refreshCatalog: () => Promise<void>; playRadio: (radio: Radio) => Promise<void>; togglePlay: () => void; toggleFavorite: (radioId: string) => void; isFavorite: (radioId: string) => boolean };
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
@@ -68,6 +68,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     if (playerRef.current && currentRadio) syncLockScreenControls(playerRef.current, currentRadio, enabled);
     AsyncStorage.setItem("radio-background-playback", String(enabled)).catch(() => undefined);
   };
+  const updateLockScreenMetadata = useCallback((metadata: LockScreenMetadata) => {
+    if (!backgroundPlaybackEnabled || !playerRef.current) return;
+    try { playerRef.current.updateLockScreenMetadata(metadata); } catch { /* no-op when native controls are unavailable */ }
+  }, [backgroundPlaybackEnabled]);
 
   const playRadio = async (radio: Radio) => {
     const requestId = ++playRequestRef.current;
@@ -112,7 +116,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     }
   };
   const toggleFavorite = (radioId: string) => { setFavorites((previous) => { const next = toggleFavoriteId(previous, radioId); saveFavoriteIds(next).catch(() => undefined); return next; }); };
-  const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled]);
+  const value = useMemo(() => ({ currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, setBackgroundPlaybackEnabled: updateBackgroundPlayback, updateLockScreenMetadata, refreshCatalog, playRadio, togglePlay, toggleFavorite, isFavorite: (id: string) => favorites.includes(id) }), [currentRadio, isPlaying, isLoading, playbackError, favorites, radios, catalogUpdatedAt, catalogSource, isRefreshingCatalog, backgroundPlaybackEnabled, updateLockScreenMetadata]);
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
 export function useRadioPlayer() { const value = useContext(PlayerContext); if (!value) throw new Error("useRadioPlayer must be used inside RadioPlayerProvider"); return value; }

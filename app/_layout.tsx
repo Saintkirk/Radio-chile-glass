@@ -9,6 +9,7 @@ import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { RadioPlayerProvider } from "@/lib/radio-player";
+import { LockScreenNowPlayingSync } from "@/components/lock-screen-now-playing-sync";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -99,6 +100,7 @@ export default function RootLayout() {
               }}
             />
           </Stack>
+          <LockScreenNowPlayingSync />
           <StatusBar style="auto" />
         </QueryClientProvider>
       </trpc.Provider>

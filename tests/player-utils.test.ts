@@ -58,4 +58,18 @@ describe("player interaction utilities", () => {
       artworkUrl: "https://example.com/logo.png",
     });
   });
+
+  it("uses dynamic ICY title and artist when available", () => {
+    expect(lockScreenMetadata(radio, { available: true, title: "Lamento Boliviano", artist: "Los Enanitos Verdes" })).toMatchObject({
+      title: "Lamento Boliviano",
+      artist: "Los Enanitos Verdes",
+    });
+  });
+
+  it("keeps station fallback when ICY metadata is unavailable", () => {
+    expect(lockScreenMetadata(radio, { available: false, title: null, artist: null })).toMatchObject({
+      title: "FM Latina",
+      artist: "89.1 FM · Pop latino",
+    });
+  });
 });

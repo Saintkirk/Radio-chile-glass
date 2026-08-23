@@ -833,3 +833,12 @@
 - [x] Respetar la preferencia de reproducción en segundo plano y limpiar la sesión al cambiar de emisora
 - [x] Añadir prueba determinista de metadatos y ampliar el checklist Android
 - [ ] Validar controles en pantalla de bloqueo con un APK instalado en un dispositivo Android físico
+
+## Metadatos ICY dinámicos en pantalla de bloqueo
+
+- [x] Reutilizar el endpoint ICY existente con consulta periódica y cancelación segura
+- [x] Actualizar título, artista y artwork de la sesión multimedia sin reiniciar el audio
+- [x] Mantener fallback de emisora cuando no exista StreamTitle
+- [x] Añadir pruebas deterministas para metadatos disponibles y ausentes
+- [x] Validar typecheck, tests, lint, documentación y CI
+- [ ] Validar visualmente los metadatos en un APK Android físico
