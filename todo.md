@@ -11,7 +11,7 @@
 - [x] Reproductor expandido con controles multimedia
 - [x] Reproducción con expo-audio
 - [x] Configuración de audio para continuidad en segundo plano
-- [ ] Metadatos y controles de pantalla de bloqueo en build Android (requiere validar APK nativo)
+- [x] Metadatos y controles de pantalla de bloqueo en build Android (requiere validar APK nativo)
 - [x] Feedback táctil y estados de carga/error
 - [x] Generar logo personalizado y actualizar assets de branding
 - [x] Actualizar app.config.ts con nombre y logo
