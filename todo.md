@@ -977,3 +977,10 @@
 - [ ] Revisar logs de arranque y eliminar inicializaciones nativas bloqueantes
 - [x] Fortalecer CI/CD con validación de configuración, bundle y artefacto APK
 - [ ] Generar un APK de prueba y documentar exactamente la validación pendiente en dispositivo
+
+## Workflow Android nativo con Gradle
+
+- [x] Crear workflow GitHub Actions sin EAS usando Expo prebuild y Gradle
+- [x] Configurar Java, Android SDK, caché de Gradle y dependencias reproducibles
+- [x] Validar integridad, versión, paquete y procedencia del APK generado
+- [ ] Ejecutar el workflow nativo y documentar el tipo de firma del APK

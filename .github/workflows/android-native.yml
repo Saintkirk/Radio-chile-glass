@@ -1,0 +1,117 @@
+name: Android APK (Native Gradle)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "plugins/**"
+      - "assets/**"
+      - "app.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "android/**"
+      - ".github/workflows/android-native.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build APK with Gradle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "1"
+      NODE_VERSION: "22"
+      PNPM_VERSION: "9.12.0"
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build tools
+        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Verify JavaScript project
+        run: pnpm check && pnpm test && pnpm lint
+
+      - name: Verify Expo configuration
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          pnpm exec expo config --type public --json > .expo-config.json
+          node -e 'const fs=require("fs"); const c=JSON.parse(fs.readFileSync(".expo-config.json","utf8")); if(c.version !== "1.0.2") throw new Error(`Unexpected app version: ${c.version}`); if(c.android?.package !== "com.app.radiochileglass") throw new Error("Unexpected Android package"); console.log(`Expo config OK: ${c.name} ${c.version} ${c.android.package}`);'
+
+      - name: Generate native Android project
+        run: pnpm exec expo prebuild --platform android --no-install
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Build signed release APK with Gradle
+        working-directory: android
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace assembleRelease
+
+      - name: Verify APK and write provenance
+        run: |
+          set -euo pipefail
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+          unzip -l "$APK" | grep -q 'classes.dex'
+          if command -v apksigner >/dev/null 2>&1; then apksigner verify --verbose "$APK"; fi
+          sha256sum "$APK" | tee android/app/build/outputs/apk/release/SHA256SUMS.txt
+          {
+            echo "commit=${GITHUB_SHA}"
+            echo "workflow_run=${GITHUB_RUN_ID}"
+            echo "build_system=Gradle"
+            echo "profile=release"
+            echo "version=1.0.2"
+            echo "package=com.app.radiochileglass"
+            stat -c 'size_bytes=%s' "$APK"
+          } | tee android/app/build/outputs/apk/release/build-info.txt
+
+      - name: Upload native APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: radio-chile-glass-native-v1.0.2-${{ github.sha }}
+          path: android/app/build/outputs/apk/release/
+          if-no-files-found: error
+          retention-days: 14
