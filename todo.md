@@ -702,3 +702,11 @@
 - [x] Aplicar la nueva dirección a Inicio y Cover Flow
 - [x] Adaptar reproductor, mini reproductor y navegación sin perder contraste
 - [x] Validar interacción, temas, typecheck, tests, lint y preview
+
+## Adaptación a referencia visual nocturna premium
+
+- [x] Preparar fondo atmosférico nocturno inspirado en un paisaje chileno
+- [x] Ajustar cabecera, Cover Flow, reflejos y controles luminosos
+- [x] Rediseñar tarjetas glassmorphism y navegación inferior activa
+- [x] Alinear reproductor con la misma composición visual
+- [x] Validar contraste, interacción, typecheck, tests, lint y preview

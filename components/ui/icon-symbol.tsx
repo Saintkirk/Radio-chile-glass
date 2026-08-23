@@ -24,6 +24,7 @@ const MAPPING = {
   "pause.fill": "pause",
   "magnifyingglass": "search",
   "slider.horizontal.3": "tune",
+  "line.3.horizontal": "menu",
   "moon.fill": "dark-mode",
   "waveform": "graphic-eq",
   "radio": "radio",

@@ -64,6 +64,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenContainer containerClassName="bg-background" className="px-5 pt-3">
+      <View pointerEvents="none" style={styles.ambient}><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></View>
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -72,8 +73,9 @@ export default function HomeScreen() {
         ListHeaderComponent={
           <>
             <View style={styles.topBar}>
-              <View><Text style={styles.eyebrow}>RADIO CHILE</Text><Text style={[styles.title, lightMode && styles.titleLight]}>Escucha lo que{`\n`}te mueve.</Text></View>
-              <Pressable onPress={() => router.push("/settings")} accessibilityRole="button" accessibilityLabel="Abrir ajustes" style={({ pressed }) => [styles.settingsButton, pressed && styles.controlPressed]}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
+              <Pressable onPress={() => router.push("/explore")} accessibilityRole="button" accessibilityLabel="Abrir exploración" style={({ pressed }) => [styles.headerButton, pressed && styles.controlPressed]}><IconSymbol name="line.3.horizontal" size={22} color="#F5F3EE" /></Pressable>
+              <View style={styles.brandLockup}><View style={styles.brandLine}><Text style={styles.brandRadio}>Radio</Text><Text style={[styles.brandChile, lightMode && styles.brandChileLight]}> Chile </Text><Text style={styles.brandGlass}>Glass</Text></View><Text style={styles.brandTagline}>LO MEJOR SUENA AQUÍ</Text></View>
+              <Pressable onPress={() => router.push("/settings")} accessibilityRole="button" accessibilityLabel="Abrir ajustes" style={({ pressed }) => [styles.headerButton, pressed && styles.controlPressed]}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
             </View>
             <View style={[styles.searchWrap, lightMode && styles.searchWrapLight]}><IconSymbol name="magnifyingglass" size={18} color={lightMode ? "#667085" : "#A8B0C2"} /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor={lightMode ? "#667085" : "#7F8799"} style={[styles.searchInput, lightMode && styles.searchInputLight]} /></View>
             <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
@@ -92,7 +94,10 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
-  topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 },
+  ambient: { ...StyleSheet.absoluteFillObject, overflow: "hidden" }, ambientCoral: { position: "absolute", width: 330, height: 240, borderRadius: 180, top: 80, left: -100, backgroundColor: "#B52F3C38", transform: [{ rotate: "-12deg" }] }, ambientViolet: { position: "absolute", width: 300, height: 260, borderRadius: 180, top: 110, right: -120, backgroundColor: "#6A35A53D", transform: [{ rotate: "18deg" }] }, ambientHorizon: { position: "absolute", left: -40, right: -40, top: 270, height: 2, backgroundColor: "#FF6B5A66", opacity: 0.45 },
+  topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 22 },
+  brandLockup: { alignItems: "center", flex: 1 }, brandLine: { flexDirection: "row", alignItems: "baseline" }, brandRadio: { color: "#FF6B5A", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandChile: { color: "#F5F3EE", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandChileLight: { color: "#241B24" }, brandGlass: { color: "#B66BFF", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandTagline: { color: "#C7B9C3", fontSize: 9, letterSpacing: 3.7, marginTop: 5 },
+  headerButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },
   eyebrow: { color: "#FF6B5A", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
   title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 }, titleLight: { color: "#172033" },
   settingsButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },
