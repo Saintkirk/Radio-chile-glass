@@ -50,6 +50,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [backgroundPlaybackEnabled, setBackgroundPlaybackEnabled] = useState(true);
   const resumeAfterFocusGainRef = useRef(false);
   const autoplayStartedRef = useRef(false);
+  const playbackIntentRef = useRef(false);
 
   const disposeCurrentPlayer = useCallback((preserveMediaSession = false) => {
     if (startupTimeoutRef.current) {
@@ -104,7 +105,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     disposeCurrentPlayer(preserveMediaSession);
     setCurrentRadio(radio);
     AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
-    setIsPlaying(false);
+    // El control debe mostrar la intención de reproducción desde el primer cuadro;
+    // el listener nativo confirmará o revertirá el estado si el stream falla.
+    playbackIntentRef.current = true;
+    setIsPlaying(true);
     setIsLoading(true);
     setPlaybackError(null);
 
@@ -129,11 +133,12 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
           // Algunos streams emiten playing=false durante el buffering inicial.
           // No debe sobrescribir el estado optimista hasta que expire el timeout.
-          if (status.playing || !startupTimeoutRef.current) {
+          if (status.playing || (!startupTimeoutRef.current && !playbackIntentRef.current)) {
             setIsPlaying(status.playing);
             updateNativeMediaState(status.playing);
           }
           if (status.playing) {
+            playbackIntentRef.current = false;
             if (startupTimeoutRef.current) {
               clearTimeout(startupTimeoutRef.current);
               startupTimeoutRef.current = null;
@@ -163,6 +168,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         startupTimeoutRef.current = setTimeout(() => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
           startupTimeoutRef.current = null;
+          playbackIntentRef.current = false;
           setIsPlaying(false);
           setIsLoading(false);
           setPlaybackError(`No se pudo iniciar el audio de ${radio.name}`);
@@ -189,6 +195,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         }
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
         if (attempt === MAX_PLAYBACK_RETRIES) {
+          playbackIntentRef.current = false;
           setIsPlaying(false);
           setPlaybackError(`No se pudo conectar con ${radio.name}`);
           setIsLoading(false);
@@ -210,6 +217,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     const player = playerRef.current;
     if (!player) return;
     if (!shouldPlay) {
+      playbackIntentRef.current = false;
       player.pause();
       setIsPlaying(false);
       updateNativeMediaState(false);
@@ -218,6 +226,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     }
     const focusResult = requestAudioFocus();
     if (focusResult === "failed") return;
+    playbackIntentRef.current = true;
     player.play();
     setIsPlaying(true);
     updateNativeMediaState(true);
@@ -294,6 +303,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       else if (action === "play") setPlayingState(true);
       else if (action === "pause") setPlayingState(false);
       else if (action === "stop") {
+        playbackIntentRef.current = false;
         disposeCurrentPlayer();
         setIsPlaying(false);
         setIsLoading(false);

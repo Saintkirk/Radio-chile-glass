@@ -1169,3 +1169,11 @@
 - [x] Mostrar fallback estable mientras carga el artwork
 - [x] Validar que logo, nombre y emisora activa aparezcan sincronizados
 - [x] Ejecutar pruebas y documentar el resultado
+
+## Play/Pause inicial de Radio Carolina
+
+- [x] Auditar el estado visual inicial antes de crear el reproductor
+- [x] Confirmar que autoplay publica Play/Pause de forma determinista
+- [x] Evitar que buffering inicial revierta un estado de reproducción válido
+- [x] Verificar coherencia entre proveedor, mini reproductor y MediaSession
+- [x] Ejecutar pruebas y documentar el resultado
