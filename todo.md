@@ -1188,7 +1188,7 @@
 
 ## APK para validación física
 
-- [ ] Validar el proyecto antes del build Android
-- [ ] Generar APK nativa con la sincronización Play/Pause actualizada
-- [ ] Descargar y verificar integridad del APK
-- [ ] Entregar el archivo instalable y documentar la prueba física sugerida
+- [x] Validar el proyecto antes del build Android
+- [x] Generar APK nativa con la sincronización Play/Pause actualizada
+- [x] Descargar y verificar integridad del APK
+- [x] Entregar el archivo instalable y documentar la prueba física sugerida

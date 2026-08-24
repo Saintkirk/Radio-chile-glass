@@ -1,8 +1,8 @@
-commit=49a0062c36843298b91ead9352c525dcfef81d0e
-workflow_run=32705854781
+commit=f491ba28c1b656d8461e21a8f1b7e9b21b3da687
+workflow_run=32782843793
 build_system=Gradle
 profile=release
 version=1.0.2
 package=com.app.radiochileglass
 signing=debug-keystore-testing-only
-size_bytes=32802045
+size_bytes=32803665
