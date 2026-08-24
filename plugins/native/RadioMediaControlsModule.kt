@@ -61,6 +61,13 @@ class RadioMediaControlsModule(
     lastArtworkUrl = artworkUrl
     lastPlaying = playing
     active = true
+    try {
+      val serviceIntent = android.content.Intent(reactContext, RadioKeepAliveService::class.java)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reactContext.startForegroundService(serviceIntent)
+      else reactContext.startService(serviceIntent)
+    } catch (_: Exception) {
+      // expo-audio remains the primary playback service.
+    }
     RadioMediaSessionRegistry.session = mediaSession
     mediaSession.isActive = true
     updateMetadata(title, artist, artworkUrl)
@@ -139,6 +146,7 @@ class RadioMediaControlsModule(
     }
     RadioMediaSessionRegistry.session = null
     active = false
+    try { reactContext.stopService(android.content.Intent(reactContext, RadioKeepAliveService::class.java)) } catch (_: Exception) { /* no-op */ }
     NotificationManagerCompat.from(reactContext).cancel(NOTIFICATION_ID)
   }
 
@@ -209,7 +217,11 @@ class RadioMediaControlsModule(
       .addAction(android.R.drawable.ic_media_next, "Siguiente", actionIntent(ACTION_NEXT))
       .setStyle(MediaStyle().setMediaSession(mediaSession.sessionToken).setShowActionsInCompactView(0, 1, 2))
       .build()
-    NotificationManagerCompat.from(reactContext).notify(NOTIFICATION_ID, notification)
+    try {
+      NotificationManagerCompat.from(reactContext).notify(NOTIFICATION_ID, notification)
+    } catch (_: SecurityException) {
+      // Playback continues through expo-audio even when notification permission is denied.
+    }
   }
 
   private fun emit(action: String) {

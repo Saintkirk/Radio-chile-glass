@@ -34,7 +34,7 @@ function withRadioMediaControls(config) {
   return withDangerousMod(config, ["android", async (mod) => {
     const destinationDir = path.join(mod.modRequest.platformProjectRoot, "app", "src", "main", "java", PACKAGE_PATH);
     fs.mkdirSync(destinationDir, { recursive: true });
-    for (const fileName of ["RadioMediaControlsModule.kt", "RadioMediaControlsPackage.kt", "RadioMediaActionReceiver.kt"]) {
+    for (const fileName of ["RadioMediaControlsModule.kt", "RadioMediaControlsPackage.kt", "RadioMediaActionReceiver.kt", "RadioKeepAliveService.kt"]) {
       fs.copyFileSync(path.join(SOURCE_DIR, fileName), path.join(destinationDir, fileName));
     }
     const manifestPath = path.join(mod.modRequest.platformProjectRoot, "app", "src", "main", "AndroidManifest.xml");
@@ -43,8 +43,11 @@ function withRadioMediaControls(config) {
       const receiver = '    <receiver android:name=".RadioMediaActionReceiver" android:exported="false" />';
       if (!manifest.includes("RadioMediaActionReceiver")) {
         manifest = manifest.replace(/(<application\b[^>]*>)/, `$1\n${receiver}`);
-        fs.writeFileSync(manifestPath, manifest);
       }
+      if (!manifest.includes("RadioKeepAliveService")) {
+        manifest = manifest.replace(/(<application\b[^>]*>)/, `$1\n    <service android:name=".RadioKeepAliveService" android:exported="false" android:foregroundServiceType="mediaPlayback" />`);
+      }
+      fs.writeFileSync(manifestPath, manifest);
     }
     return mod;
   }]);
