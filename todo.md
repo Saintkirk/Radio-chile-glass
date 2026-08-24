@@ -997,5 +997,12 @@
 - [x] Diagnosticar por qué el APK nativo no muestra notificación ni reproductor de pantalla bloqueada
 - [x] Restaurar la sesión multimedia y la notificación persistente sin bloquear el arranque
 - [x] Sincronizar play, pausa, detener, anterior, siguiente y metadatos
-- [ ] Validar permisos, servicio foreground y compilación nativa
+- [x] Validar permisos, servicio foreground y compilación nativa
 - [ ] Generar APK corregido y probarlo en dispositivo Android
+
+## Bloqueo persistente al restaurar MediaSession
+
+- [x] Obtener evidencia del fallo de arranque del APK actual y comparar con la versión estable
+- [x] Aislar la inicialización de `expo-audio` y MediaSession fuera del arranque del layout raíz
+- [x] Validar que la app llegue a Inicio antes de activar controles multimedia
+- [ ] Generar un APK de diagnóstico/reparado y documentar la prueba en dispositivo
