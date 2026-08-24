@@ -1022,3 +1022,11 @@
 - [x] Añadir un timeout global de respaldo para evitar bloqueo indefinido en el logo
 - [x] Validar Expo config, export Android, typecheck, tests y lint
 - [ ] Confirmar el arranque del APK nuevo en un dispositivo Android
+
+## Controles multimedia activos y respuesta táctil
+
+- [x] Exponer anterior/siguiente como acciones de estación en Android
+- [x] Asegurar que los botones multimedia aparezcan habilitados en notificación y pantalla bloqueada
+- [x] Reducir latencia percibida al tocar play, anterior/siguiente y cambiar emisora
+- [x] Suavizar la transición del Cover Flow sin retrasar la selección real
+- [ ] Validar reproducción única, foco, background, pantalla bloqueada y build nativo

@@ -81,7 +81,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
       return undefined;
     }
     motion.set(0);
-    motion.set(withTiming(1, { duration: 460, easing: Easing.bezier(0.22, 1, 0.36, 1) }));
+    motion.set(withTiming(1, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }));
     return undefined;
   }, [activeIndex, motion, reduceMotion]);
 

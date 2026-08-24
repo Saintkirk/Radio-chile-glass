@@ -5,7 +5,7 @@ import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
-import { clearNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaState } from "@/lib/radio-media-controls";
+import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -81,15 +81,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       try { player.clearLockScreenControls(); } catch { /* no-op on unsupported builds */ }
       return;
     }
-    // Use expo-audio's Android Media3 foreground service. It owns the
-    // notification and MediaSession lifecycle, including lock-screen controls.
-    // The custom bridge remains available for future station actions, but must
-    // not create a second competing MediaSession on Android.
+    // expo-audio owns foreground playback and notification lifecycle.
+    // The deferred bridge adds station-level previous/next actions on Android.
     try {
-      player.setActiveForLockScreen(true, metadata, { showSeekForward: true, showSeekBackward: true });
+      player.setActiveForLockScreen(true, metadata, { showSeekForward: false, showSeekBackward: false });
     } catch {
       // Lock-screen controls are optional on unsupported builds.
     }
+    setNativeMediaSession(metadata, playing);
   }, []);
 
   const playRadio = useCallback(async (radio: Radio) => {
@@ -130,6 +129,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         }
         setIsPlaying(true);
         updateNativeMediaState(true);
+        setNativeMediaSession(lockScreenMetadata(radio), true);
         setPlaybackError(null);
         setIsLoading(false);
         return;
@@ -164,6 +164,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       player.pause();
       setIsPlaying(false);
       updateNativeMediaState(false);
+      if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
       return;
     }
     const focusResult = requestAudioFocus();
@@ -171,7 +172,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     player.play();
     setIsPlaying(true);
     updateNativeMediaState(true);
-  }, []);
+    if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), true);
+  }, [currentRadio]);
 
   const togglePlay = useCallback(() => {
     setPlayingState(!isPlaying);
@@ -187,6 +189,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const updateLockScreenMetadata = useCallback((metadata: LockScreenMetadata) => {
     if (!backgroundPlaybackEnabled) return;
     try { playerRef.current?.updateLockScreenMetadata(metadata); } catch { /* no-op */ }
+    updateNativeMediaMetadata(metadata);
   }, [backgroundPlaybackEnabled]);
 
   useEffect(() => {

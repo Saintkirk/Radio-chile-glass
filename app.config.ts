@@ -92,6 +92,7 @@ const config: ExpoConfig = {
     "expo-asset",
     "expo-font",
     "expo-web-browser",
+    "./plugins/with-radio-media-controls",
     [
       "expo-audio",
       {
