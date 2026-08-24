@@ -2,6 +2,7 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
+import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
@@ -78,6 +79,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       setRadios(result.radios);
       setCatalogUpdatedAt(result.updatedAt);
       setCatalogSource(result.source);
+      void prefetchFrequentLogos(result.radios);
       return result.radios;
     } finally {
       setIsRefreshingCatalog(false);
@@ -255,6 +257,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
     AsyncStorage.getItem("radio-background-playback").then((value) => { if (value !== null) setBackgroundPlaybackEnabled(value !== "false"); });
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
+    void prefetchFrequentLogos(RADIOS);
 
     const startInitialPlayback = async () => {
       const lastRadioId = await AsyncStorage.getItem(LAST_RADIO_KEY).catch(() => null);

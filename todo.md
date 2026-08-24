@@ -1200,3 +1200,11 @@
 - [x] Mostrar fallback de la nueva emisora mientras carga su artwork
 - [x] Mantener logo, título, frecuencia y estado sincronizados en MediaSession
 - [x] Validar cambios rápidos y generar APK corregida
+
+## Caché instantánea de logos frecuentes
+
+- [x] Definir el conjunto de emisoras frecuentes y sus claves de caché
+- [x] Precargar logos locales o remotos al iniciar la aplicación
+- [x] Persistir los logos descargados por radioId sin mezclar emisoras
+- [x] Integrar la caché en carátulas, mini reproductor y MediaSession
+- [x] Validar transiciones instantáneas, expiración y fallbacks
