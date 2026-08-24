@@ -1124,8 +1124,8 @@
 
 ## Deep link de notificación a reproducción
 
-- [ ] Auditar la ruta actual que abre la notificación
-- [ ] Dirigir el PendingIntent a la pantalla /radio/{id} de la emisora activa
-- [ ] Manejar el deep link con la app fría o ya abierta
-- [ ] Validar que la radio activa, sus metadatos y el mini reproductor permanezcan sincronizados
-- [ ] Ejecutar typecheck, tests, lint y build Android nativo
+- [x] Auditar la ruta actual que abre la notificación
+- [x] Dirigir el PendingIntent a la pantalla /radio/{id} de la emisora activa
+- [x] Manejar el deep link con la app fría o ya abierta
+- [x] Validar que la radio activa, sus metadatos y el mini reproductor permanezcan sincronizados
+- [x] Ejecutar typecheck, tests, lint y build Android nativo
