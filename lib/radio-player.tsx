@@ -36,6 +36,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
   const playerStatusSubscriptionRef = useRef<{ remove: () => void } | null>(null);
   const playRequestRef = useRef(0);
+  const startupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [currentRadio, setCurrentRadio] = useState<Radio | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +50,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const resumeAfterFocusGainRef = useRef(false);
 
   const disposeCurrentPlayer = useCallback(() => {
+    if (startupTimeoutRef.current) {
+      clearTimeout(startupTimeoutRef.current);
+      startupTimeoutRef.current = null;
+    }
     playerStatusSubscriptionRef.current?.remove();
     playerStatusSubscriptionRef.current = null;
     const player = playerRef.current;
@@ -120,18 +125,35 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
           setIsPlaying(status.playing);
           updateNativeMediaState(status.playing);
+          if (status.playing) {
+            if (startupTimeoutRef.current) {
+              clearTimeout(startupTimeoutRef.current);
+              startupTimeoutRef.current = null;
+            }
+            setPlaybackError(null);
+            setIsLoading(false);
+            setNativeMediaSession(lockScreenMetadata(radio), true);
+          }
         });
         candidate.play();
+        startupTimeoutRef.current = setTimeout(() => {
+          if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+          setIsPlaying(false);
+          setIsLoading(false);
+          setPlaybackError(`No se pudo iniciar el audio de ${radio.name}`);
+          try { candidate?.pause(); } catch { /* no-op */ }
+          try { candidate?.remove(); } catch { /* no-op */ }
+          playerRef.current = null;
+          clearNativeMediaSession();
+          abandonAudioFocus();
+        }, 8000);
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
           try { candidate.remove(); } catch { /* no-op */ }
           return;
         }
-        setIsPlaying(true);
-        updateNativeMediaState(true);
-        setNativeMediaSession(lockScreenMetadata(radio), true);
-        setPlaybackError(null);
-        setIsLoading(false);
+        // Do not claim success immediately: network streams can accept play() while still buffering.
+        // The playbackStatusUpdate event is the source of truth for the visible playing state.
         return;
       } catch {
         if (candidate && candidate !== playerRef.current) {

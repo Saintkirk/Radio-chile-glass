@@ -1045,3 +1045,11 @@
 - [x] Ejecutar la compilación de la APK actualizada
 - [x] Verificar integridad, paquete, versión, tamaño y hash del artefacto
 - [x] Entregar la APK e instrucciones de instalación desde el teléfono
+
+## Corrección Carolina y controles multimedia Android
+
+- [ ] Auditar y corregir el stream real de Radio Carolina
+- [ ] Evitar mostrar “En reproducción” si el stream no abrió audio
+- [ ] Habilitar anterior/siguiente como acciones de emisora en bloqueo y notificación
+- [ ] Mostrar logo y metadatos de la emisora en MediaSession y notificación
+- [ ] Validar reproducción única, controles y build Android en dispositivo

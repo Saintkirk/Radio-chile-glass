@@ -9,6 +9,13 @@ describe("catálogo de radios chilenas", () => {
     expect(fmLatina?.homepage).toBe("https://www.radiofmlatina.com/");
   });
 
+  it("mantiene la señal y el logo oficial de Radio Carolina", () => {
+    const carolina = RADIOS.find((radio) => radio.id === "carolina");
+    expect(carolina?.frequency).toBe("99.3 FM");
+    expect(carolina?.streamUrl).toBe("https://stream.zeno.fm/sri2de2qdlivv");
+    expect(carolina?.favicon).toContain("carolina-online.png");
+  });
+
   it("mantiene stream, frecuencia y ciudad en cada emisora editorial", () => {
     expect(RADIOS.length).toBeGreaterThanOrEqual(6);
     RADIOS.forEach((radio) => {

@@ -1,20 +1,31 @@
 package com.app.radiochileglass
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.facebook.react.bridge.Arguments
-import kotlin.LazyThreadSafetyMode
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.concurrent.Executors
+import kotlin.LazyThreadSafetyMode
 
 class RadioMediaControlsModule(
   private val reactContext: ReactApplicationContext,
 ) : ReactContextBaseJavaModule(reactContext) {
   private val mediaSessionDelegate = lazy(LazyThreadSafetyMode.NONE) {
-    MediaSessionCompat(reactContext, "RadioChileGlass").apply {
+    MediaSessionCompat(reactContext, SESSION_TAG).apply {
       setFlags(
         MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
           MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS,
@@ -29,20 +40,36 @@ class RadioMediaControlsModule(
     }
   }
   private val mediaSession: MediaSessionCompat get() = mediaSessionDelegate.value
+  private val executor = Executors.newSingleThreadExecutor()
   private var active = false
+  private var lastTitle = "Radio Chile Glass"
+  private var lastArtist = "Radio en vivo"
+  private var lastArtworkUrl: String? = null
+  private var lastArtwork: Bitmap? = null
+  private var lastPlaying = false
 
   override fun getName(): String = NAME
 
   @ReactMethod
   fun activate(title: String, artist: String, artworkUrl: String?, playing: Boolean) {
+    ensureNotificationChannel()
+    lastTitle = title
+    lastArtist = artist
+    lastArtworkUrl = artworkUrl
+    lastPlaying = playing
+    active = true
+    RadioMediaSessionRegistry.session = mediaSession
+    mediaSession.isActive = true
     updateMetadata(title, artist, artworkUrl)
     updatePlaybackState(playing)
-    mediaSession.isActive = true
-    active = true
+    loadArtworkAsync(artworkUrl)
   }
 
   @ReactMethod
   fun updateMetadata(title: String, artist: String, artworkUrl: String?) {
+    lastTitle = title
+    lastArtist = artist
+    lastArtworkUrl = artworkUrl
     val metadata = MediaMetadataCompat.Builder()
       .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
       .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
@@ -50,17 +77,22 @@ class RadioMediaControlsModule(
       .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
       .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist)
       .apply {
-        if (!artworkUrl.isNullOrBlank()) {
+        if (lastArtwork != null) {
+          putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, lastArtwork)
+          putBitmap(MediaMetadataCompat.METADATA_KEY_ART, lastArtwork)
+        } else if (!artworkUrl.isNullOrBlank()) {
           putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, artworkUrl)
           putString(MediaMetadataCompat.METADATA_KEY_ART_URI, artworkUrl)
         }
       }
       .build()
     mediaSession.setMetadata(metadata)
+    if (active) postNotification()
   }
 
   @ReactMethod
   fun updatePlaybackState(playing: Boolean) {
+    lastPlaying = playing
     val actions = PlaybackStateCompat.ACTION_PLAY or
       PlaybackStateCompat.ACTION_PAUSE or
       PlaybackStateCompat.ACTION_PLAY_PAUSE or
@@ -68,7 +100,13 @@ class RadioMediaControlsModule(
       PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
       PlaybackStateCompat.ACTION_STOP
     val state = if (playing) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
-    mediaSession.setPlaybackState(PlaybackStateCompat.Builder().setActions(actions).setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1f).build())
+    mediaSession.setPlaybackState(
+      PlaybackStateCompat.Builder()
+        .setActions(actions)
+        .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1f)
+        .build(),
+    )
+    if (active) postNotification()
   }
 
   @ReactMethod
@@ -76,7 +114,79 @@ class RadioMediaControlsModule(
     if (mediaSessionDelegate.isInitialized()) {
       mediaSession.isActive = false
     }
+    RadioMediaSessionRegistry.session = null
     active = false
+    NotificationManagerCompat.from(reactContext).cancel(NOTIFICATION_ID)
+  }
+
+  private fun loadArtworkAsync(artworkUrl: String?) {
+    if (artworkUrl.isNullOrBlank()) return
+    executor.execute {
+      try {
+        val connection = (URL(artworkUrl).openConnection() as HttpURLConnection).apply {
+          connectTimeout = 5000
+          readTimeout = 5000
+          instanceFollowRedirects = true
+        }
+        connection.inputStream.use { input ->
+          val bitmap = BitmapFactory.decodeStream(input)
+          if (bitmap != null && active && artworkUrl == lastArtworkUrl) {
+            lastArtwork = bitmap
+            reactContext.runOnUiQueueThread {
+              updateMetadata(lastTitle, lastArtist, artworkUrl)
+            }
+          }
+        }
+        connection.disconnect()
+      } catch (_: Exception) {
+        // The notification remains usable with the application icon.
+      }
+    }
+  }
+
+  private fun ensureNotificationChannel() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val manager = reactContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      manager.createNotificationChannel(
+        NotificationChannel(CHANNEL_ID, "Radio Chile Glass", NotificationManager.IMPORTANCE_LOW).apply {
+          description = "Controles de reproducción de Radio Chile Glass"
+          setShowBadge(false)
+        },
+      )
+    }
+  }
+
+  private fun actionIntent(action: String) = android.app.PendingIntent.getBroadcast(
+    reactContext,
+    action.hashCode(),
+    android.content.Intent(reactContext, RadioMediaActionReceiver::class.java).setAction(action),
+    android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+      (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) android.app.PendingIntent.FLAG_IMMUTABLE else 0),
+  )
+
+  private fun loadAppIcon(): Bitmap? {
+    val iconId = reactContext.resources.getIdentifier("ic_launcher", "mipmap", reactContext.packageName)
+    return if (iconId != 0) BitmapFactory.decodeResource(reactContext.resources, iconId) else null
+  }
+
+  private fun postNotification() {
+    val playIcon = if (lastPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+    val artwork = lastArtwork ?: loadAppIcon()
+    val notification = NotificationCompat.Builder(reactContext, CHANNEL_ID)
+      .setSmallIcon(android.R.drawable.ic_media_play)
+      .setContentTitle(lastTitle)
+      .setContentText(lastArtist)
+      .setLargeIcon(artwork)
+      .setOngoing(lastPlaying)
+      .setOnlyAlertOnce(true)
+      .setShowWhen(false)
+      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      .addAction(android.R.drawable.ic_media_previous, "Anterior", actionIntent(ACTION_PREVIOUS))
+      .addAction(playIcon, if (lastPlaying) "Pausar" else "Reproducir", actionIntent(if (lastPlaying) ACTION_PAUSE else ACTION_PLAY))
+      .addAction(android.R.drawable.ic_media_next, "Siguiente", actionIntent(ACTION_NEXT))
+      .setStyle(NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken).setShowActionsInCompactView(0, 1, 2))
+      .build()
+    NotificationManagerCompat.from(reactContext).notify(NOTIFICATION_ID, notification)
   }
 
   private fun emit(action: String) {
@@ -88,5 +198,17 @@ class RadioMediaControlsModule(
   companion object {
     const val NAME = "RadioMediaControls"
     const val EVENT_NAME = "RadioMediaControls.action"
+    const val ACTION_PLAY = "com.app.radiochileglass.PLAY"
+    const val ACTION_PAUSE = "com.app.radiochileglass.PAUSE"
+    const val ACTION_NEXT = "com.app.radiochileglass.NEXT"
+    const val ACTION_PREVIOUS = "com.app.radiochileglass.PREVIOUS"
+    const val ACTION_STOP = "com.app.radiochileglass.STOP"
+    private const val SESSION_TAG = "RadioChileGlass"
+    private const val CHANNEL_ID = "radio_chile_glass_playback"
+    private const val NOTIFICATION_ID = 9133
   }
+}
+
+object RadioMediaSessionRegistry {
+  @Volatile var session: MediaSessionCompat? = null
 }
