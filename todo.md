@@ -1038,3 +1038,10 @@
 - [x] Seleccionar y aplicar la propuesta al icono, splash, favicon y adaptive icon
 - [x] Actualizar logoUrl y branding en app.config.ts
 - [x] Validar que el logo aparezca al abrir la aplicación y preparar checkpoint
+
+## Generación de APK con Antena Glass
+
+- [x] Confirmar la revisión y el workflow nativo de Android
+- [x] Ejecutar la compilación de la APK actualizada
+- [x] Verificar integridad, paquete, versión, tamaño y hash del artefacto
+- [x] Entregar la APK e instrucciones de instalación desde el teléfono
