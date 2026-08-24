@@ -1185,3 +1185,10 @@
 - [x] Confirmar que Pause actualiza el proveedor y la MediaSession
 - [x] Confirmar reanudación y detención sin estados visuales divergentes
 - [x] Ejecutar pruebas y documentar el resultado
+
+## APK para validación física
+
+- [ ] Validar el proyecto antes del build Android
+- [ ] Generar APK nativa con la sincronización Play/Pause actualizada
+- [ ] Descargar y verificar integridad del APK
+- [ ] Entregar el archivo instalable y documentar la prueba física sugerida
