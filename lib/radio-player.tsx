@@ -1,7 +1,7 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { loadCatalog, RADIOS, type Radio } from "./radios";
+import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
@@ -251,7 +251,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       const lastRadioId = await AsyncStorage.getItem(LAST_RADIO_KEY).catch(() => null);
       const catalog = await refreshCatalog().catch(() => RADIOS);
       if (cancelled || autoplayStartedRef.current || playRequestRef.current !== 0) return;
-      const initialRadio = catalog.find((radio) => radio.id === lastRadioId) ?? catalog[0] ?? RADIOS[0];
+      const initialRadio = selectStartupRadio(catalog, lastRadioId);
       if (!initialRadio) return;
       autoplayStartedRef.current = true;
       await playRadio(initialRadio).catch(() => undefined);

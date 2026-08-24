@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mergeCatalog, normalizeRemoteStations, RADIOS, regionFromCity } from "../lib/radios";
+import { mergeCatalog, normalizeRemoteStations, RADIOS, regionFromCity, selectStartupRadio } from "../lib/radios";
 
 describe("catálogo de radios chilenas", () => {
   it("incluye FM Latina como radio destacada", () => {
@@ -85,6 +85,18 @@ describe("catálogo de radios chilenas", () => {
     ]);
     expect(result[0].favicon).toBeUndefined();
     expect(result[0].initials).toBe("RS");
+  });
+
+  it("selecciona la última emisora válida al arrancar sin conexión", () => {
+    expect(selectStartupRadio(RADIOS, "carolina")?.id).toBe("carolina");
+  });
+
+  it("usa la primera emisora del catálogo cuando la última ya no existe", () => {
+    expect(selectStartupRadio(RADIOS, "radio-eliminada")?.id).toBe(RADIOS[0].id);
+  });
+
+  it("usa el fallback editorial cuando el catálogo offline está vacío", () => {
+    expect(selectStartupRadio([], null)?.id).toBe(RADIOS[0].id);
   });
 
   it("mantiene textos largos seguros para renderizar en tarjetas", () => {

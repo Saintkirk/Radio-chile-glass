@@ -140,4 +140,8 @@ export async function loadCatalog(): Promise<{ radios: Radio[]; updatedAt: strin
   }
 }
 
+export function selectStartupRadio(catalog: Radio[], lastRadioId?: string | null): Radio | null {
+  return catalog.find((radio) => radio.id === lastRadioId) ?? catalog[0] ?? EDITORIAL_RADIOS[0] ?? null;
+}
+
 export const RADIOS = EDITORIAL_RADIOS;

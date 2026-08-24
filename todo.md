@@ -1137,3 +1137,11 @@
 - [x] Reproducir automáticamente la última emisora o la emisora inicial como fallback
 - [x] Evitar bloqueo o cierre si el stream inicial falla
 - [x] Validar autoplay, persistencia, typecheck, tests, lint y build Android
+
+## Verificación de arranque sin conexión
+
+- [x] Confirmar que loadCatalog usa caché o catálogo local sin red
+- [x] Confirmar selección de última emisora y fallback a la inicial sin red
+- [x] Confirmar que un stream inaccesible muestra error recuperable sin bloqueo
+- [x] Añadir o ejecutar prueba determinista del flujo offline
+- [x] Documentar resultado y guardar checkpoint si se requieren cambios
