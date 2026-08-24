@@ -23,7 +23,7 @@ type PlayerContextValue = {
   setBackgroundPlaybackEnabled: (enabled: boolean) => void;
   updateLockScreenMetadata: (metadata: LockScreenMetadata) => void;
   refreshCatalog: () => Promise<void>;
-  playRadio: (radio: Radio) => Promise<void>;
+  playRadio: (radio: Radio, preserveMediaSession?: boolean) => Promise<void>;
   playAdjacent: (direction: -1 | 1, fromId?: string) => Promise<void>;
   togglePlay: () => void;
   toggleFavorite: (radioId: string) => void;
@@ -49,7 +49,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [backgroundPlaybackEnabled, setBackgroundPlaybackEnabled] = useState(true);
   const resumeAfterFocusGainRef = useRef(false);
 
-  const disposeCurrentPlayer = useCallback(() => {
+  const disposeCurrentPlayer = useCallback((preserveMediaSession = false) => {
     if (startupTimeoutRef.current) {
       clearTimeout(startupTimeoutRef.current);
       startupTimeoutRef.current = null;
@@ -60,11 +60,15 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     playerRef.current = null;
     if (player) {
       try { player.pause(); } catch { /* no-op */ }
-      try { player.clearLockScreenControls(); } catch { /* no-op on Android custom session */ }
+      if (!preserveMediaSession) {
+        try { player.clearLockScreenControls(); } catch { /* no-op on Android custom session */ }
+      }
       try { player.remove(); } catch { /* no-op */ }
     }
-    clearNativeMediaSession();
-    abandonAudioFocus();
+    if (!preserveMediaSession) {
+      clearNativeMediaSession();
+      abandonAudioFocus();
+    }
   }, []);
 
   const refreshCatalog = useCallback(async () => {
@@ -96,9 +100,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     setNativeMediaSession(metadata, playing);
   }, []);
 
-  const playRadio = useCallback(async (radio: Radio) => {
+  const playRadio = useCallback(async (radio: Radio, preserveMediaSession = false) => {
     const requestId = ++playRequestRef.current;
-    disposeCurrentPlayer();
+    disposeCurrentPlayer(preserveMediaSession);
     setCurrentRadio(radio);
     setIsPlaying(false);
     setIsLoading(true);
@@ -135,7 +139,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
             setNativeMediaSession(lockScreenMetadata(radio), true);
           }
         });
-        candidate.play();
+        const activeCandidate = candidate;
+        activeCandidate.play();
+        setTimeout(() => {
+          if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && !activeCandidate.playing) {
+            try { activeCandidate.play(); } catch { /* status listener reports the real failure */ }
+          }
+        }, 350);
         startupTimeoutRef.current = setTimeout(() => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
           setIsPlaying(false);
@@ -176,7 +186,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     const currentIndex = radios.findIndex((radio) => radio.id === sourceId);
     if (currentIndex < 0 || radios.length < 2) return;
     const nextIndex = (currentIndex + direction + radios.length) % radios.length;
-    await playRadio(radios[nextIndex]);
+    await playRadio(radios[nextIndex], true);
   }, [currentRadio?.id, playRadio, radios]);
 
   const setPlayingState = useCallback((shouldPlay: boolean) => {

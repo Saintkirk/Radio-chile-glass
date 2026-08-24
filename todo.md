@@ -1068,3 +1068,11 @@
 - [x] Ejecutar el workflow Android nativo
 - [x] Descargar y verificar el APK generado
 - [x] Entregar el APK y checkpoint actualizado
+
+## Cambio de emisora desde bloqueo y notificación
+
+- [ ] Evitar que anterior/siguiente cierre la actividad o elimine la notificación
+- [ ] Mantener MediaSession y controles visibles durante el cambio
+- [ ] Hacer que la nueva emisora reproduzca automáticamente al completar la conexión
+- [ ] Sincronizar estado loading/playing/error entre servicio, bloqueo y app
+- [ ] Validar cambio fuera de la app y generar APK actualizada
