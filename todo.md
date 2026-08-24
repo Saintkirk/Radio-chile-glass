@@ -1129,3 +1129,11 @@
 - [x] Manejar el deep link con la app fría o ya abierta
 - [x] Validar que la radio activa, sus metadatos y el mini reproductor permanezcan sincronizados
 - [x] Ejecutar typecheck, tests, lint y build Android nativo
+
+## Reproducción automática al abrir
+
+- [ ] Persistir el ID de la última emisora reproducida localmente
+- [ ] Recuperar la última emisora válida al montar el proveedor
+- [ ] Reproducir automáticamente la última emisora o la emisora inicial como fallback
+- [ ] Evitar bloqueo o cierre si el stream inicial falla
+- [ ] Validar autoplay, persistencia, typecheck, tests, lint y build Android

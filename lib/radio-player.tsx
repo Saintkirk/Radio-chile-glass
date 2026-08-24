@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { loadCatalog, RADIOS, type Radio } from "./radios";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
@@ -22,7 +22,7 @@ type PlayerContextValue = {
   backgroundPlaybackEnabled: boolean;
   setBackgroundPlaybackEnabled: (enabled: boolean) => void;
   updateLockScreenMetadata: (metadata: LockScreenMetadata) => void;
-  refreshCatalog: () => Promise<void>;
+  refreshCatalog: () => Promise<Radio[]>;
   playRadio: (radio: Radio, preserveMediaSession?: boolean) => Promise<void>;
   playAdjacent: (direction: -1 | 1, fromId?: string) => Promise<void>;
   togglePlay: () => void;
@@ -31,6 +31,7 @@ type PlayerContextValue = {
 };
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
+const LAST_RADIO_KEY = "radio-last-played-id";
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
@@ -48,6 +49,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [isRefreshingCatalog, setIsRefreshingCatalog] = useState(false);
   const [backgroundPlaybackEnabled, setBackgroundPlaybackEnabled] = useState(true);
   const resumeAfterFocusGainRef = useRef(false);
+  const autoplayStartedRef = useRef(false);
 
   const disposeCurrentPlayer = useCallback((preserveMediaSession = false) => {
     if (startupTimeoutRef.current) {
@@ -68,13 +70,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshCatalog = useCallback(async () => {
+  const refreshCatalog = useCallback(async (): Promise<Radio[]> => {
     setIsRefreshingCatalog(true);
     try {
       const result = await loadCatalog();
       setRadios(result.radios);
       setCatalogUpdatedAt(result.updatedAt);
       setCatalogSource(result.source);
+      return result.radios;
     } finally {
       setIsRefreshingCatalog(false);
     }
@@ -100,6 +103,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     }
     disposeCurrentPlayer(preserveMediaSession);
     setCurrentRadio(radio);
+    AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
     setIsPlaying(false);
     setIsLoading(true);
     setPlaybackError(null);
@@ -238,12 +242,26 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, [backgroundPlaybackEnabled]);
 
   useEffect(() => {
+    let cancelled = false;
     loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
     AsyncStorage.getItem("radio-background-playback").then((value) => { if (value !== null) setBackgroundPlaybackEnabled(value !== "false"); });
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
-    refreshCatalog().catch(() => undefined);
-    return () => disposeCurrentPlayer();
-  }, [disposeCurrentPlayer, refreshCatalog]);
+
+    const startInitialPlayback = async () => {
+      const lastRadioId = await AsyncStorage.getItem(LAST_RADIO_KEY).catch(() => null);
+      const catalog = await refreshCatalog().catch(() => RADIOS);
+      if (cancelled || autoplayStartedRef.current || playRequestRef.current !== 0) return;
+      const initialRadio = catalog.find((radio) => radio.id === lastRadioId) ?? catalog[0] ?? RADIOS[0];
+      if (!initialRadio) return;
+      autoplayStartedRef.current = true;
+      await playRadio(initialRadio).catch(() => undefined);
+    };
+    void startInitialPlayback();
+    return () => {
+      cancelled = true;
+      disposeCurrentPlayer();
+    };
+  }, [disposeCurrentPlayer, playRadio, refreshCatalog]);
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled }).catch(() => undefined);
