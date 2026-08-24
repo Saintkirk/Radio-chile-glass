@@ -1053,3 +1053,11 @@
 - [x] Habilitar anterior/siguiente como acciones de emisora en bloqueo y notificación
 - [x] Mostrar logo y metadatos de la emisora en MediaSession y notificación
 - [x] Validar reproducción única, controles y build Android en dispositivo
+
+## Persistencia multimedia fuera de la app
+
+- [ ] Auditar la sesión duplicada de expo-audio y RadioMediaControls
+- [ ] Mantener la notificación mediante servicio foreground multimedia
+- [ ] Evitar que anterior/siguiente abra la interfaz desde bloqueo
+- [ ] Añadir guía y acceso a ajustes de notificaciones/ahorro de batería
+- [ ] Validar reproducción con pantalla apagada y fuera de la app en APK Android

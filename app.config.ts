@@ -67,7 +67,7 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
     versionCode: 2,
-    permissions: ["POST_NOTIFICATIONS", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_MEDIA_PLAYBACK"],
+    permissions: ["POST_NOTIFICATIONS", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_MEDIA_PLAYBACK", "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"],
     intentFilters: [
       {
         action: "VIEW",

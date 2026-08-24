@@ -5,7 +5,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -108,6 +110,26 @@ class RadioMediaControlsModule(
         .build(),
     )
     if (active) postNotification()
+  }
+
+  @ReactMethod
+  fun openBatteryOptimizationSettings() {
+    try {
+      val intent = android.content.Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        .setData(Uri.parse("package:${reactContext.packageName}"))
+        .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+      reactContext.startActivity(intent)
+    } catch (_: Exception) {
+      try {
+        reactContext.startActivity(
+          android.content.Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            .setData(Uri.parse("package:${reactContext.packageName}"))
+            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+      } catch (_: Exception) {
+        // Settings are optional and unavailable on some OEM builds.
+      }
+    }
   }
 
   @ReactMethod
