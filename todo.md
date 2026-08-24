@@ -1107,8 +1107,8 @@
 
 ## Correcciones posteriores de pantalla bloqueada y notificación
 
-- [ ] Reducir el retardo del artwork en pantalla bloqueada y notificación
-- [ ] Garantizar un logo visible para Radio Oasis en todas las superficies
-- [ ] Derivar Play/Pause desde un estado de reproducción único y actualizado
-- [ ] Evitar cierres y estados colgados al cambiar a un stream que no responde
-- [ ] Validar cambios rápidos desde notificación, bloqueo y Inicio en APK nativa
+- [x] Reducir el retardo del artwork en pantalla bloqueada y notificación
+- [x] Garantizar un logo visible para Radio Oasis en todas las superficies
+- [x] Derivar Play/Pause desde un estado de reproducción único y actualizado
+- [x] Evitar cierres y estados colgados al cambiar a un stream que no responde
+- [x] Validar cambios rápidos desde notificación, bloqueo y Inicio en APK nativa
