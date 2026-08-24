@@ -1048,8 +1048,8 @@
 
 ## Corrección Carolina y controles multimedia Android
 
-- [ ] Auditar y corregir el stream real de Radio Carolina
-- [ ] Evitar mostrar “En reproducción” si el stream no abrió audio
-- [ ] Habilitar anterior/siguiente como acciones de emisora en bloqueo y notificación
-- [ ] Mostrar logo y metadatos de la emisora en MediaSession y notificación
-- [ ] Validar reproducción única, controles y build Android en dispositivo
+- [x] Auditar y corregir el stream real de Radio Carolina
+- [x] Evitar mostrar “En reproducción” si el stream no abrió audio
+- [x] Habilitar anterior/siguiente como acciones de emisora en bloqueo y notificación
+- [x] Mostrar logo y metadatos de la emisora en MediaSession y notificación
+- [x] Validar reproducción única, controles y build Android en dispositivo
