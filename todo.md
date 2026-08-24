@@ -998,11 +998,27 @@
 - [x] Restaurar la sesión multimedia y la notificación persistente sin bloquear el arranque
 - [x] Sincronizar play, pausa, detener, anterior, siguiente y metadatos
 - [x] Validar permisos, servicio foreground y compilación nativa
-- [ ] Generar APK corregido y probarlo en dispositivo Android
+- [x] Generar APK corregido
+- [ ] Instalarlo y documentar la prueba en dispositivo Android
 
 ## Bloqueo persistente al restaurar MediaSession
 
 - [x] Obtener evidencia del fallo de arranque del APK actual y comparar con la versión estable
 - [x] Aislar la inicialización de `expo-audio` y MediaSession fuera del arranque del layout raíz
 - [x] Validar que la app llegue a Inicio antes de activar controles multimedia
-- [ ] Generar un APK de diagnóstico/reparado y documentar la prueba en dispositivo
+- [x] Generar un APK de diagnóstico/reparado
+- [ ] Documentar la prueba en dispositivo Android
+
+## Registro local de errores y arranque
+
+- [ ] Crear modelo persistente de eventos de arranque y errores con límite de tamaño
+- [ ] Registrar estados de inicialización, catálogo, audio, MediaSession y errores globales
+- [ ] Añadir panel de diagnóstico accesible desde Inicio con detalle y copia/limpieza local
+- [ ] Evitar datos sensibles y confirmar persistencia, accesibilidad y pruebas
+
+## Fallback explícito del splash
+
+- [x] Ocultar el splash al montar el layout raíz
+- [x] Añadir un timeout global de respaldo para evitar bloqueo indefinido en el logo
+- [x] Validar Expo config, export Android, typecheck, tests y lint
+- [ ] Confirmar el arranque del APK nuevo en un dispositivo Android
