@@ -19,7 +19,7 @@ import { adjacentRadioIndex } from "@/lib/player-utils";
 export default function RadioDetailScreen() {
   const router = useRouter();
   const { id, originX, originY, originWidth, originHeight, containerX, containerY, containerWidth, containerHeight, viewportWidth, viewportHeight } = useLocalSearchParams<{ id: string; originX?: string; originY?: string; originWidth?: string; originHeight?: string; containerX?: string; containerY?: string; containerWidth?: string; containerHeight?: string; viewportWidth?: string; viewportHeight?: string }>();
-  const { radios, currentRadio, isPlaying, isLoading, playbackError, playRadio, togglePlay, toggleFavorite, isFavorite } = useRadioPlayer();
+  const { radios, currentRadio, isPlaying, isLoading, playbackError, playRadio, playAdjacent, togglePlay, toggleFavorite, isFavorite } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -91,8 +91,8 @@ export default function RadioDetailScreen() {
     const nextIndex = adjacentRadioIndex(radios.length, currentIndex, direction === -1 ? -1 : 1);
     const nextRadio = radios[nextIndex];
     setSelectedRadioId(nextRadio.id);
-    void playRadio(nextRadio);
-  }, [currentIndex, playRadio, radios]);
+    void playAdjacent(direction === -1 ? -1 : 1, selectedRadioId);
+  }, [currentIndex, playAdjacent, radios, selectedRadioId]);
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 10 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
     onPanResponderGrant: () => dismissY.stopAnimation(),

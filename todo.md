@@ -1079,8 +1079,8 @@
 
 ## Sincronización atómica del reproductor
 
-- [ ] Actualizar logo y nombre de bloqueo/notificación sin desfase
-- [ ] Eliminar controles de desplazamiento que no corresponden a emisoras
-- [ ] Mantener fija la superficie del reproductor durante el cambio
-- [ ] Garantizar auto-play al completar la conexión de la nueva emisora
-- [ ] Validar sesión multimedia, estado y APK Android
+- [x] Actualizar logo y nombre de bloqueo/notificación sin desfase
+- [x] Eliminar controles de desplazamiento que no corresponden a emisoras
+- [x] Mantener fija la superficie del reproductor durante el cambio
+- [x] Garantizar auto-play al completar la conexión de la nueva emisora
+- [x] Validar sesión multimedia, estado y APK Android

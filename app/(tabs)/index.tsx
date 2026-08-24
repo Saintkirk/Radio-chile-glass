@@ -61,7 +61,7 @@ export default function HomeScreen() {
   const selectAndPlayRadio = (radio: Radio) => {
     const nextIndex = filtered.findIndex((item) => item.id === radio.id);
     if (nextIndex >= 0) setFeaturedIndex(nextIndex);
-    void playRadio(radio);
+    void playRadio(radio, Boolean(currentRadio && currentRadio.id !== radio.id));
   };
   const browseFeatured = (direction: number) => {
     const total = filtered.length;
