@@ -1177,3 +1177,11 @@
 - [x] Evitar que buffering inicial revierta un estado de reproducción válido
 - [x] Verificar coherencia entre proveedor, mini reproductor y MediaSession
 - [x] Ejecutar pruebas y documentar el resultado
+
+## Sincronización Play/Pause nativa
+
+- [x] Auditar el mapeo de acciones de notificación y pantalla de bloqueo
+- [x] Confirmar que Play actualiza el proveedor y la MediaSession
+- [x] Confirmar que Pause actualiza el proveedor y la MediaSession
+- [x] Confirmar reanudación y detención sin estados visuales divergentes
+- [x] Ejecutar pruebas y documentar el resultado
