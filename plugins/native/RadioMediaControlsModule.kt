@@ -11,6 +11,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.media.app.NotificationCompat.MediaStyle
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -184,7 +185,7 @@ class RadioMediaControlsModule(
       .addAction(android.R.drawable.ic_media_previous, "Anterior", actionIntent(ACTION_PREVIOUS))
       .addAction(playIcon, if (lastPlaying) "Pausar" else "Reproducir", actionIntent(if (lastPlaying) ACTION_PAUSE else ACTION_PLAY))
       .addAction(android.R.drawable.ic_media_next, "Siguiente", actionIntent(ACTION_NEXT))
-      .setStyle(NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken).setShowActionsInCompactView(0, 1, 2))
+      .setStyle(MediaStyle().setMediaSession(mediaSession.sessionToken).setShowActionsInCompactView(0, 1, 2))
       .build()
     NotificationManagerCompat.from(reactContext).notify(NOTIFICATION_ID, notification)
   }
