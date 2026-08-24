@@ -137,9 +137,19 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         });
         const activeCandidate = candidate;
         activeCandidate.play();
+        // La acción del usuario es la fuente inmediata del estado visual; el timeout
+        // y el listener siguen siendo los encargados de revertirlo si el stream falla.
+        setIsPlaying(true);
+        setIsLoading(false);
+        updateNativeMediaState(true);
+        setNativeMediaSession(lockScreenMetadata(radio), true);
         setTimeout(() => {
           if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && !activeCandidate.playing) {
-            try { activeCandidate.play(); } catch { /* status listener reports the real failure */ }
+            try {
+              activeCandidate.play();
+              setIsPlaying(true);
+              updateNativeMediaState(true);
+            } catch { /* status listener reports the real failure */ }
           }
         }, 350);
         startupTimeoutRef.current = setTimeout(() => {
