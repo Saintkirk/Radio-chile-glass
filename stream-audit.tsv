@@ -1,0 +1,30 @@
+id	name	status	http	content_type	bytes	prefix	url
+13c	13C Radio	ok	200	application/vnd.apple.mpegurl	264	234558544d33550d0a234558	https://us-b4-p-e-qg12-audio.cdn.mdstrm.com/live-audio-aw/5c915497c6fd7c085b29169d/playlist.m3u8
+activa	Radio Activa	ok	200	audio/mpeg	15883	fffb9264000003d761d70661	https://stream.zeno.fm/pvs6hqz3crtvv
+adn	ADN Radio	ok	200	audio/aacp	65536	fff15e40281ffc014616ad8c	https://playerservices.streamtheworld.com/api/livestream-redirect/ADNAAC.aac
+agricultura	Radio Agricultura	ok	200	application/vnd.apple.mpegurl	370	234558544d33550a23455854	https://unlimited4-us.dps.live/agricultura/gotardis/audio/now/livestream1.m3u8
+beethoven	Radio Beethoven	ok	200	audio/aacp	65536	fff158402b2144013a35ad94	https://unlimited5-us.dps.live/beethovenfm/aac/icecast.audio
+biobio	Radio Bío Bío	ok	200	audio/mpeg	65536	fffb9064e20003b035dbfb0c	https://unlimited3-cl.dps.live/biobiosantiago/mp3/icecast.audio
+carnaval-la-serena	Radio Carnaval La Serena	ok	200	audio/aac	3604	fff95c8015e1b421199545ac	https://cp2.streamchileno.cl/listen/radiocarnaval/radio.mp3
+carolina	Radio Carolina	ok	200	audio/aac	16000	fff150802ea000211a950da2	https://stream.zeno.fm/sri2de2qdlivv
+concierto	Radio Concierto	ok	200	audio/aacp	65536	fff15e4028fffc013236a58c	https://playerservices.streamtheworld.com/api/livestream-redirect/CONCIERTOAAC.aac
+conquistador	El Conquistador FM	ok	200	audio/mpeg	7691	fffa9200cb5ef30e038858d8	https://stream10.usastreams.com/9314/stream
+cooperativa	Radio Cooperativa	ok	200	audio/aacp	65536	fff95c802e6244211b5534aa	https://redirector.dps.live/cooperativafm/aac/icecast.audio
+corazon	Radio Corazón	ok	200	audio/mpeg	65536	fffb9264000303a46158630c	https://playerservices.streamtheworld.com/api/livestream-redirect/CORAZON_SC.mp3
+duna	Radio Duna	ok	200	audio/aac	7712	fff950803921e0214c3747b2	https://mdstrm.com/audio/67f42f96e464d19a6eda3c7d/icecast.audio
+edelweiss	Radio Edelweiss	ok	200	audio/mpeg	7690	fffbb2644380164767d94b0f	https://encoder.stationlink.cl/listen/edelweiss/radio.mp3
+festival	Radio Festival	ok	200	audio/aacp	32064	fff15880622128211b452dfd	https://stream.festival.cl/1
+fmdos	FM Dos	ok	200	audio/aacp	65536	fff15e4027fffc014816a9f0	https://playerservices.streamtheworld.com/api/livestream-redirect/FMDOSAAC_SC.aac
+fmlatina	FM Latina	ok	200	audio/mpeg	4096	fffb9244780002fa525ef9e8	https://jm8n.com/proxy/radiofmlatina/stream
+futuro	Radio Futuro	ok	200	audio/mpeg	65536	fffbb2640000053f614dcb8c	https://playerservices.streamtheworld.com/api/livestream-redirect/FUTURO_SC.mp3
+imagina	Radio Imagina	ok	200	audio/mpeg	65536	fffb9264000003cc4f59ae61	https://playerservices.streamtheworld.com/api/livestream-redirect/IMAGINA_SC.mp3
+la-clave	Radio La Clave	ok	200	application/vnd.apple.mpegurl	688	234558544d33550a23455854	https://unlimited1-cl-isp.dps.live/laclavetv/laclavetv.smil/playlist.m3u8
+la-mexicana	Radio La Mexicana	ok	200	audio/mpeg	7674	fffb9264e50003b95a5cf9eb	https://audio0.tustreaming.cl/7160/aire
+los40	Los 40	ok	200	audio/mpeg	65536	fffb92640000033c3fdb69e6	https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_CHILE_SC.mp3
+oasis	Oasis FM	ok	200	application/vnd.apple.mpegurl	670	234558544d33550d0a234558	https://mdstrm.com/audio/5c915497c6fd7c085b29169d/live.m3u8
+play-fm	Play FM	ok	200	audio/aac	7702	fff95080218000211a14fd92	https://mdstrm.com/audio/5c8d6406f98fbf269f57c82c/icecast.audio
+pudahuel	Radio Pudahuel	ok	200	audio/mpeg	65536	fffb92640000034957dae986	https://playerservices.streamtheworld.com/api/livestream-redirect/PUDAHUEL_SC.mp3
+punto7-temuco	Radio Punto 7 Temuco	ok	200	audio/aacp	65536	fff15c8042419c211b4e0000	https://redirector.dps.live/p7temuco/aac/icecast.audio
+radio-recuerdos	FM de Los Recuerdos	ok	200	audio/mpeg	65536	519db0a15903fb3852aa58c0	https://sonando-us.digitalproserver.com/fmdelosrecuerdos.aac
+rock-pop	Rock & Pop	ok	200	audio/aacp	65536	fff15e402bfffc014216a848	https://playerservices.streamtheworld.com/api/livestream-redirect/ROCK_AND_POPAAC_SC
+sonar	Radio Sonar	ok	200	audio/aac	7704	fff9508022e000211a0fb52e	https://mdstrm.com/audio/5c915724519bce27671c4d15/icecast.audio?property=radiobox

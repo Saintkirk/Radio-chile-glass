@@ -1115,9 +1115,9 @@
 
 ## Auditoría de notificación y catálogo completo
 
-- [ ] Evitar que una acción de notificación cierre la app si el stream falla
-- [ ] Abrir desde la notificación directamente la ruta de la radio activa
-- [ ] Garantizar fallback de logo en el reproductor y MediaSession
-- [ ] Auditar todos los streams editoriales y regionales por respuesta y formato
-- [ ] Identificar y corregir las tres emisoras con audio distorsionado
-- [ ] Validar cambios rápidos, logos y reproducción en APK nativa
+- [x] Evitar que una acción de notificación cierre la app si el stream falla
+- [x] Abrir desde la notificación directamente la ruta de la radio activa
+- [x] Garantizar fallback de logo en el reproductor y MediaSession
+- [x] Auditar todos los streams editoriales y regionales por respuesta y formato
+- [x] Identificar y corregir las tres emisoras con audio distorsionado
+- [x] Validar cambios rápidos, logos y reproducción en APK nativa
