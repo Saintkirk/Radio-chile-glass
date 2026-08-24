@@ -45,6 +45,7 @@ export type LockScreenMetadata = {
   artist: string;
   albumTitle: string;
   artworkUrl?: string;
+  radioId?: string;
 };
 
 export type LockScreenNowPlaying = {
@@ -62,6 +63,7 @@ export function lockScreenMetadata(radio: Radio, nowPlaying?: LockScreenNowPlayi
     title: hasIcyMetadata && title ? title : radio.name,
     artist: hasIcyMetadata && artist ? artist : `${radio.frequency} · ${radio.genre}`,
     albumTitle: "Radio Chile Glass",
+    radioId: radio.id,
     ...(radio.favicon ? { artworkUrl: radio.favicon } : {}),
   };
 }

@@ -6,6 +6,7 @@ export type RadioMediaMetadata = {
   title: string;
   artist: string;
   artworkUrl?: string;
+  radioId?: string;
 };
 
 const nativeControls = Platform.OS === "android" ? NativeModules.RadioMediaControls : undefined;
@@ -14,7 +15,7 @@ const EVENT_NAME = "RadioMediaControls.action";
 export function setNativeMediaSession(metadata: RadioMediaMetadata, playing: boolean): void {
   if (!nativeControls) return;
   try {
-    nativeControls.activate(metadata.title, metadata.artist, metadata.artworkUrl ?? null, playing);
+    nativeControls.activate(metadata.title, metadata.artist, metadata.artworkUrl ?? null, playing, metadata.radioId ?? null);
   } catch {
     // Native controls are optional; regular in-app playback must remain functional.
   }
@@ -32,7 +33,7 @@ export function updateNativeMediaState(playing: boolean): void {
 export function updateNativeMediaMetadata(metadata: RadioMediaMetadata): void {
   if (!nativeControls) return;
   try {
-    nativeControls.updateMetadata(metadata.title, metadata.artist, metadata.artworkUrl ?? null);
+    nativeControls.updateMetadata(metadata.title, metadata.artist, metadata.artworkUrl ?? null, metadata.radioId ?? null);
   } catch {
     // No-op on unsupported or unavailable native builds.
   }

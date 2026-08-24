@@ -123,8 +123,12 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         syncLockScreenControls(candidate, radio, backgroundPlaybackEnabled, false);
         playerStatusSubscriptionRef.current = candidate.addListener("playbackStatusUpdate", (status) => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
-          setIsPlaying(status.playing);
-          updateNativeMediaState(status.playing);
+          // Algunos streams emiten playing=false durante el buffering inicial.
+          // No debe sobrescribir el estado optimista hasta que expire el timeout.
+          if (status.playing || !startupTimeoutRef.current) {
+            setIsPlaying(status.playing);
+            updateNativeMediaState(status.playing);
+          }
           if (status.playing) {
             if (startupTimeoutRef.current) {
               clearTimeout(startupTimeoutRef.current);
@@ -154,13 +158,16 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         }, 350);
         startupTimeoutRef.current = setTimeout(() => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+          startupTimeoutRef.current = null;
           setIsPlaying(false);
           setIsLoading(false);
           setPlaybackError(`No se pudo iniciar el audio de ${radio.name}`);
           try { candidate?.pause(); } catch { /* no-op */ }
           try { candidate?.remove(); } catch { /* no-op */ }
           playerRef.current = null;
-          clearNativeMediaSession();
+          // Mantener la MediaSession visible en estado pausado permite que el usuario
+          // intente otra emisora desde la notificación sin cerrar la actividad.
+          setNativeMediaSession(lockScreenMetadata(radio), false);
           abandonAudioFocus();
         }, 8000);
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
@@ -168,8 +175,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           try { candidate.remove(); } catch { /* no-op */ }
           return;
         }
-        // Do not claim success immediately: network streams can accept play() while still buffering.
-        // The playbackStatusUpdate event is the source of truth for the visible playing state.
+        // El estado visual se actualiza de inmediato y se confirma con playbackStatusUpdate;
+        // si el stream no responde, el timeout lo revierte sin destruir la MediaSession.
         return;
       } catch {
         if (candidate && candidate !== playerRef.current) {
@@ -181,7 +188,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           setIsPlaying(false);
           setPlaybackError(`No se pudo conectar con ${radio.name}`);
           setIsLoading(false);
-          clearNativeMediaSession();
+          setNativeMediaSession(lockScreenMetadata(radio), false);
         }
       }
     }

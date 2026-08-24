@@ -69,6 +69,7 @@ describe("player interaction utilities", () => {
       artist: "89.1 FM · Pop latino",
       albumTitle: "Radio Chile Glass",
       artworkUrl: "https://example.com/logo.png",
+      radioId: "fmlatina",
     });
   });
 

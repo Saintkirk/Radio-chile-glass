@@ -49,17 +49,19 @@ class RadioMediaControlsModule(
   private var lastArtist = "Radio en vivo"
   private var lastArtworkUrl: String? = null
   private var lastArtwork: Bitmap? = null
+  private var lastRadioId: String? = null
   private var lastPlaying = false
 
   override fun getName(): String = NAME
 
   @ReactMethod
-  fun activate(title: String, artist: String, artworkUrl: String?, playing: Boolean) {
+  fun activate(title: String, artist: String, artworkUrl: String?, playing: Boolean, radioId: String?) {
     ensureNotificationChannel()
     if (artworkUrl != lastArtworkUrl) lastArtwork = null
     lastTitle = title
     lastArtist = artist
     lastArtworkUrl = artworkUrl
+    lastRadioId = radioId
     lastPlaying = playing
     active = true
     try {
@@ -71,17 +73,18 @@ class RadioMediaControlsModule(
     }
     RadioMediaSessionRegistry.session = mediaSession
     mediaSession.isActive = true
-    updateMetadata(title, artist, artworkUrl)
+    updateMetadata(title, artist, artworkUrl, radioId)
     updatePlaybackState(playing)
     loadArtworkAsync(artworkUrl)
   }
 
   @ReactMethod
-  fun updateMetadata(title: String, artist: String, artworkUrl: String?) {
+  fun updateMetadata(title: String, artist: String, artworkUrl: String?, radioId: String?) {
     if (artworkUrl != lastArtworkUrl) lastArtwork = null
     lastTitle = title
     lastArtist = artist
     lastArtworkUrl = artworkUrl
+    if (radioId != null) lastRadioId = radioId
     val metadata = MediaMetadataCompat.Builder()
       .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
       .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
@@ -150,8 +153,22 @@ class RadioMediaControlsModule(
     active = false
     lastArtwork = null
     lastArtworkUrl = null
+    lastRadioId = null
     try { reactContext.stopService(android.content.Intent(reactContext, RadioKeepAliveService::class.java)) } catch (_: Exception) { /* no-op */ }
     NotificationManagerCompat.from(reactContext).cancel(NOTIFICATION_ID)
+  }
+
+  private fun openRadioIntent(): android.app.PendingIntent? {
+    val radioId = lastRadioId ?: return null
+    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, Uri.parse("manusradiochileglass://radio/$radioId"))
+      .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    return android.app.PendingIntent.getActivity(
+      reactContext,
+      7001,
+      intent,
+      android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+        (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) android.app.PendingIntent.FLAG_IMMUTABLE else 0),
+    )
   }
 
   private fun loadArtworkAsync(artworkUrl: String?) {
@@ -168,7 +185,7 @@ class RadioMediaControlsModule(
           if (bitmap != null && active && artworkUrl == lastArtworkUrl) {
             lastArtwork = bitmap
             reactContext.runOnUiQueueThread {
-              updateMetadata(lastTitle, lastArtist, artworkUrl)
+              updateMetadata(lastTitle, lastArtist, artworkUrl, lastRadioId)
             }
           }
         }
@@ -216,6 +233,7 @@ class RadioMediaControlsModule(
       .setOnlyAlertOnce(true)
       .setShowWhen(false)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      .apply { openRadioIntent()?.let { setContentIntent(it) } }
       .addAction(android.R.drawable.ic_media_previous, "Anterior", actionIntent(ACTION_PREVIOUS))
       .addAction(playIcon, if (lastPlaying) "Pausar" else "Reproducir", actionIntent(if (lastPlaying) ACTION_PAUSE else ACTION_PLAY))
       .addAction(android.R.drawable.ic_media_next, "Siguiente", actionIntent(ACTION_NEXT))
