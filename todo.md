@@ -1153,3 +1153,11 @@
 - [x] Confirmar que la emisora guardada se selecciona antes del fallback inicial
 - [x] Validar que el autoplay inicia la emisora guardada sin duplicar reproductores
 - [x] Ejecutar pruebas y documentar el resultado
+
+## Prueba de autoplay con emisora alternativa
+
+- [x] Preparar escenario con una emisora guardada distinta a FM Latina
+- [x] Confirmar recuperación y selección de la emisora alternativa
+- [x] Confirmar que el autoplay usa la emisora alternativa sin duplicar reproductores
+- [x] Verificar coherencia entre radio activa, logo, nombre y controles
+- [x] Documentar resultado de la prueba
