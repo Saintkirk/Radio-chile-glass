@@ -1092,8 +1092,8 @@
 
 ## Corrección visual de emisora activa en Android
 
-- [ ] Evitar que el logo de la carátula difiera del nombre de la emisora
-- [ ] Sincronizar carátula central, título, frecuencia, índice y mini reproductor
-- [ ] Reducir el solapamiento de carátulas laterales en pantallas estrechas
-- [ ] Añadir espacio seguro inferior para no invadir la navegación del sistema
-- [ ] Validar la captura visual y generar APK corregida
+- [x] Evitar que el logo de la carátula difiera del nombre de la emisora
+- [x] Sincronizar carátula central, título, frecuencia, índice y mini reproductor
+- [x] Reducir el solapamiento de carátulas laterales en pantallas estrechas
+- [x] Añadir espacio seguro inferior para no invadir la navegación del sistema
+- [x] Validar la captura visual y generar APK corregida
