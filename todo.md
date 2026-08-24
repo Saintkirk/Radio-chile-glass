@@ -1145,3 +1145,11 @@
 - [x] Confirmar que un stream inaccesible muestra error recuperable sin bloqueo
 - [x] Añadir o ejecutar prueba determinista del flujo offline
 - [x] Documentar resultado y guardar checkpoint si se requieren cambios
+
+## Arranque con emisora guardada
+
+- [x] Verificar recuperación del ID guardado localmente
+- [x] Confirmar que el ID guardado se resuelve contra el catálogo actual
+- [x] Confirmar que la emisora guardada se selecciona antes del fallback inicial
+- [x] Validar que el autoplay inicia la emisora guardada sin duplicar reproductores
+- [x] Ejecutar pruebas y documentar el resultado
