@@ -39,7 +39,7 @@ class RadioKeepAliveService : Service() {
     .build()
 
   companion object {
-    const val CHANNEL_ID = "radio_chile_glass_service"
-    const val NOTIFICATION_ID = 9134
+    const val CHANNEL_ID = "radio_chile_glass_playback"
+    const val NOTIFICATION_ID = 9133
   }
 }

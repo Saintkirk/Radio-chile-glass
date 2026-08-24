@@ -1076,3 +1076,11 @@
 - [x] Hacer que la nueva emisora reproduzca automáticamente al completar la conexión
 - [x] Sincronizar estado loading/playing/error entre servicio, bloqueo y app
 - [x] Validar cambio fuera de la app y generar APK actualizada
+
+## Sincronización atómica del reproductor
+
+- [ ] Actualizar logo y nombre de bloqueo/notificación sin desfase
+- [ ] Eliminar controles de desplazamiento que no corresponden a emisoras
+- [ ] Mantener fija la superficie del reproductor durante el cambio
+- [ ] Garantizar auto-play al completar la conexión de la nueva emisora
+- [ ] Validar sesión multimedia, estado y APK Android

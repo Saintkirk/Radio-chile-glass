@@ -60,9 +60,6 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     playerRef.current = null;
     if (player) {
       try { player.pause(); } catch { /* no-op */ }
-      if (!preserveMediaSession) {
-        try { player.clearLockScreenControls(); } catch { /* no-op on Android custom session */ }
-      }
       try { player.remove(); } catch { /* no-op */ }
     }
     if (!preserveMediaSession) {
@@ -90,18 +87,17 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       try { player.clearLockScreenControls(); } catch { /* no-op on unsupported builds */ }
       return;
     }
-    // expo-audio owns foreground playback and notification lifecycle.
-    // The deferred bridge adds station-level previous/next actions on Android.
-    try {
-      player.setActiveForLockScreen(true, metadata, { showSeekForward: false, showSeekBackward: false });
-    } catch {
-      // Lock-screen controls are optional on unsupported builds.
-    }
+    // Android uses one custom MediaSession for station actions and one foreground
+    // notification id. Avoid registering expo-audio's second session, which can
+    // leave stale metadata or show seek controls for a live radio stream.
     setNativeMediaSession(metadata, playing);
   }, []);
 
   const playRadio = useCallback(async (radio: Radio, preserveMediaSession = false) => {
     const requestId = ++playRequestRef.current;
+    if (preserveMediaSession && backgroundPlaybackEnabled) {
+      setNativeMediaSession(lockScreenMetadata(radio), false);
+    }
     disposeCurrentPlayer(preserveMediaSession);
     setCurrentRadio(radio);
     setIsPlaying(false);
