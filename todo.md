@@ -1132,8 +1132,8 @@
 
 ## Reproducción automática al abrir
 
-- [ ] Persistir el ID de la última emisora reproducida localmente
-- [ ] Recuperar la última emisora válida al montar el proveedor
-- [ ] Reproducir automáticamente la última emisora o la emisora inicial como fallback
-- [ ] Evitar bloqueo o cierre si el stream inicial falla
-- [ ] Validar autoplay, persistencia, typecheck, tests, lint y build Android
+- [x] Persistir el ID de la última emisora reproducida localmente
+- [x] Recuperar la última emisora válida al montar el proveedor
+- [x] Reproducir automáticamente la última emisora o la emisora inicial como fallback
+- [x] Evitar bloqueo o cierre si el stream inicial falla
+- [x] Validar autoplay, persistencia, typecheck, tests, lint y build Android
