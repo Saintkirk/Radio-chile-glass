@@ -1061,3 +1061,10 @@
 - [x] Evitar que anterior/siguiente abra la interfaz desde bloqueo
 - [x] Añadir guía y acceso a ajustes de notificaciones/ahorro de batería
 - [x] Validar reproducción con pantalla apagada y fuera de la app en APK Android
+
+## Nueva APK instalable
+
+- [x] Sincronizar la revisión del servicio foreground con GitHub
+- [x] Ejecutar el workflow Android nativo
+- [x] Descargar y verificar el APK generado
+- [x] Entregar el APK y checkpoint actualizado
