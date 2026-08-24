@@ -1084,3 +1084,16 @@
 - [x] Mantener fija la superficie del reproductor durante el cambio
 - [x] Garantizar auto-play al completar la conexión de la nueva emisora
 - [x] Validar sesión multimedia, estado y APK Android
+
+## Entrega directa de APK
+
+- [x] Comprobar el artefacto APK final de la última corrección
+- [x] Entregar la APK para instalación en Android
+
+## Corrección visual de emisora activa en Android
+
+- [ ] Evitar que el logo de la carátula difiera del nombre de la emisora
+- [ ] Sincronizar carátula central, título, frecuencia, índice y mini reproductor
+- [ ] Reducir el solapamiento de carátulas laterales en pantallas estrechas
+- [ ] Añadir espacio seguro inferior para no invadir la navegación del sistema
+- [ ] Validar la captura visual y generar APK corregida

@@ -37,19 +37,20 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
   useEffect(() => {
     setFailed(false);
     if (radio.favicon) void prefetchLogo(radio.favicon);
-  }, [radio.favicon]);
+  }, [radio.favicon, radio.id]);
   const hasLocalLogo = Boolean(LOCAL_LOGOS[radio.id]);
   const showLogo = Boolean((hasLocalLogo || radio.favicon) && !failed);
   return (
     <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}> 
       {showLogo ? (
         <Image
+          key={radio.id}
           source={LOCAL_LOGOS[radio.id] ?? { uri: radio.favicon }}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
           contentFit="contain"
           contentPosition="center"
           cachePolicy="memory-disk"
-          transition={220}
+          transition={hasLocalLogo ? 0 : 120}
           onLoad={(event) => {
             const sourceWidth = event.source?.width ?? 0;
             const sourceHeight = event.source?.height ?? 0;

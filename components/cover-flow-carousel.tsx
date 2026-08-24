@@ -165,9 +165,9 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
 }
 
 const styles = StyleSheet.create({
-  root: { height: 388, borderRadius: 0, overflow: "hidden", backgroundColor: "#090A10", borderWidth: 1, borderColor: "#29202F", marginBottom: 28, paddingTop: 4 },
+  root: { height: 410, borderRadius: 0, overflow: "hidden", backgroundColor: "#090A10", borderWidth: 1, borderColor: "#29202F", marginBottom: 28, paddingTop: 4 },
   rootLight: { backgroundColor: "#090A10", borderColor: "#29202F" },
-  stage: { height: 286, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
+  stage: { height: 302, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
   sideSlot: { position: "absolute", top: 36, width: 128, height: 222, zIndex: 1, alignItems: "center" },
   sideLeft: { left: 6 },
   sideRight: { right: 6 },
@@ -183,8 +183,8 @@ const styles = StyleSheet.create({
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
   diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
-  reflection: { position: "absolute", top: 212, width: 128, height: 52, opacity: 0.18, transform: [{ scaleY: -1 }], overflow: "hidden" },
-  centerReflection: { width: 218, height: 72, opacity: 0.15, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  reflection: { position: "absolute", top: 212, width: 128, height: 36, opacity: 0.1, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  centerReflection: { width: 218, height: 42, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden" },
   captionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, marginTop: 4 },
   caption: { flex: 1, alignItems: "center", paddingHorizontal: 12 },
   stationName: { color: "#F5F3EE", fontSize: 22, fontWeight: "700", letterSpacing: -0.4 },
