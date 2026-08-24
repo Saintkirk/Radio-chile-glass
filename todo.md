@@ -1030,3 +1030,11 @@
 - [x] Reducir latencia percibida al tocar play, anterior/siguiente y cambiar emisora
 - [x] Suavizar la transición del Cover Flow sin retrasar la selección real
 - [ ] Validar reproducción única, foco, background, pantalla bloqueada y build nativo
+
+## Propuestas de logo y pantalla inicial
+
+- [x] Crear propuestas de logo minimalista premium para Radio Chile Glass
+- [x] Revisar legibilidad del símbolo como icono Android y splash
+- [x] Seleccionar y aplicar la propuesta al icono, splash, favicon y adaptive icon
+- [x] Actualizar logoUrl y branding en app.config.ts
+- [x] Validar que el logo aparezca al abrir la aplicación y preparar checkpoint
