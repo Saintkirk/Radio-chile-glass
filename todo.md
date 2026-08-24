@@ -1097,3 +1097,10 @@
 - [x] Reducir el solapamiento de carátulas laterales en pantallas estrechas
 - [x] Añadir espacio seguro inferior para no invadir la navegación del sistema
 - [x] Validar la captura visual y generar APK corregida
+
+## Corrección confirmada por capturas Android
+
+- [ ] Hacer atómica la identidad de emisora entre carátula, nombre, frecuencia y MediaSession
+- [ ] Evitar que el mini reproductor cubra el título y los indicadores del Cover Flow
+- [ ] Alinear los controles Anterior, Play y Siguiente con la emisora activa
+- [ ] Validar nuevamente la pantalla bloqueada y la notificación tras cambiar de emisora

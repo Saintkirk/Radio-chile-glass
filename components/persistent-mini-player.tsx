@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
 import { NowPlayingLabel } from "@/components/now-playing-label";
@@ -12,7 +11,6 @@ import { useColors } from "@/hooks/use-colors";
 
 export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number }) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
   const { currentRadio, isPlaying, isLoading, playbackError, playRadio, playAdjacent, togglePlay } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
@@ -50,22 +48,24 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
     });
   };
 
-  if (!miniRadio) return null;
+  const displayRadio = currentRadio ?? miniRadio;
+  if (!displayRadio) return null;
   const lightMode = colorScheme === "light";
-  const bottom = bottomOffset + Math.max(insets.bottom, 0);
+  // bottomOffset ya incluye la altura de la barra y el inset inferior; no duplicarlo.
+  const bottom = bottomOffset;
 
   return (
     <Animated.View ref={containerRef} collapsable={false} style={[styles.container, { backgroundColor: lightMode ? "#FFFFFFF5" : "#171D2BF7", borderColor: lightMode ? "#D9E0EC" : "#FFFFFF22", bottom, opacity: progress, transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}>
-      <Pressable onPress={() => openDetail(miniRadio)} accessibilityRole="button" accessibilityLabel={`Abrir reproductor de ${miniRadio.name}`} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
-        <View ref={logoRef} collapsable={false}><StationLogo radio={miniRadio} size={48} radius={14} /></View>
-        <View style={styles.info}><Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{miniRadio.name}</Text>{isLoading ? <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text> : playbackError ? <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text> : <NowPlayingLabel streamUrl={miniRadio.streamUrl} compact />}</View>
-        <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : miniRadio.accent} barCount={5} compact />
+      <Pressable onPress={() => openDetail(displayRadio)} accessibilityRole="button" accessibilityLabel={`Abrir reproductor de ${displayRadio.name}`} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
+        <View ref={logoRef} collapsable={false}><StationLogo radio={displayRadio} size={48} radius={14} /></View>
+        <View style={styles.info}><Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{displayRadio.name}</Text>{isLoading ? <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text> : playbackError ? <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text> : <NowPlayingLabel streamUrl={displayRadio.streamUrl} compact />}</View>
+        <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : displayRadio.accent} barCount={5} compact />
       </Pressable>
-      <Pressable onPress={() => void playAdjacent(-1, miniRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
-      <Pressable onPress={() => playbackError ? playRadio(miniRadio) : togglePlay()} accessibilityRole="button" accessibilityLabel={playbackError ? `Reintentar ${miniRadio.name}` : isPlaying ? `Pausar ${miniRadio.name}` : `Reproducir ${miniRadio.name}`} style={({ pressed }) => [styles.control, pressed && styles.pressed]}>
+      <Pressable onPress={() => void playAdjacent(-1, displayRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
+      <Pressable onPress={() => playbackError ? playRadio(displayRadio) : togglePlay()} accessibilityRole="button" accessibilityLabel={playbackError ? `Reintentar ${displayRadio.name}` : isPlaying ? `Pausar ${displayRadio.name}` : `Reproducir ${displayRadio.name}`} style={({ pressed }) => [styles.control, pressed && styles.pressed]}>
         {isLoading ? <ActivityIndicator size="small" color={lightMode ? "#172033" : "#F5F3EE"} /> : <IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color={lightMode ? "#172033" : "#F5F3EE"} />}
       </Pressable>
-      <Pressable onPress={() => void playAdjacent(1, miniRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora siguiente" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.right" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
+      <Pressable onPress={() => void playAdjacent(1, displayRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora siguiente" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.right" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
     </Animated.View>
   );
 }

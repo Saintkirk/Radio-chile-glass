@@ -52,7 +52,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-    <PersistentMiniPlayer bottomOffset={tabBarHeight + 8} />
+    <PersistentMiniPlayer bottomOffset={tabBarHeight + 6} />
     </View>
   );
 }

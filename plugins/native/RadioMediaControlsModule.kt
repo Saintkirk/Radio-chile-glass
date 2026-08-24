@@ -56,6 +56,7 @@ class RadioMediaControlsModule(
   @ReactMethod
   fun activate(title: String, artist: String, artworkUrl: String?, playing: Boolean) {
     ensureNotificationChannel()
+    if (artworkUrl != lastArtworkUrl) lastArtwork = null
     lastTitle = title
     lastArtist = artist
     lastArtworkUrl = artworkUrl
@@ -77,6 +78,7 @@ class RadioMediaControlsModule(
 
   @ReactMethod
   fun updateMetadata(title: String, artist: String, artworkUrl: String?) {
+    if (artworkUrl != lastArtworkUrl) lastArtwork = null
     lastTitle = title
     lastArtist = artist
     lastArtworkUrl = artworkUrl
@@ -146,6 +148,8 @@ class RadioMediaControlsModule(
     }
     RadioMediaSessionRegistry.session = null
     active = false
+    lastArtwork = null
+    lastArtworkUrl = null
     try { reactContext.stopService(android.content.Intent(reactContext, RadioKeepAliveService::class.java)) } catch (_: Exception) { /* no-op */ }
     NotificationManagerCompat.from(reactContext).cancel(NOTIFICATION_ID)
   }
