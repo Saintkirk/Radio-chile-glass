@@ -1071,8 +1071,8 @@
 
 ## Cambio de emisora desde bloqueo y notificación
 
-- [ ] Evitar que anterior/siguiente cierre la actividad o elimine la notificación
-- [ ] Mantener MediaSession y controles visibles durante el cambio
-- [ ] Hacer que la nueva emisora reproduzca automáticamente al completar la conexión
-- [ ] Sincronizar estado loading/playing/error entre servicio, bloqueo y app
-- [ ] Validar cambio fuera de la app y generar APK actualizada
+- [x] Evitar que anterior/siguiente cierre la actividad o elimine la notificación
+- [x] Mantener MediaSession y controles visibles durante el cambio
+- [x] Hacer que la nueva emisora reproduzca automáticamente al completar la conexión
+- [x] Sincronizar estado loading/playing/error entre servicio, bloqueo y app
+- [x] Validar cambio fuera de la app y generar APK actualizada
