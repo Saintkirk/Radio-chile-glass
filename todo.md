@@ -1208,3 +1208,10 @@
 - [x] Persistir los logos descargados por radioId sin mezclar emisoras
 - [x] Integrar la caché en carátulas, mini reproductor y MediaSession
 - [x] Validar transiciones instantáneas, expiración y fallbacks
+
+## Entrega de APK con caché de logos
+
+- [ ] Publicar el commit que incluye la caché local de logos
+- [ ] Compilar la APK Android actualizada
+- [ ] Descargar y verificar el APK
+- [ ] Entregar la APK y documentar la prueba física
