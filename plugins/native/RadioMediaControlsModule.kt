@@ -49,6 +49,8 @@ class RadioMediaControlsModule(
   private var lastArtist = "Radio en vivo"
   private var lastArtworkUrl: String? = null
   private var lastArtwork: Bitmap? = null
+  private var lastArtworkKey: String = ""
+  private var artworkGeneration: Long = 0
   private var lastRadioId: String? = null
   private var lastPlaying = false
 
@@ -57,7 +59,12 @@ class RadioMediaControlsModule(
   @ReactMethod
   fun activate(title: String, artist: String, artworkUrl: String?, playing: Boolean, radioId: String?) {
     ensureNotificationChannel()
-    if (artworkUrl != lastArtworkUrl) lastArtwork = null
+    val artworkKey = artworkKey(radioId, artworkUrl)
+    if (artworkKey != lastArtworkKey) {
+      artworkGeneration += 1
+      lastArtwork = null
+      lastArtworkKey = artworkKey
+    }
     lastTitle = title
     lastArtist = artist
     lastArtworkUrl = artworkUrl
@@ -75,12 +82,18 @@ class RadioMediaControlsModule(
     mediaSession.isActive = true
     updateMetadata(title, artist, artworkUrl, radioId)
     updatePlaybackState(playing)
-    loadArtworkAsync(artworkUrl)
+    loadArtworkAsync(artworkUrl, artworkKey, artworkGeneration)
   }
 
   @ReactMethod
   fun updateMetadata(title: String, artist: String, artworkUrl: String?, radioId: String?) {
-    if (artworkUrl != lastArtworkUrl) lastArtwork = null
+    val effectiveRadioId = radioId ?: lastRadioId
+    val artworkKey = artworkKey(effectiveRadioId, artworkUrl)
+    if (artworkKey != lastArtworkKey) {
+      artworkGeneration += 1
+      lastArtwork = null
+      lastArtworkKey = artworkKey
+    }
     lastTitle = title
     lastArtist = artist
     lastArtworkUrl = artworkUrl
@@ -153,6 +166,8 @@ class RadioMediaControlsModule(
     active = false
     lastArtwork = null
     lastArtworkUrl = null
+    lastArtworkKey = ""
+    artworkGeneration += 1
     lastRadioId = null
     try { reactContext.stopService(android.content.Intent(reactContext, RadioKeepAliveService::class.java)) } catch (_: Exception) { /* no-op */ }
     NotificationManagerCompat.from(reactContext).cancel(NOTIFICATION_ID)
@@ -175,7 +190,7 @@ class RadioMediaControlsModule(
     )
   }
 
-  private fun loadArtworkAsync(artworkUrl: String?) {
+  private fun loadArtworkAsync(artworkUrl: String?, artworkKey: String, generation: Long) {
     if (artworkUrl.isNullOrBlank()) return
     executor.execute {
       try {
@@ -186,10 +201,12 @@ class RadioMediaControlsModule(
         }
         connection.inputStream.use { input ->
           val bitmap = BitmapFactory.decodeStream(input)
-          if (bitmap != null && active && artworkUrl == lastArtworkUrl) {
+          if (bitmap != null && active && artworkUrl == lastArtworkUrl && artworkKey == lastArtworkKey && generation == artworkGeneration) {
             lastArtwork = bitmap
             reactContext.runOnUiQueueThread {
-              updateMetadata(lastTitle, lastArtist, artworkUrl, lastRadioId)
+              if (active && artworkKey == lastArtworkKey && generation == artworkGeneration) {
+                updateMetadata(lastTitle, lastArtist, artworkUrl, lastRadioId)
+              }
             }
           }
         }
@@ -199,6 +216,9 @@ class RadioMediaControlsModule(
       }
     }
   }
+
+  private fun artworkKey(radioId: String?, artworkUrl: String?): String =
+    "${radioId.orEmpty()}|${artworkUrl.orEmpty()}"
 
   private fun ensureNotificationChannel() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

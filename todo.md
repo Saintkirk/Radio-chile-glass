@@ -1192,3 +1192,11 @@
 - [x] Generar APK nativa con la sincronización Play/Pause actualizada
 - [x] Descargar y verificar integridad del APK
 - [x] Entregar el archivo instalable y documentar la prueba física sugerida
+
+## Artwork atómico en notificación y pantalla de bloqueo
+
+- [ ] Invalidar inmediatamente el bitmap anterior al cambiar de emisora
+- [ ] Evitar que una descarga tardía de Carolina reemplace el logo de Futuro
+- [ ] Mostrar fallback de la nueva emisora mientras carga su artwork
+- [ ] Mantener logo, título, frecuencia y estado sincronizados en MediaSession
+- [ ] Validar cambios rápidos y generar APK corregida
