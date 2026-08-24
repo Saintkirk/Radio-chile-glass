@@ -1056,8 +1056,8 @@
 
 ## Persistencia multimedia fuera de la app
 
-- [ ] Auditar la sesión duplicada de expo-audio y RadioMediaControls
-- [ ] Mantener la notificación mediante servicio foreground multimedia
-- [ ] Evitar que anterior/siguiente abra la interfaz desde bloqueo
-- [ ] Añadir guía y acceso a ajustes de notificaciones/ahorro de batería
-- [ ] Validar reproducción con pantalla apagada y fuera de la app en APK Android
+- [x] Auditar la sesión duplicada de expo-audio y RadioMediaControls
+- [x] Mantener la notificación mediante servicio foreground multimedia
+- [x] Evitar que anterior/siguiente abra la interfaz desde bloqueo
+- [x] Añadir guía y acceso a ajustes de notificaciones/ahorro de batería
+- [x] Validar reproducción con pantalla apagada y fuera de la app en APK Android
