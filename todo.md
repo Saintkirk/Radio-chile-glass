@@ -1161,3 +1161,11 @@
 - [x] Confirmar que el autoplay usa la emisora alternativa sin duplicar reproductores
 - [x] Verificar coherencia entre radio activa, logo, nombre y controles
 - [x] Documentar resultado de la prueba
+
+## Logo de Carolina durante autoplay
+
+- [x] Auditar si Carolina tiene un recurso local o solo remoto
+- [x] Evitar que el logo dependa de la primera respuesta de red al arrancar
+- [x] Mostrar fallback estable mientras carga el artwork
+- [x] Validar que logo, nombre y emisora activa aparezcan sincronizados
+- [x] Ejecutar pruebas y documentar el resultado
