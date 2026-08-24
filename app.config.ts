@@ -75,7 +75,6 @@ const config: ExpoConfig = {
         data: [
           {
             scheme: env.scheme,
-            host: "*",
           },
         ],
         category: ["BROWSABLE", "DEFAULT"],

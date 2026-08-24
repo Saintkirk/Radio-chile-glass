@@ -160,8 +160,12 @@ class RadioMediaControlsModule(
 
   private fun openRadioIntent(): android.app.PendingIntent? {
     val radioId = lastRadioId ?: return null
-    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, Uri.parse("manusradiochileglass://radio/$radioId"))
-      .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    // La ruta debe viajar como path explícito. Con `scheme://radio/id`, Android
+    // interpreta `radio` como hostname y Expo Router puede resolverlo en Inicio.
+    // Las tres barras fuerzan el path `/radio/{id}` esperado por la ruta dinámica.
+    val deepLink = Uri.parse("manusradiochileglass:///radio/$radioId")
+    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, deepLink)
+      .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
     return android.app.PendingIntent.getActivity(
       reactContext,
       7001,

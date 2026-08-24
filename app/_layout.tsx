@@ -1,6 +1,7 @@
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
+import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -33,6 +34,25 @@ if (Platform.OS !== "web") {
   setTimeout(() => SplashScreen.hideAsync().catch(() => undefined), 4500);
 }
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
+
+function NotificationRouteBridge() {
+  const url = Linking.useURL();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!url) return;
+    const parsed = Linking.parse(url);
+    const path = parsed.path?.replace(/^\/+/, "") ?? "";
+    const match = path.match(/^radio\/([^/]+)$/);
+    if (!match) return;
+    const radioId = decodeURIComponent(match[1]);
+    const target = `/radio/${radioId}`;
+    if (pathname !== target) router.replace({ pathname: "/radio/[id]", params: { id: radioId } });
+  }, [pathname, router, url]);
+
+  return null;
+}
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -116,6 +136,7 @@ export default function RootLayout() {
               }}
             />
           </Stack>
+          <NotificationRouteBridge />
           <LockScreenNowPlayingSync />
           <StatusBar style="auto" />
         </QueryClientProvider>

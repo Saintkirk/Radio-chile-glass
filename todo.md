@@ -1121,3 +1121,11 @@
 - [x] Auditar todos los streams editoriales y regionales por respuesta y formato
 - [x] Identificar y corregir las tres emisoras con audio distorsionado
 - [x] Validar cambios rápidos, logos y reproducción en APK nativa
+
+## Deep link de notificación a reproducción
+
+- [ ] Auditar la ruta actual que abre la notificación
+- [ ] Dirigir el PendingIntent a la pantalla /radio/{id} de la emisora activa
+- [ ] Manejar el deep link con la app fría o ya abierta
+- [ ] Validar que la radio activa, sus metadatos y el mini reproductor permanezcan sincronizados
+- [ ] Ejecutar typecheck, tests, lint y build Android nativo
