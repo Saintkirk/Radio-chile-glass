@@ -40,6 +40,25 @@ export function adjacentRadioIndex(length: number, currentIndex: number, directi
   return (currentIndex + direction + length) % length;
 }
 
+/** Returns whether opening a station should start or restart its stream. */
+export function shouldAutoplayStation(currentRadioId: string | null | undefined, targetRadioId: string, isPlaying: boolean): boolean {
+  return currentRadioId !== targetRadioId || !isPlaying;
+}
+
+/** Classifies a horizontal gesture using distance plus a small velocity projection. */
+export function horizontalSwipeDirection(
+  translationX: number,
+  velocityX: number,
+  options: { distance?: number; velocity?: number; projectionFactor?: number } = {},
+): -1 | 0 | 1 {
+  const distance = options.distance ?? 34;
+  const velocity = options.velocity ?? 300;
+  const projectionFactor = options.projectionFactor ?? 0.2;
+  const projectedTranslation = translationX + velocityX * projectionFactor;
+  if (Math.abs(projectedTranslation) < distance && Math.abs(velocityX) < velocity) return 0;
+  return projectedTranslation < 0 ? 1 : -1;
+}
+
 export type LockScreenMetadata = {
   title: string;
   artist: string;

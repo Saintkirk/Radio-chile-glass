@@ -31,9 +31,12 @@ export function ItunesRadioCard({
   const openWithCoverFlow = () => {
     if (leaving.current) return;
     leaving.current = true;
-    Animated.timing(progress, { toValue: 1, duration: 230, useNativeDriver: true }).start(({ finished }) => {
-      if (finished) onOpen();
-    });
+    // La navegación debe comenzar de inmediato; el destino ya tiene su propia
+    // transición de entrada. Mantener esta tarjeta visible evita un cuadro negro
+    // entre la lista y el reproductor.
+    progress.stopAnimation();
+    progress.setValue(0);
+    onOpen();
   };
 
   const cardTransform = {

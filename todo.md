@@ -1339,3 +1339,11 @@
 - [x] Añadir reflejo inferior recortado con opacidad y degradado visual
 - [x] Mantener reflejo y sombra sincronizados con perspectiva y navegación
 - [x] Validar legibilidad, reducción de movimiento y rendimiento móvil
+
+## Regresiones de Explorar, autoplay y gesto táctil
+
+- [x] Evitar la vista negra al seleccionar una emisora desde la lista y redirigir al reproductor estable
+- [x] Activar autoplay real al seleccionar una emisora y mantener Play/Pause sincronizado desde el primer cuadro
+- [x] Hacer que el gesto horizontal responda en toda la superficie útil sin zonas muertas ni latencia perceptible
+- [x] Añadir pruebas deterministas para selección desde lista, autoplay y gestos del Cover Flow
+- [x] Validar la corrección en viewport móvil y guardar checkpoint actualizado

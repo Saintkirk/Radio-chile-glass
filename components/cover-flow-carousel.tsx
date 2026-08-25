@@ -19,6 +19,7 @@ import Animated, {
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
+import { horizontalSwipeDirection } from "@/lib/player-utils";
 
 type Side = -1 | 0 | 1;
 type OuterSide = -2 | 2;
@@ -31,10 +32,10 @@ const EQUALIZER_VALUES = [
 ] as const;
 
 const DRAG_LIMIT = 156;
-const SWIPE_DISTANCE = 52;
-const SWIPE_VELOCITY = 480;
-const SWIPE_EXIT_DISTANCE = 224;
-const MAX_GESTURE_VELOCITY = 1800;
+const SWIPE_DISTANCE = 34;
+const SWIPE_VELOCITY = 300;
+const SWIPE_EXIT_DISTANCE = 196;
+const MAX_GESTURE_VELOCITY = 2200;
 
 function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
@@ -208,26 +209,26 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   }, [next, previous, requestChange]);
 
   const panGesture = useMemo(() => Gesture.Pan()
-    .activeOffsetX([-10, 10])
-    .failOffsetY([-12, 12])
+    .activeOffsetX([-6, 6])
+    .failOffsetY([-24, 24])
+    .shouldCancelWhenOutside(false)
     .onBegin(() => {
-      if (isTransitioning.get()) return;
+      // Un nuevo gesto siempre puede tomar el control; esto evita una zona muerta
+      // mientras la carátula anterior termina de encajar.
       cancelAnimation(dragX);
+      isTransitioning.set(false);
     })
     .onUpdate((event) => {
-      if (reduceMotion || isTransitioning.get()) return;
+      if (reduceMotion) return;
       const translation = event.translationX;
       const elasticDrag = translation / (1 + Math.abs(translation) / 300);
       dragX.set(Math.max(-DRAG_LIMIT, Math.min(DRAG_LIMIT, elasticDrag)));
     })
     .onEnd((event) => {
-      if (isTransitioning.get()) return;
       const limitedVelocity = Math.max(-MAX_GESTURE_VELOCITY, Math.min(MAX_GESTURE_VELOCITY, event.velocityX));
-      const projectedTranslation = event.translationX + limitedVelocity * 0.2;
-      const swipeDirection = projectedTranslation < 0 ? 1 : -1;
-      const shouldAdvance = Math.abs(projectedTranslation) >= SWIPE_DISTANCE || Math.abs(limitedVelocity) >= SWIPE_VELOCITY;
-      if (!shouldAdvance) {
-        dragX.set(withTiming(0, { duration: 210, easing: Easing.bezier(0.2, 0.85, 0.28, 1) }));
+      const swipeDirection = horizontalSwipeDirection(event.translationX, limitedVelocity, { distance: SWIPE_DISTANCE, velocity: SWIPE_VELOCITY });
+      if (swipeDirection === 0) {
+        dragX.set(withTiming(0, { duration: 150, easing: Easing.bezier(0.2, 0.85, 0.28, 1) }));
         return;
       }
       direction.set(swipeDirection);
@@ -237,9 +238,9 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       }
       isTransitioning.set(true);
       const exitTarget = swipeDirection > 0 ? -SWIPE_EXIT_DISTANCE : SWIPE_EXIT_DISTANCE;
-      const finalSnapDuration = Math.max(105, Math.min(180, 180 - Math.abs(limitedVelocity) / 24));
+      const finalSnapDuration = Math.max(90, Math.min(150, 150 - Math.abs(limitedVelocity) / 30));
       const inertiaThenSnap = withSequence(
-        withDecay({ velocity: limitedVelocity, deceleration: 0.996, clamp: [-SWIPE_EXIT_DISTANCE, SWIPE_EXIT_DISTANCE] }),
+        withDecay({ velocity: limitedVelocity, deceleration: 0.99, clamp: [-SWIPE_EXIT_DISTANCE, SWIPE_EXIT_DISTANCE] }),
         withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
           isTransitioning.set(false);
           if (!finished) return;

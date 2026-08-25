@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, horizontalSwipeDirection, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, shouldAutoplayStation, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -40,6 +40,18 @@ describe("player interaction utilities", () => {
     expect(adjacentRadioIndex(4, 0, -1)).toBe(3);
     expect(adjacentRadioIndex(4, 3, 1)).toBe(0);
     expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
+  });
+
+  it("starts autoplay when opening a different or paused station", () => {
+    expect(shouldAutoplayStation("fmlatina", "cooperativa", true)).toBe(true);
+    expect(shouldAutoplayStation("fmlatina", "fmlatina", false)).toBe(true);
+    expect(shouldAutoplayStation("fmlatina", "fmlatina", true)).toBe(false);
+  });
+
+  it("accepts short flicks and keeps tiny taps centered", () => {
+    expect(horizontalSwipeDirection(-20, -100)).toBe(1);
+    expect(horizontalSwipeDirection(0, 420)).toBe(-1);
+    expect(horizontalSwipeDirection(8, 20)).toBe(0);
   });
 
   it("ignores stale playback callbacks after a newer station request", () => {
