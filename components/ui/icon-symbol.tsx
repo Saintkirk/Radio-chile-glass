@@ -29,6 +29,7 @@ const MAPPING = {
   "waveform": "graphic-eq",
   "radio": "radio",
   "chevron.left": "chevron-left",
+  "chevron.down": "keyboard-arrow-down",
   "sparkles": "auto-awesome",
   "music.note": "music-note",
 } as IconMapping;

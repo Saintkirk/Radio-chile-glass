@@ -1215,3 +1215,11 @@
 - [ ] Compilar la APK Android actualizada
 - [ ] Descargar y verificar el APK
 - [ ] Entregar la APK y documentar la prueba física
+
+## Botón de navegación y sección Romántica
+
+- [x] Hacer visible el icono del botón circular superior izquierdo
+- [x] Confirmar que el botón navegue correctamente hacia atrás
+- [x] Revisar el filtro y etiqueta de género Romántica
+- [x] Confirmar logos correctos para Imagina y emisoras románticas laterales
+- [x] Validar la pantalla de reproducción en Android
