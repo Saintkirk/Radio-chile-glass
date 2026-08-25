@@ -12,6 +12,7 @@ import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { RadioPlayerProvider } from "@/lib/radio-player";
 import { LockScreenNowPlayingSync } from "@/components/lock-screen-now-playing-sync";
+import { AnimatedAppLoader } from "@/components/animated-app-loader";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -64,6 +65,7 @@ export default function RootLayout() {
 
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
+  const [showAppLoader, setShowAppLoader] = useState(true);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -139,6 +141,7 @@ export default function RootLayout() {
           <NotificationRouteBridge />
           <LockScreenNowPlayingSync />
           <StatusBar style="auto" />
+          <AnimatedAppLoader visible={showAppLoader} onFinished={() => setShowAppLoader(false)} />
         </QueryClientProvider>
       </trpc.Provider>
     </GestureHandlerRootView>

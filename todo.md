@@ -1347,3 +1347,10 @@
 - [x] Hacer que el gesto horizontal responda en toda la superficie útil sin zonas muertas ni latencia perceptible
 - [x] Añadir pruebas deterministas para selección desde lista, autoplay y gestos del Cover Flow
 - [x] Validar la corrección en viewport móvil y guardar checkpoint actualizado
+
+## Pantalla de carga animada
+
+- [x] Crear una pantalla de carga con el logo de Radio Chile Glass y animación breve
+- [x] Integrar la pantalla de carga al arranque con salida segura y fallback anti-bloqueo
+- [x] Añadir pruebas de estado inicial, finalización y reducción de movimiento
+- [x] Validar la pantalla en móvil y guardar checkpoint actualizado
