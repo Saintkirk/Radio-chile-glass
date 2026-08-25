@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, ImageBackground, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { ItunesRadioCard } from "@/components/itunes-radio-card";
 import { CoverFlowCarousel } from "@/components/cover-flow-carousel";
@@ -35,6 +35,8 @@ export default function HomeScreen() {
   const [activeGenre, setActiveGenre] = useState("Todo");
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [favoriteNotice, setFavoriteNotice] = useState<string | null>(null);
+  const genreScrollRef = useRef<ScrollView>(null);
+  const genres = ["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"];
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
   useEffect(() => {
@@ -89,7 +91,7 @@ export default function HomeScreen() {
               <Pressable onPress={() => router.push("/settings")} accessibilityRole="button" accessibilityLabel="Abrir ajustes" style={({ pressed }) => [styles.headerButton, pressed && styles.controlPressed]}><IconSymbol name="slider.horizontal.3" size={21} color="#F5F3EE" /></Pressable>
             </View>
             <View style={[styles.searchWrap, lightMode && styles.searchWrapLight]}><IconSymbol name="magnifyingglass" size={18} color={lightMode ? "#667085" : "#A8B0C2"} /><TextInput value={query} onChangeText={setQuery} placeholder="Buscar radio, ciudad o género" placeholderTextColor={lightMode ? "#667085" : "#7F8799"} style={[styles.searchInput, lightMode && styles.searchInputLight]} /></View>
-            <View style={styles.genreRail}>{["Todo", "Noticias", "Música", "Rock", "Romántica", "Clásica"].map((genre) => <Pressable key={genre} onPress={() => setActiveGenre(genre)} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</View>
+            <ScrollView ref={genreScrollRef} horizontal showsHorizontalScrollIndicator={false} style={styles.genreRail} contentContainerStyle={styles.genreRailContent} keyboardShouldPersistTaps="handled">{genres.map((genre, index) => <Pressable key={genre} onPress={() => { setActiveGenre(genre); genreScrollRef.current?.scrollTo({ x: Math.max(0, index * 76 - 52), animated: true }); }} style={[styles.genreChip, lightMode && styles.genreChipLight, activeGenre === genre && styles.genreChipActive]}><Text style={[styles.genreChipText, lightMode && styles.genreChipTextLight, activeGenre === genre && styles.genreChipTextActive]}>{genre}</Text></Pressable>)}</ScrollView>
             <View style={[styles.syncRow, lightMode && styles.syncRowLight]}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>AHORA SONANDO</Text><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
             <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : selectAndPlayRadio(featured)} isPlaying={isPlaying} isLoading={isLoading && currentRadio?.id === featured.id} currentRadioId={currentRadio?.id} lightMode={lightMode} />
             <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>EMISORAS DESTACADAS</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
   heroName: { color: "#F5F3EE", fontSize: 27, fontWeight: "700", letterSpacing: -0.5 },
   heroGenre: { color: "#D0D3DD", fontSize: 13, marginTop: 5 },
   heroPlay: { position: "absolute", right: 20, bottom: 18, width: 52, height: 52, borderRadius: 26, backgroundColor: "#F5F3EE", alignItems: "center", justifyContent: "center" },
-  genreRail: { flexDirection: "row", gap: 8, marginBottom: 18 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipLight: { borderColor: "#D9E0EC", backgroundColor: "#FFFFFF" }, genreChipActive: { backgroundColor: "#D94B4B", borderColor: "#D94B4B" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextLight: { color: "#5B667B" }, genreChipTextActive: { color: "#160F14" },
+  genreRail: { marginBottom: 18 }, genreRailContent: { flexDirection: "row", gap: 8, paddingRight: 20 }, genreChip: { borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF18", backgroundColor: "#FFFFFF0A", paddingHorizontal: 13, paddingVertical: 8 }, genreChipLight: { borderColor: "#D9E0EC", backgroundColor: "#FFFFFF" }, genreChipActive: { backgroundColor: "#D94B4B", borderColor: "#D94B4B" }, genreChipText: { color: "#A8B0C2", fontSize: 12, fontWeight: "700" }, genreChipTextLight: { color: "#5B667B" }, genreChipTextActive: { color: "#160F14" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   seeAll: { color: "#FF6B5A", fontSize: 13, fontWeight: "600", marginBottom: 12 },
   controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#D94B4B1C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#B83E46" },

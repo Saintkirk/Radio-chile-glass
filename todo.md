@@ -1223,3 +1223,10 @@
 - [x] Revisar el filtro y etiqueta de género Romántica
 - [x] Confirmar logos correctos para Imagina y emisoras románticas laterales
 - [x] Validar la pantalla de reproducción en Android
+
+## Chip Romántica recortado en Android
+
+- [x] Permitir desplazamiento horizontal completo del carril de géneros
+- [x] Mantener el chip Romántica completamente visible al seleccionarlo
+- [x] Añadir margen final seguro para el último chip
+- [x] Validar que el mini reproductor no interfiera con el carril
