@@ -1259,3 +1259,10 @@
 - [x] Evitar solapamientos, fugas de reproductores y estados inconsistentes durante cambios rápidos
 - [x] Validar autoplay, errores de stream, segundo plano y controles de pantalla bloqueada
 - [x] Añadir pruebas deterministas para la secuencia de crossfade
+
+
+## Indicador de buffering en carátula
+
+- [x] Mostrar un ecualizador animado mientras la emisora nueva está almacenando en búfer
+- [x] Diferenciar buffering, reproducción confirmada y error sin mover el logo ni los controles
+- [x] Validar accesibilidad, reducción de movimiento y pruebas del estado de carga

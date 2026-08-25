@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AccessibilityInfo, ActivityIndicator, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { AccessibilityInfo, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
   Extrapolation,
@@ -55,10 +55,24 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
   }, [direction, motion, reduceMotion, side]);
 }
 
+function useEqualizerBarStyle(equalizer: SharedValue<number>, index: number, reduceMotion: boolean) {
+  return useAnimatedStyle(() => {
+    if (reduceMotion) return { transform: [{ scaleY: 0.62 }] };
+    const values = [
+      [0.32, 0.86, 0.46, 0.72, 0.32],
+      [0.48, 0.98, 0.36, 0.76, 0.48],
+      [0.38, 0.72, 0.98, 0.52, 0.38],
+      [0.62, 0.34, 0.82, 0.98, 0.62],
+    ][index];
+    return { transform: [{ scaleY: interpolate(equalizer.get(), [0, 0.25, 0.5, 0.75, 1], values, Extrapolation.CLAMP) }] };
+  }, [equalizer, index, reduceMotion]);
+}
+
 export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPlaying, isLoading, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onChange: (direction: number) => void; onPlay: () => void; isPlaying: boolean; isLoading: boolean; currentRadioId?: string; lightMode?: boolean }) {
   const motion = useSharedValue(1);
   const dragX = useSharedValue(0);
   const glow = useSharedValue(0);
+  const equalizer = useSharedValue(0);
   const direction = useSharedValue(1);
   const directionRef = useRef(1);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -78,6 +92,12 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   const stageDragStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: dragX.get() }],
   }), [dragX]);
+  const equalizerStyles = [
+    useEqualizerBarStyle(equalizer, 0, reduceMotion),
+    useEqualizerBarStyle(equalizer, 1, reduceMotion),
+    useEqualizerBarStyle(equalizer, 2, reduceMotion),
+    useEqualizerBarStyle(equalizer, 3, reduceMotion),
+  ];
 
   useEffect(() => {
     cancelAnimation(motion);
@@ -104,6 +124,19 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
     ), -1, false));
     return undefined;
   }, [active, currentRadioId, glow, isPlaying, reduceMotion]);
+
+  useEffect(() => {
+    cancelAnimation(equalizer);
+    if (!isLoading || reduceMotion) {
+      equalizer.set(0);
+      return undefined;
+    }
+    equalizer.set(withRepeat(withSequence(
+      withTiming(1, { duration: 620, easing: Easing.inOut(Easing.ease) }),
+      withTiming(0, { duration: 620, easing: Easing.inOut(Easing.ease) }),
+    ), -1, false));
+    return () => cancelAnimation(equalizer);
+  }, [equalizer, isLoading, reduceMotion]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion).catch(() => undefined);
@@ -169,7 +202,12 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
             <Pressable disabled={isLoading} onPress={onPlay} accessibilityRole="button" accessibilityLabel={isLoading ? `Conectando con ${active.name}` : currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
               <StationLogo radio={active} size={214} radius={30} />
               <View pointerEvents="none" style={[styles.liveBadge, { borderColor: `${active.accent}CC`, backgroundColor: `${active.accent}DD` }]}><IconSymbol name="waveform" size={15} color="#FFFFFF" /><Text style={styles.liveBadgeText}>EN VIVO</Text></View>
-              {isLoading && <View pointerEvents="none" style={styles.bufferingOverlay}><ActivityIndicator size="large" color="#F5F3EE" /><Text style={styles.bufferingText}>Conectando…</Text></View>}
+              {isLoading && <View pointerEvents="none" style={styles.bufferingOverlay} accessible accessibilityLabel={`Almacenando en búfer ${active.name}`}>
+                <View style={styles.equalizer}>
+                  {equalizerStyles.map((animatedStyle, index) => <Animated.View key={index} style={[styles.equalizerBar, { backgroundColor: active.accent }, animatedStyle]} />)}
+                </View>
+                <Text style={styles.bufferingText}>Conectando…</Text>
+              </View>}
               <View pointerEvents="none" style={styles.diagonalSheen} />
               <View pointerEvents="none" style={styles.centerGloss} />
             </Pressable>
@@ -201,7 +239,9 @@ const styles = StyleSheet.create({
   sideCover: { width: 136, height: 246, borderRadius: 18 },
   centerCover: { width: 238, height: 300, borderRadius: 28, shadowRadius: 34, shadowOpacity: 0.84 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
-  bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 8 },
+  bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 10 },
+  equalizer: { height: 42, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5 },
+  equalizerBar: { width: 6, height: 34, borderRadius: 3, shadowColor: "#FFFFFF", shadowOpacity: 0.35, shadowRadius: 6, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
   bufferingText: { color: "#F5F3EE", fontSize: 11, fontWeight: "700", letterSpacing: 0.4 },
   liveBadge: { position: "absolute", bottom: 24, left: 46, right: 46, height: 34, borderRadius: 17, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, shadowColor: "#FF5E67", shadowOpacity: 0.55, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 7 }, liveBadgeText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
