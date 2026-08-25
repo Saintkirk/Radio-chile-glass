@@ -66,7 +66,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenContainer containerClassName="bg-background" className="px-4 pt-2">
-      <View pointerEvents="none" style={styles.ambientLayer}><ImageBackground source={{ uri: "/manus-storage/santiago-radio-hero_fd9afec2.jpg" }} resizeMode="cover" style={styles.ambient} imageStyle={styles.ambientImage}><View style={styles.ambientTint} /><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></ImageBackground></View>
+      <View pointerEvents="none" style={styles.ambientLayer}><ImageBackground source={require("../../assets/images/santiago-radio-hero.jpg")} resizeMode="cover" style={styles.ambient} imageStyle={styles.ambientImage}><View style={styles.ambientTint} /><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></ImageBackground></View>
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -94,9 +94,9 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
-  ambientLayer: { ...StyleSheet.absoluteFillObject }, ambient: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#08090E" }, ambientImage: { opacity: 1 }, ambientTint: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B28" }, ambientCoral: { position: "absolute", width: 330, height: 240, borderRadius: 180, top: 100, left: -120, backgroundColor: "#B52F3C20", transform: [{ rotate: "-12deg" }] }, ambientViolet: { position: "absolute", width: 300, height: 260, borderRadius: 180, top: 120, right: -120, backgroundColor: "#6A35A526", transform: [{ rotate: "18deg" }] }, ambientHorizon: { position: "absolute", left: -40, right: -40, top: 260, height: 2, backgroundColor: "#FF6B5A52", opacity: 0.45 },
-  topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18, paddingTop: 4 },
-  brandLockup: { alignItems: "center", flex: 1 }, brandLine: { flexDirection: "row", alignItems: "baseline" }, brandRadio: { color: "#FF6B5A", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandChile: { color: "#F5F3EE", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandChileLight: { color: "#241B24" }, brandGlass: { color: "#B66BFF", fontSize: 25, fontWeight: "400", letterSpacing: -1 }, brandTagline: { color: "#C7B9C3", fontSize: 9, letterSpacing: 3.7, marginTop: 5 },
+  ambientLayer: { ...StyleSheet.absoluteFillObject }, ambient: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#08090E" }, ambientImage: { opacity: 1 }, ambientTint: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B52" }, ambientCoral: { position: "absolute", width: 330, height: 240, borderRadius: 180, top: 100, left: -120, backgroundColor: "#B52F3C20", transform: [{ rotate: "-12deg" }] }, ambientViolet: { position: "absolute", width: 300, height: 260, borderRadius: 180, top: 120, right: -120, backgroundColor: "#6A35A526", transform: [{ rotate: "18deg" }] }, ambientHorizon: { position: "absolute", left: -40, right: -40, top: 260, height: 2, backgroundColor: "#FF6B5A52", opacity: 0.45 },
+  topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingTop: 8 },
+  brandLockup: { alignItems: "center", flex: 1 }, brandLine: { flexDirection: "row", alignItems: "baseline" }, brandRadio: { color: "#FF6B5A", fontSize: 29, fontWeight: "400", letterSpacing: -1 }, brandChile: { color: "#F5F3EE", fontSize: 29, fontWeight: "400", letterSpacing: -1 }, brandChileLight: { color: "#241B24" }, brandGlass: { color: "#B66BFF", fontSize: 29, fontWeight: "400", letterSpacing: -1 }, brandTagline: { color: "#E2D5DF", fontSize: 10, letterSpacing: 3.7, marginTop: 5 },
   headerButton: { width: 48, height: 48, borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF2E", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF12", shadowColor: "#FFFFFF", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
   eyebrow: { color: "#FF6B5A", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
   title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 }, titleLight: { color: "#172033" },

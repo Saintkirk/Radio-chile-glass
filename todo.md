@@ -1281,3 +1281,12 @@
 - [x] Diagnosticar por qué las emisoras no reproducen en la vista actual
 - [x] Restaurar el efecto visual del Cover Flow y el cambio de carátulas
 - [x] Validar reproducción real, cambio rápido, buffering y controles nativos
+
+
+## Alineación estética con referencia vertical
+
+- [x] Hacer visible el fondo de Santiago a pantalla completa y ajustar el contraste
+- [x] Convertir el Cover Flow en una composición de pósteres verticales con laterales inclinados
+- [x] Añadir bordes luminosos, reflejos y proporciones más cercanas al mockup
+- [x] Ajustar cabecera, espaciado y controles para una composición móvil 9:16
+- [x] Validar que la estética no rompa gestos, reproducción ni controles funcionales
