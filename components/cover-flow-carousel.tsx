@@ -10,6 +10,7 @@ import Animated, {
   withSequence,
   withTiming,
   cancelAnimation,
+  runOnJS,
   type SharedValue,
 } from "react-native-reanimated";
 
@@ -56,6 +57,7 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
 
 export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPlaying, isLoading, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onChange: (direction: number) => void; onPlay: () => void; isPlaying: boolean; isLoading: boolean; currentRadioId?: string; lightMode?: boolean }) {
   const motion = useSharedValue(1);
+  const dragX = useSharedValue(0);
   const glow = useSharedValue(0);
   const direction = useSharedValue(1);
   const directionRef = useRef(1);
@@ -73,9 +75,14 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   const innerGlowStyle = useAnimatedStyle(() => ({
     opacity: interpolate(glow.get(), [0, 1], [0.08, 0.18], Extrapolation.CLAMP),
   }), [glow]);
+  const stageDragStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: dragX.get() }],
+  }), [dragX]);
 
   useEffect(() => {
     cancelAnimation(motion);
+    cancelAnimation(dragX);
+    dragX.set(0);
     if (reduceMotion) {
       motion.set(1);
       return undefined;
@@ -83,7 +90,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
     motion.set(0);
     motion.set(withTiming(1, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }));
     return undefined;
-  }, [activeIndex, motion, reduceMotion]);
+  }, [activeIndex, dragX, motion, reduceMotion]);
 
   useEffect(() => {
     cancelAnimation(glow);
@@ -107,14 +114,30 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > Math.abs(gesture.dy) && Math.abs(gesture.dx) > 8,
+    onPanResponderGrant: () => {
+      cancelAnimation(dragX);
+    },
+    onPanResponderMove: (_, gesture) => {
+      if (reduceMotion) return;
+      const resistance = Math.max(-84, Math.min(84, gesture.dx * 0.34));
+      dragX.set(resistance);
+    },
     onPanResponderRelease: (_, gesture) => {
-      if (Math.abs(gesture.dx) < 48 || Math.abs(gesture.dx) < Math.abs(gesture.dy) * 1.15) return;
+      const validSwipe = Math.abs(gesture.dx) >= 48 && Math.abs(gesture.dx) >= Math.abs(gesture.dy) * 1.15;
+      if (!validSwipe || reduceMotion) {
+        dragX.set(withTiming(0, { duration: 180, easing: Easing.out(Easing.cubic) }));
+        return;
+      }
       const nextDirection = gesture.dx < 0 ? 1 : -1;
       directionRef.current = nextDirection;
       direction.set(nextDirection);
-      onChange(nextDirection);
+      dragX.set(withTiming(gesture.dx < 0 ? -118 : 118, { duration: 145, easing: Easing.bezier(0.22, 1, 0.36, 1) }, (finished) => {
+        if (!finished) return;
+        dragX.set(0);
+        runOnJS(onChange)(nextDirection);
+      }));
     },
-  }), [direction, onChange]);
+  }), [direction, dragX, onChange, reduceMotion]);
 
   if (!active) return null;
 
@@ -137,7 +160,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
 
   return (
     <View {...panResponder.panHandlers} style={[styles.root, lightMode && styles.rootLight]} accessibilityLabel="Carrusel de emisoras">
-      <View style={styles.stage}>
+      <Animated.View style={[styles.stage, stageDragStyle]}>
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
           <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
@@ -154,7 +177,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
           <View style={styles.centerReflection}><StationLogo radio={active} size={184} radius={27} /></View>
         </Animated.View>
         {sideCard(next, 1, nextStyle)}
-      </View>
+      </Animated.View>
       <View style={styles.captionRow}>
         <Pressable onPress={() => requestChange(-1)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={20} color="#F5F3EE" /></Pressable>
         <View style={styles.caption}><Text style={[styles.stationName, lightMode && styles.stationNameLight]} numberOfLines={1}>{active.name}</Text><Text style={[styles.stationMeta, lightMode && styles.stationMetaLight]}>{active.frequency}  ·  {active.genre}</Text><Text style={styles.counter}>{activeIndex + 1} / {radios.length}</Text></View>

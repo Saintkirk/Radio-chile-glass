@@ -1244,3 +1244,10 @@
 
 - [x] Eliminar el panel negro envolvente y dejar el carrusel flotando sobre el fondo
 - [x] Validar el cambio visual en viewport móvil y repetir typecheck, lint y 37 pruebas Vitest
+
+
+## Transición suave del Cover Flow
+
+- [x] Animar el desplazamiento horizontal de las carátulas al deslizar
+- [x] Mantener fondo, controles y estado de reproducción estables durante la transición
+- [x] Validar reducción de movimiento, gesto táctil y pruebas automatizadas
