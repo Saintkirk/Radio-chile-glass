@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { prefetchLogo } from "@/lib/logo-cache";
 import { StyleSheet, Text, View } from "react-native";
 import type { Radio } from "@/lib/radios";
@@ -32,7 +32,7 @@ const LOCAL_LOGOS: Record<string, number> = {
   edelweiss: require("@/assets/images/radios/edelweiss.png"),
 };
 
-export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
+export const StationLogo = memo(function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     setFailed(false);
@@ -67,7 +67,7 @@ export function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps)
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({ container: { overflow: "hidden", backgroundColor: "#181818", alignItems: "center", justifyContent: "center" }, image: { backgroundColor: "#F4F4F2" }, fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" }, glassOrb: { position: "absolute", right: -sizeOffset(), top: -sizeOffset(), backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" }, initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 }, });
 function sizeOffset() { return 8; }

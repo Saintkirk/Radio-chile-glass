@@ -20,6 +20,13 @@ import type { Radio } from "@/lib/radio-player";
 
 type Side = -1 | 0 | 1;
 
+const EQUALIZER_VALUES = [
+  [0.32, 0.86, 0.46, 0.72, 0.32],
+  [0.48, 0.98, 0.36, 0.76, 0.48],
+  [0.38, 0.72, 0.98, 0.52, 0.38],
+  [0.62, 0.34, 0.82, 0.98, 0.62],
+] as const;
+
 function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
     const dir = direction.get();
@@ -58,12 +65,7 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
 function useEqualizerBarStyle(equalizer: SharedValue<number>, index: number, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
     if (reduceMotion) return { transform: [{ scaleY: 0.62 }] };
-    const values = [
-      [0.32, 0.86, 0.46, 0.72, 0.32],
-      [0.48, 0.98, 0.36, 0.76, 0.48],
-      [0.38, 0.72, 0.98, 0.52, 0.38],
-      [0.62, 0.34, 0.82, 0.98, 0.62],
-    ][index];
+    const values = EQUALIZER_VALUES[index];
     return { transform: [{ scaleY: interpolate(equalizer.get(), [0, 0.25, 0.5, 0.75, 1], values, Extrapolation.CLAMP) }] };
   }, [equalizer, index, reduceMotion]);
 }

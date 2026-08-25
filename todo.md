@@ -1266,3 +1266,11 @@
 - [x] Mostrar un ecualizador animado mientras la emisora nueva está almacenando en búfer
 - [x] Diferenciar buffering, reproducción confirmada y error sin mover el logo ni los controles
 - [x] Validar accesibilidad, reducción de movimiento y pruebas del estado de carga
+
+
+## Optimización de rendimiento visual
+
+- [x] Reducir renders y recreación de estilos durante gestos del Cover Flow
+- [x] Mantener transformaciones y opacidades en el hilo nativo de Reanimated
+- [x] Evitar recargas o transiciones innecesarias de logos al cambiar rápidamente
+- [x] Validar la fluidez en viewport móvil y repetir typecheck, lint y pruebas
