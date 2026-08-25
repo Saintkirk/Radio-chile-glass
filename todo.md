@@ -1274,3 +1274,10 @@
 - [x] Mantener transformaciones y opacidades en el hilo nativo de Reanimated
 - [x] Evitar recargas o transiciones innecesarias de logos al cambiar rápidamente
 - [x] Validar la fluidez en viewport móvil y repetir typecheck, lint y pruebas
+
+
+## Regresiones reportadas: audio y Cover Flow
+
+- [x] Diagnosticar por qué las emisoras no reproducen en la vista actual
+- [x] Restaurar el efecto visual del Cover Flow y el cambio de carátulas
+- [x] Validar reproducción real, cambio rápido, buffering y controles nativos

@@ -56,6 +56,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const resumeAfterFocusGainRef = useRef(false);
   const autoplayStartedRef = useRef(false);
   const playbackIntentRef = useRef(false);
+  const currentRadioRef = useRef<Radio | null>(null);
 
   const disposeCurrentPlayer = useCallback((preserveMediaSession = false) => {
     crossfadeTokenRef.current += 1;
@@ -171,7 +172,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       try { crossfadeOutgoingRef.current.remove(); } catch { /* no-op */ }
       crossfadeOutgoingRef.current = null;
     }
-    const outgoingRadio = currentRadio;
+    const outgoingRadio = currentRadioRef.current;
     const outgoingPlayer = detachCurrentPlayerForCrossfade();
     if (outgoingPlayer) {
       try { outgoingPlayer.volume = 1; } catch { /* no-op */ }
@@ -179,6 +180,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     if (preserveMediaSession && backgroundPlaybackEnabled) {
       setNativeMediaSession(lockScreenMetadata(radio), false);
     }
+    currentRadioRef.current = radio;
     setCurrentRadio(radio);
     AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
     // El control debe mostrar la intención de reproducción desde el primer cuadro;
@@ -260,6 +262,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           if (outgoingPlayer && outgoingRadio) {
             try { outgoingPlayer.volume = 1; outgoingPlayer.play(); } catch { /* no-op */ }
             playerRef.current = outgoingPlayer;
+            currentRadioRef.current = outgoingRadio;
             setCurrentRadio(outgoingRadio);
             setIsPlaying(true);
             updateNativeMediaState(true);
@@ -295,6 +298,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           if (outgoingPlayer && outgoingRadio) {
             try { outgoingPlayer.volume = 1; outgoingPlayer.play(); } catch { /* no-op */ }
             playerRef.current = outgoingPlayer;
+            currentRadioRef.current = outgoingRadio;
             setCurrentRadio(outgoingRadio);
             setIsPlaying(true);
             updateNativeMediaState(true);
@@ -306,7 +310,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-  }, [backgroundPlaybackEnabled, currentRadio, detachCurrentPlayerForCrossfade, startCrossfade, syncLockScreenControls]);
+  }, [backgroundPlaybackEnabled, detachCurrentPlayerForCrossfade, startCrossfade, syncLockScreenControls]);
 
   const playAdjacent = useCallback(async (direction: -1 | 1, fromId?: string) => {
     const sourceId = fromId ?? currentRadio?.id;

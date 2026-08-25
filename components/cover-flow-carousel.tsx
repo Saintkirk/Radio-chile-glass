@@ -147,7 +147,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   }, []);
 
   const panResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > Math.abs(gesture.dy) && Math.abs(gesture.dx) > 8,
     onPanResponderGrant: () => {
       cancelAnimation(dragX);
