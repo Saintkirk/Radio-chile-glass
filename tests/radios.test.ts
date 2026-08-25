@@ -16,6 +16,14 @@ describe("catálogo de radios chilenas", () => {
     expect(carolina?.favicon).toContain("carolina-online.png");
   });
 
+  it("usa el stream MP3 vigente y la identidad oficial de Radio Cooperativa", () => {
+    const cooperativa = RADIOS.find((radio) => radio.id === "cooperativa");
+    expect(cooperativa?.frequency).toBe("93.3 FM");
+    expect(cooperativa?.streamUrl).toBe("https://redirector.dps.live/cooperativafm/mp3/icecast.audio");
+    expect(cooperativa?.homepage).toBe("https://cooperativa.cl/");
+    expect(cooperativa?.favicon).toBe("https://www.cooperativa.cl/favicon.ico");
+  });
+
   it("mantiene stream, frecuencia y ciudad en cada emisora editorial", () => {
     expect(RADIOS.length).toBeGreaterThanOrEqual(6);
     RADIOS.forEach((radio) => {

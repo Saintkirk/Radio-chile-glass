@@ -1290,3 +1290,10 @@
 - [x] Añadir bordes luminosos, reflejos y proporciones más cercanas al mockup
 - [x] Ajustar cabecera, espaciado y controles para una composición móvil 9:16
 - [x] Validar que la estética no rompa gestos, reproducción ni controles funcionales
+
+
+## Corrección de Radio Cooperativa
+
+- [x] Encontrar y validar una URL pública de streaming que responda como audio
+- [x] Actualizar el catálogo manteniendo el ID, logo y metadatos de Cooperativa
+- [x] Probar reproducción, buffering, crossfade y controles nativos de la emisora
