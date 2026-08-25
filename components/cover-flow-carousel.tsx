@@ -21,6 +21,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
 
 type Side = -1 | 0 | 1;
+type OuterSide = -2 | 2;
 
 const EQUALIZER_VALUES = [
   [0.32, 0.86, 0.46, 0.72, 0.32],
@@ -81,6 +82,35 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
   }, [direction, dragX, motion, reduceMotion, side]);
 }
 
+function useOuterCardAnimatedStyle(side: OuterSide, motion: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
+  return useAnimatedStyle(() => {
+    if (reduceMotion) {
+      return {
+        opacity: 0.42,
+        transform: [{ perspective: 900 }, { scale: 0.58 }, { rotateY: side < 0 ? "56deg" : "-56deg" }],
+      };
+    }
+
+    const progress = motion.get();
+    const dragProgress = Math.max(-1, Math.min(1, dragX.get() / DRAG_LIMIT));
+    const dragStrength = Math.abs(dragProgress);
+    const incoming = side * dragProgress < 0;
+    const baseRotation = side < 0 ? 62 : -62;
+    const baseShift = side < 0 ? -10 : 10;
+
+    return {
+      opacity: interpolate(progress, [0, 1], [0.08, 0.38], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.2 : -dragStrength * 0.08),
+      transform: [
+        { perspective: 900 },
+        { translateX: baseShift + dragProgress * (incoming ? 54 : 12) },
+        { translateY: 28 - dragStrength * 8 },
+        { scale: interpolate(progress, [0, 1], [0.44, 0.58], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.1 : -dragStrength * 0.04) },
+        { rotateY: `${baseRotation - dragProgress * 20}deg` },
+      ],
+    };
+  }, [dragX, motion, reduceMotion, side]);
+}
+
 function useEqualizerBarStyle(equalizer: SharedValue<number>, index: number, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
     if (reduceMotion) return { transform: [{ scaleY: 0.62 }] };
@@ -100,9 +130,13 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   const active = radios[activeIndex];
   const previous = radios.length ? radios[(activeIndex - 1 + radios.length) % radios.length] : undefined;
   const next = radios.length ? radios[(activeIndex + 1) % radios.length] : undefined;
+  const farPrevious = radios.length > 3 ? radios[(activeIndex - 2 + radios.length) % radios.length] : undefined;
+  const farNext = radios.length > 3 ? radios[(activeIndex + 2) % radios.length] : undefined;
   const centerStyle = useCardAnimatedStyle(0, motion, direction, dragX, reduceMotion);
   const previousStyle = useCardAnimatedStyle(-1, motion, direction, dragX, reduceMotion);
   const nextStyle = useCardAnimatedStyle(1, motion, direction, dragX, reduceMotion);
+  const farPreviousStyle = useOuterCardAnimatedStyle(-2, motion, dragX, reduceMotion);
+  const farNextStyle = useOuterCardAnimatedStyle(2, motion, dragX, reduceMotion);
   const glowStyle = useAnimatedStyle(() => ({
     opacity: interpolate(glow.get(), [0, 1], [0.12, 0.32], Extrapolation.CLAMP),
     transform: [{ scale: interpolate(glow.get(), [0, 1], [0.94, 1.08], Extrapolation.CLAMP) }],
@@ -226,12 +260,22 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     </Pressable>
   ) : null;
 
+  const outerCard = (radio: Radio | undefined, side: OuterSide, animatedStyle: ReturnType<typeof useOuterCardAnimatedStyle>) => radio ? (
+    <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight]}>
+      <Animated.View style={[styles.cover, styles.outerCover, animatedStyle, { backgroundColor: `${radio.accent}2A` }]}>
+        <StationLogo radio={radio} size={100} radius={17} />
+        <View style={styles.outerShade} />
+      </Animated.View>
+    </Pressable>
+  ) : null;
+
   if (!active) return null;
 
   return (
     <GestureDetector gesture={panGesture}>
     <View style={[styles.root, lightMode && styles.rootLight]} accessibilityLabel="Carrusel de emisoras">
       <View style={styles.stage}>
+        {outerCard(farPrevious, -2, farPreviousStyle)}
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
           <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
@@ -253,6 +297,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
           <View style={styles.centerReflection}><StationLogo radio={active} size={184} radius={27} /></View>
         </Animated.View>
         {sideCard(next, 1, nextStyle)}
+        {outerCard(farNext, 2, farNextStyle)}
       </View>
       <View style={styles.captionRow}>
         <Pressable onPress={() => requestChange(previous, -1)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={20} color="#F5F3EE" /></Pressable>
@@ -269,12 +314,16 @@ const styles = StyleSheet.create({
   root: { height: 556, borderRadius: 0, overflow: "visible", backgroundColor: "transparent", borderWidth: 0, marginBottom: 24, paddingTop: 10 },
   rootLight: { backgroundColor: "transparent", borderColor: "transparent" },
   stage: { height: 414, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
+  outerSlot: { position: "absolute", top: 86, width: 112, height: 238, zIndex: 0, alignItems: "center" },
+  outerLeft: { left: -64 },
+  outerRight: { right: -64 },
   sideSlot: { position: "absolute", top: 46, width: 150, height: 316, zIndex: 1, alignItems: "center" },
   sideLeft: { left: -2 },
   sideRight: { right: -2 },
   centerSlot: { width: 270, height: 392, zIndex: 3, alignItems: "center" },
   outerGlow: { position: "absolute", width: 292, height: 402, borderRadius: 32, shadowColor: "#FF5E67", shadowOpacity: 0.9, shadowRadius: 34, shadowOffset: { width: 0, height: 0 }, elevation: 16 },
   cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.7, shadowRadius: 26, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
+  outerCover: { width: 112, height: 228, borderRadius: 18, borderColor: "#FFFFFF32", shadowOpacity: 0.38, shadowRadius: 12, shadowOffset: { width: 0, height: 9 }, elevation: 3 },
   sideCover: { width: 150, height: 308, borderRadius: 24 },
   centerCover: { width: 270, height: 382, borderRadius: 34, borderWidth: 2, borderColor: "#FFFFFFB8", shadowRadius: 38, shadowOpacity: 0.92 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
@@ -285,6 +334,7 @@ const styles = StyleSheet.create({
   liveBadge: { position: "absolute", bottom: 24, left: 46, right: 46, height: 34, borderRadius: 17, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, shadowColor: "#FF5E67", shadowOpacity: 0.55, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 7 }, liveBadgeText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
+  outerShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B66" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
   diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
   reflection: { position: "absolute", top: 307, width: 150, height: 58, opacity: 0.12, transform: [{ scaleY: -1 }], overflow: "hidden" },

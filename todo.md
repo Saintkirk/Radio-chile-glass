@@ -1318,3 +1318,10 @@
 - [x] Aplicar desaceleración gradual antes del encaje de la carátula siguiente
 - [x] Limitar cada gesto a un cambio de emisora y cancelar rebotes obsoletos
 - [x] Validar flicks rápidos, arrastres cortos y reducción de movimiento
+
+## Biblioteca lateral de Cover Flow
+
+- [x] Mostrar varias carátulas reales a ambos lados de la estación activa
+- [x] Aplicar escala, perspectiva, opacidad y orden visual por profundidad
+- [x] Conservar selección, gestos, botones e inercia al navegar la biblioteca
+- [x] Validar composición 9:16 y rendimiento de logos precargados
