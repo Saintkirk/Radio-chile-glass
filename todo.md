@@ -1230,3 +1230,11 @@
 - [x] Mantener el chip Romántica completamente visible al seleccionarlo
 - [x] Añadir margen final seguro para el último chip
 - [x] Validar que el mini reproductor no interfiera con el carril
+
+## Alineación visual con mockup de referencia
+
+- [x] Reestructurar Inicio para usar fondo fotográfico a pantalla completa y encabezado compacto tipo Android
+- [x] Ajustar Cover Flow para una carátula central grande con emisoras laterales visibles
+- [x] Rediseñar tarjetas de emisoras con estética premium, acentos por marca y controles claros
+- [x] Elevar la navegación inferior y conservar el mini reproductor sin solapamientos
+- [x] Validar composición en viewport móvil 9:16 y ejecución de pruebas

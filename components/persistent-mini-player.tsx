@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { StationLogo } from "@/components/station-logo";
@@ -11,6 +11,7 @@ import { useColors } from "@/hooks/use-colors";
 
 export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
   const { currentRadio, isPlaying, isLoading, playbackError, playRadio, playAdjacent, togglePlay } = useRadioPlayer();
   const { colorScheme } = useThemeContext();
@@ -49,7 +50,9 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
   };
 
   const displayRadio = currentRadio ?? miniRadio;
-  if (!displayRadio) return null;
+  // Inicio ya muestra el control completo dentro de cada tarjeta; el mini reproductor
+  // permanece visible en las otras pestañas y rutas para no cubrir el Cover Flow.
+  if (!displayRadio || pathname === "/" || pathname === "/(tabs)") return null;
   const lightMode = colorScheme === "light";
   // bottomOffset ya incluye la altura de la barra y el inset inferior; no duplicarlo.
   const bottom = bottomOffset;

@@ -128,10 +128,10 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
       <Animated.View style={[styles.cover, styles.sideCover, animatedStyle, { backgroundColor: `${radio.accent}32` }]}>
-        <StationLogo radio={radio} size={124} radius={20} />
+        <StationLogo radio={radio} size={122} radius={22} />
         <View style={styles.sideShade} />
       </Animated.View>
-      <View style={styles.reflection}><StationLogo radio={radio} size={124} radius={20} /></View>
+      <View style={styles.reflection}><StationLogo radio={radio} size={122} radius={22} /></View>
     </Pressable>
   ) : null;
 
@@ -141,10 +141,11 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
           <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
-          <View style={[styles.cover, styles.centerCover, { backgroundColor: `${active.accent}32` }]}>
+          <View style={[styles.centerCover, { backgroundColor: `${active.accent}40` }]}>
             <Animated.View pointerEvents="none" style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }]} />
             <Pressable disabled={isLoading} onPress={onPlay} accessibilityRole="button" accessibilityLabel={isLoading ? `Conectando con ${active.name}` : currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
-              <StationLogo radio={active} size={184} radius={27} />
+              <StationLogo radio={active} size={214} radius={30} />
+              <View pointerEvents="none" style={[styles.liveBadge, { borderColor: `${active.accent}CC`, backgroundColor: `${active.accent}DD` }]}><IconSymbol name="waveform" size={15} color="#FFFFFF" /><Text style={styles.liveBadgeText}>EN VIVO</Text></View>
               {isLoading && <View pointerEvents="none" style={styles.bufferingOverlay}><ActivityIndicator size="large" color="#F5F3EE" /><Text style={styles.bufferingText}>Conectando…</Text></View>}
               <View pointerEvents="none" style={styles.diagonalSheen} />
               <View pointerEvents="none" style={styles.centerGloss} />
@@ -165,36 +166,37 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
 }
 
 const styles = StyleSheet.create({
-  root: { height: 410, borderRadius: 0, overflow: "hidden", backgroundColor: "#090A10", borderWidth: 1, borderColor: "#29202F", marginBottom: 28, paddingTop: 4 },
-  rootLight: { backgroundColor: "#090A10", borderColor: "#29202F" },
-  stage: { height: 302, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
-  sideSlot: { position: "absolute", top: 36, width: 128, height: 222, zIndex: 1, alignItems: "center" },
-  sideLeft: { left: 6 },
-  sideRight: { right: 6 },
-  centerSlot: { width: 218, height: 250, zIndex: 3, alignItems: "center" },
-  outerGlow: { position: "absolute", width: 246, height: 246, borderRadius: 28, shadowColor: "#FF5E67", shadowOpacity: 0.9, shadowRadius: 30, shadowOffset: { width: 0, height: 0 }, elevation: 14 },
-  cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF45", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.62, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 10 },
-  sideCover: { width: 128, height: 210, borderRadius: 12 },
-  centerCover: { width: 218, height: 232, borderRadius: 18, shadowRadius: 30, shadowOpacity: 0.78 },
+  root: { height: 454, borderRadius: 26, overflow: "hidden", backgroundColor: "#08090ED9", borderWidth: 1, borderColor: "#FFFFFF22", marginBottom: 24, paddingTop: 10, shadowColor: "#000", shadowOpacity: 0.35, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 8 },
+  rootLight: { backgroundColor: "#08090ED9", borderColor: "#FFFFFF22" },
+  stage: { height: 334, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
+  sideSlot: { position: "absolute", top: 34, width: 136, height: 250, zIndex: 1, alignItems: "center" },
+  sideLeft: { left: -2 },
+  sideRight: { right: -2 },
+  centerSlot: { width: 238, height: 310, zIndex: 3, alignItems: "center" },
+  outerGlow: { position: "absolute", width: 264, height: 316, borderRadius: 32, shadowColor: "#FF5E67", shadowOpacity: 0.9, shadowRadius: 34, shadowOffset: { width: 0, height: 0 }, elevation: 16 },
+  cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.7, shadowRadius: 26, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
+  sideCover: { width: 136, height: 246, borderRadius: 18 },
+  centerCover: { width: 238, height: 300, borderRadius: 28, shadowRadius: 34, shadowOpacity: 0.84 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
   bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 8 },
   bufferingText: { color: "#F5F3EE", fontSize: 11, fontWeight: "700", letterSpacing: 0.4 },
+  liveBadge: { position: "absolute", bottom: 24, left: 46, right: 46, height: 34, borderRadius: 17, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, shadowColor: "#FF5E67", shadowOpacity: 0.55, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 7 }, liveBadgeText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
   diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
-  reflection: { position: "absolute", top: 212, width: 128, height: 36, opacity: 0.1, transform: [{ scaleY: -1 }], overflow: "hidden" },
-  centerReflection: { width: 218, height: 42, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden" },
-  captionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, marginTop: 4 },
+  reflection: { position: "absolute", top: 246, width: 136, height: 42, opacity: 0.12, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  centerReflection: { width: 238, height: 52, opacity: 0.11, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  captionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, marginTop: 4 },
   caption: { flex: 1, alignItems: "center", paddingHorizontal: 12 },
-  stationName: { color: "#F5F3EE", fontSize: 22, fontWeight: "700", letterSpacing: -0.4 },
+  stationName: { color: "#F5F3EE", fontSize: 24, fontWeight: "700", letterSpacing: -0.5 },
   stationNameLight: { color: "#F5F3EE" },
   stationMeta: { color: "#B7C0D0", fontSize: 12, marginTop: 5 },
   stationMetaLight: { color: "#B7C0D0" },
   counter: { color: "#FF6B5A", fontSize: 10, fontWeight: "700", marginTop: 6 },
   arrow: { width: 38, height: 38, borderRadius: 19, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#FFFFFF1C" },
   pressed: { opacity: 0.62, transform: [{ scale: 0.93 }] },
-  dots: { flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 9 },
+  dots: { flexDirection: "row", justifyContent: "center", gap: 7, marginTop: 10 },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#687184" },
   dotActive: { width: 18, backgroundColor: "#FF6B5A" },
 });

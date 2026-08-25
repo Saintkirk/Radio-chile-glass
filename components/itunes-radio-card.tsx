@@ -67,34 +67,34 @@ export function ItunesRadioCard({
           <Text style={[styles.name, lightMode && styles.nameLight]} numberOfLines={1}>{radio.name}</Text>
           <Text style={[styles.meta, lightMode && styles.metaLight]} numberOfLines={1}>{radio.frequency}  ·  {radio.genre}</Text>
         </View>
-        {trailing}
         <Pressable
           onPress={(event) => { event.stopPropagation(); onPlay(); }}
           accessibilityRole="button"
           disabled={loading}
           accessibilityLabel={loading ? `Conectando con ${radio.name}` : playing ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`}
-          style={({ pressed }) => [styles.play, lightMode && styles.playLight, playing && styles.playActive, loading && styles.playLoading, pressed && styles.controlPressed]}
+          style={({ pressed }) => [styles.play, lightMode && styles.playLight, { backgroundColor: playing ? radio.accent : `${radio.accent}D9` }, loading && styles.playLoading, pressed && styles.controlPressed]}
         >
-          {loading ? <ActivityIndicator size="small" color="#F5F3EE" /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={16} color="#F5F3EE" />}
+          {loading ? <ActivityIndicator size="small" color="#F5F3EE" /> : <IconSymbol name={playing ? "pause.fill" : "play.fill"} size={20} color="#F5F3EE" />}
         </Pressable>
+        {trailing}
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { minHeight: 78, borderRadius: 20, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF0E", padding: 10, marginBottom: 10, flexDirection: "row", alignItems: "center" },
-  cardLight: { backgroundColor: "#FFFFFFD9", borderColor: "#D9E0EC" },
+  card: { minHeight: 116, borderRadius: 24, backgroundColor: "#14151BD9", borderWidth: 1, borderColor: "#FFFFFF2A", padding: 12, marginBottom: 12, flexDirection: "row", alignItems: "center", shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  cardLight: { backgroundColor: "#14151BD9", borderColor: "#FFFFFF2A" },
   cardHovered: { backgroundColor: "#1ED76016", borderColor: "#1ED76066", shadowColor: "#1ED760", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   cardPressed: { opacity: 0.82, transform: [{ scale: 0.985 }] },
-  coverStage: { width: 58, height: 58, borderRadius: 17, alignItems: "center", justifyContent: "center", overflow: "hidden" },
-  coverBack: { position: "absolute", width: 46, height: 46, borderRadius: 14, borderWidth: 1, transform: [{ translateX: 7 }, { rotate: "8deg" }], opacity: 0.75 },
-  info: { flex: 1, marginLeft: 13, minWidth: 0 },
-  name: { color: "#F5F3EE", fontSize: 15, fontWeight: "700" },
+  coverStage: { width: 86, height: 86, borderRadius: 20, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF22", shadowColor: "#000", shadowOpacity: 0.5, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  coverBack: { position: "absolute", width: 68, height: 68, borderRadius: 18, borderWidth: 1, transform: [{ translateX: 9 }, { rotate: "8deg" }], opacity: 0.75 },
+  info: { flex: 1, marginLeft: 14, minWidth: 0 },
+  name: { color: "#F5F3EE", fontSize: 17, fontWeight: "700" },
   nameLight: { color: "#172033" },
-  meta: { color: "#8D95A7", fontSize: 12, marginTop: 5 },
+  meta: { color: "#C0C5D2", fontSize: 13, marginTop: 7 },
   metaLight: { color: "#5B667B" },
-  play: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", marginLeft: 8 },
+  play: { width: 54, height: 54, borderRadius: 27, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", marginLeft: 8, shadowColor: "#FF5E67", shadowOpacity: 0.32, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 7 },
   playLight: { backgroundColor: "#172033" },
   playActive: { backgroundColor: "#15883E" },
   playLoading: { backgroundColor: "#D94B4B" },
