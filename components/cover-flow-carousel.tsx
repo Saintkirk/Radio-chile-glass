@@ -252,19 +252,30 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
+      <Animated.View pointerEvents="none" style={[styles.sideContactShadow, animatedStyle]} />
       <Animated.View style={[styles.cover, styles.sideCover, animatedStyle, { backgroundColor: `${radio.accent}32` }]}>
         <StationLogo radio={radio} size={122} radius={22} />
         <View style={styles.sideShade} />
       </Animated.View>
-      <View style={styles.reflection}><StationLogo radio={radio} size={122} radius={22} /></View>
+      <Animated.View pointerEvents="none" style={[styles.reflection, animatedStyle]}>
+        <StationLogo radio={radio} size={122} radius={22} />
+        <View style={styles.reflectionFadeStrong} />
+        <View style={styles.reflectionFadeSoft} />
+      </Animated.View>
     </Pressable>
   ) : null;
 
   const outerCard = (radio: Radio | undefined, side: OuterSide, animatedStyle: ReturnType<typeof useOuterCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight]}>
+      <Animated.View pointerEvents="none" style={[styles.outerContactShadow, animatedStyle]} />
       <Animated.View style={[styles.cover, styles.outerCover, animatedStyle, { backgroundColor: `${radio.accent}2A` }]}>
         <StationLogo radio={radio} size={100} radius={17} />
         <View style={styles.outerShade} />
+      </Animated.View>
+      <Animated.View pointerEvents="none" style={[styles.outerReflection, animatedStyle]}>
+        <StationLogo radio={radio} size={92} radius={16} />
+        <View style={styles.reflectionFadeStrong} />
+        <View style={styles.reflectionFadeSoft} />
       </Animated.View>
     </Pressable>
   ) : null;
@@ -278,6 +289,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         {outerCard(farPrevious, -2, farPreviousStyle)}
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
+          <View pointerEvents="none" style={styles.centerContactShadow} />
           <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
           <View style={[styles.centerCover, { backgroundColor: `${active.accent}40` }]}>
             <Animated.View pointerEvents="none" style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }]} />
@@ -294,7 +306,11 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
               <View pointerEvents="none" style={styles.centerGloss} />
             </Pressable>
           </View>
-          <View style={styles.centerReflection}><StationLogo radio={active} size={184} radius={27} /></View>
+          <View pointerEvents="none" style={styles.centerReflection}>
+            <StationLogo radio={active} size={184} radius={27} />
+            <View style={styles.reflectionFadeStrong} />
+            <View style={styles.reflectionFadeSoft} />
+          </View>
         </Animated.View>
         {sideCard(next, 1, nextStyle)}
         {outerCard(farNext, 2, farNextStyle)}
@@ -320,11 +336,15 @@ const styles = StyleSheet.create({
   sideSlot: { position: "absolute", top: 46, width: 150, height: 316, zIndex: 1, alignItems: "center" },
   sideLeft: { left: -2 },
   sideRight: { right: -2 },
-  centerSlot: { width: 270, height: 392, zIndex: 3, alignItems: "center" },
+  centerSlot: { width: 270, height: 392, zIndex: 3, alignItems: "center", position: "relative" },
+  centerContactShadow: { position: "absolute", top: 374, width: 204, height: 16, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.34, transform: [{ scaleY: 0.2 }] },
   outerGlow: { position: "absolute", width: 292, height: 402, borderRadius: 32, shadowColor: "#FF5E67", shadowOpacity: 0.9, shadowRadius: 34, shadowOffset: { width: 0, height: 0 }, elevation: 16 },
   cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.7, shadowRadius: 26, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
   outerCover: { width: 112, height: 228, borderRadius: 18, borderColor: "#FFFFFF32", shadowOpacity: 0.38, shadowRadius: 12, shadowOffset: { width: 0, height: 9 }, elevation: 3 },
+  outerContactShadow: { position: "absolute", top: 218, width: 84, height: 14, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.28, transform: [{ scaleY: 0.2 }] },
+  outerReflection: { position: "absolute", top: 226, width: 106, height: 34, opacity: 0.07, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 16, alignItems: "center" },
   sideCover: { width: 150, height: 308, borderRadius: 24 },
+  sideContactShadow: { position: "absolute", top: 300, width: 112, height: 18, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.3, transform: [{ scaleY: 0.2 }] },
   centerCover: { width: 270, height: 382, borderRadius: 34, borderWidth: 2, borderColor: "#FFFFFFB8", shadowRadius: 38, shadowOpacity: 0.92 },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
   bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 10 },
@@ -337,8 +357,10 @@ const styles = StyleSheet.create({
   outerShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B66" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
   diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
-  reflection: { position: "absolute", top: 307, width: 150, height: 58, opacity: 0.12, transform: [{ scaleY: -1 }], overflow: "hidden" },
-  centerReflection: { position: "absolute", top: 382, width: 270, height: 62, opacity: 0.11, transform: [{ scaleY: -1 }], overflow: "hidden" },
+  reflection: { position: "absolute", top: 307, width: 150, height: 52, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 20, alignItems: "center" },
+  centerReflection: { position: "absolute", top: 382, width: 270, height: 52, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 28, alignItems: "center" },
+  reflectionFadeStrong: { position: "absolute", left: 0, right: 0, top: 0, height: 12, backgroundColor: "#070811", opacity: 0.2 },
+  reflectionFadeSoft: { position: "absolute", left: 0, right: 0, bottom: 0, height: 24, backgroundColor: "#070811", opacity: 0.48 },
   captionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, marginTop: 8 },
   caption: { flex: 1, alignItems: "center", paddingHorizontal: 12 },
   stationName: { color: "#F5F3EE", fontSize: 26, fontWeight: "700", letterSpacing: -0.5 },

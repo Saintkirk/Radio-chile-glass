@@ -1325,3 +1325,17 @@
 - [x] Aplicar escala, perspectiva, opacidad y orden visual por profundidad
 - [x] Conservar selección, gestos, botones e inercia al navegar la biblioteca
 - [x] Validar composición 9:16 y rendimiento de logos precargados
+
+## Reflejos y sombras 3D del Cover Flow
+
+- [x] Añadir sombra de contacto bajo cada carátula para anclarla al escenario
+- [x] Añadir reflejo inferior recortado con opacidad y degradado visual
+- [x] Mantener reflejo y sombra sincronizados con perspectiva y navegación
+- [x] Validar legibilidad, reducción de movimiento y rendimiento móvil
+
+## Reflejos y sombras 3D del Cover Flow
+
+- [x] Añadir sombra de contacto bajo cada carátula para anclarla al escenario
+- [x] Añadir reflejo inferior recortado con opacidad y degradado visual
+- [x] Mantener reflejo y sombra sincronizados con perspectiva y navegación
+- [x] Validar legibilidad, reducción de movimiento y rendimiento móvil
