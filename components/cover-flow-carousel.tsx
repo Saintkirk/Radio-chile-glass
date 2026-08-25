@@ -10,7 +10,6 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
-  withDecay,
   cancelAnimation,
   runOnJS,
   type SharedValue,
@@ -32,10 +31,11 @@ const EQUALIZER_VALUES = [
 ] as const;
 
 const DRAG_LIMIT = 156;
-const SWIPE_DISTANCE = 34;
+const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
 const SWIPE_EXIT_DISTANCE = 196;
 const MAX_GESTURE_VELOCITY = 2200;
+const CARD_SETTLE_DURATION = 210;
 
 function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
@@ -163,7 +163,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       return undefined;
     }
     motion.set(0);
-    motion.set(withTiming(1, { duration: 360, easing: Easing.bezier(0.16, 1, 0.3, 1) }));
+    motion.set(withTiming(1, { duration: CARD_SETTLE_DURATION, easing: Easing.bezier(0.16, 1, 0.3, 1) }));
     return undefined;
   }, [activeIndex, dragX, motion, reduceMotion]);
 
@@ -223,8 +223,8 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   }, [next, previous, requestChange]);
 
   const panGesture = useMemo(() => Gesture.Pan()
-    .activeOffsetX([-6, 6])
-    .failOffsetY([-24, 24])
+    .activeOffsetX([-3, 3])
+    .failOffsetY([-18, 18])
     .shouldCancelWhenOutside(false)
     .onBegin(() => {
       if (!isMounted.get()) return;
@@ -259,17 +259,16 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       }
       isTransitioning.set(true);
       const exitTarget = swipeDirection > 0 ? -SWIPE_EXIT_DISTANCE : SWIPE_EXIT_DISTANCE;
-      const finalSnapDuration = Math.max(90, Math.min(150, 150 - Math.abs(limitedVelocity) / 30));
-      const inertiaThenSnap = withSequence(
-        withDecay({ velocity: limitedVelocity, deceleration: 0.99, clamp: [-SWIPE_EXIT_DISTANCE, SWIPE_EXIT_DISTANCE] }),
-        withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
-          isTransitioning.set(false);
-          if (!finished || !isMounted.get()) return;
-          dragX.set(0);
-          runOnJS(commitSwipe)(swipeDirection);
-        })
-      );
-      dragX.set(inertiaThenSnap);
+      // A long decay makes station changes feel delayed on mid-range Android
+      // devices. The finger-following phase already provides the inertia cue;
+      // a short timing curve keeps the handoff immediate and deterministic.
+      const finalSnapDuration = Math.max(95, Math.min(165, 165 - Math.abs(limitedVelocity) / 26));
+      dragX.set(withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
+        isTransitioning.set(false);
+        if (!finished || !isMounted.get()) return;
+        dragX.set(0);
+        runOnJS(commitSwipe)(swipeDirection);
+      }));
     })
     .onFinalize(() => {
       // A vertical dismiss or parent ScrollView can cancel the pan before onEnd.

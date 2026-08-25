@@ -1369,3 +1369,11 @@
 - [x] Blindar el gesto contra índices inválidos, callbacks obsoletos y operaciones nativas inseguras
 - [x] Añadir pruebas deterministas para gestos extremos y límites del catálogo
 - [x] Validar la pantalla móvil y generar una APK corregida en GitHub Actions
+
+## Optimización de fluidez del Cover Flow
+
+- [x] Identificar renders, efectos y cálculos que generan latencia durante el arrastre
+- [x] Optimizar la respuesta del gesto y el encaje de las carátulas
+- [x] Reducir trabajo visual no esencial durante la interacción sin perder el estilo 3D
+- [x] Validar typecheck, pruebas y composición móvil después de la optimización
+- [x] Guardar checkpoint y preparar una nueva APK optimizada
