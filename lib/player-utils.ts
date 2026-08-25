@@ -40,6 +40,12 @@ export function adjacentRadioIndex(length: number, currentIndex: number, directi
   return (currentIndex + direction + length) % length;
 }
 
+/** Keeps a carousel index inside the available catalog, or returns -1 when empty/invalid. */
+export function safeRadioIndex(length: number, currentIndex: number): number {
+  if (length < 1 || !Number.isFinite(currentIndex)) return -1;
+  return Math.max(0, Math.min(length - 1, Math.trunc(currentIndex)));
+}
+
 /** Returns whether opening a station should start or restart its stream. */
 export function shouldAutoplayStation(currentRadioId: string | null | undefined, targetRadioId: string, isPlaying: boolean): boolean {
   return currentRadioId !== targetRadioId || !isPlaying;

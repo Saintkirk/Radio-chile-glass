@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, horizontalSwipeDirection, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, shouldAutoplayStation, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, horizontalSwipeDirection, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -48,10 +48,23 @@ describe("player interaction utilities", () => {
     expect(shouldAutoplayStation("fmlatina", "fmlatina", true)).toBe(false);
   });
 
+  it("clamps invalid carousel indexes without creating out-of-range access", () => {
+    expect(safeRadioIndex(4, -10)).toBe(0);
+    expect(safeRadioIndex(4, 99)).toBe(3);
+    expect(safeRadioIndex(4, 1.9)).toBe(1);
+    expect(safeRadioIndex(0, 0)).toBe(-1);
+    expect(safeRadioIndex(4, Number.NaN)).toBe(-1);
+  });
+
   it("accepts short flicks and keeps tiny taps centered", () => {
     expect(horizontalSwipeDirection(-20, -100)).toBe(1);
     expect(horizontalSwipeDirection(0, 420)).toBe(-1);
     expect(horizontalSwipeDirection(8, 20)).toBe(0);
+  });
+
+  it("keeps extreme flicks bounded to one navigation direction", () => {
+    expect(horizontalSwipeDirection(-500, -2200)).toBe(1);
+    expect(horizontalSwipeDirection(500, 2200)).toBe(-1);
   });
 
   it("ignores stale playback callbacks after a newer station request", () => {

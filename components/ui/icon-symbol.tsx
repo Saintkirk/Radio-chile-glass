@@ -32,6 +32,7 @@ const MAPPING = {
   "chevron.down": "keyboard-arrow-down",
   "sparkles": "auto-awesome",
   "music.note": "music-note",
+  "globe": "language",
 } as IconMapping;
 
 /**

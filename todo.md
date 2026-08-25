@@ -1354,3 +1354,18 @@
 - [x] Integrar la pantalla de carga al arranque con salida segura y fallback anti-bloqueo
 - [x] Añadir pruebas de estado inicial, finalización y reducción de movimiento
 - [x] Validar la pantalla en móvil y guardar checkpoint actualizado
+
+## Generación de APK en GitHub Actions
+
+- [x] Auditar el repositorio y confirmar el workflow nativo Android disponible
+- [x] Preparar la compilación con el checkpoint más reciente y el número de versión correcto
+- [x] Ejecutar la compilación desde GitHub Actions
+- [x] Verificar el estado del job y localizar el artefacto APK descargable
+- [x] Entregar el enlace del workflow y del artefacto al usuario
+
+## Crash al deslizar el Cover Flow
+
+- [x] Identificar la causa del cierre al deslizar rápido o en diagonal
+- [x] Blindar el gesto contra índices inválidos, callbacks obsoletos y operaciones nativas inseguras
+- [x] Añadir pruebas deterministas para gestos extremos y límites del catálogo
+- [x] Validar la pantalla móvil y generar una APK corregida en GitHub Actions

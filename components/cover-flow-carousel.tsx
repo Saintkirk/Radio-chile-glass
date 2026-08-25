@@ -19,7 +19,7 @@ import Animated, {
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
-import { horizontalSwipeDirection } from "@/lib/player-utils";
+import { safeRadioIndex } from "@/lib/player-utils";
 
 type Side = -1 | 0 | 1;
 type OuterSide = -2 | 2;
@@ -127,12 +127,14 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   const equalizer = useSharedValue(0);
   const direction = useSharedValue(1);
   const isTransitioning = useSharedValue(false);
+  const isMounted = useSharedValue(true);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const active = radios[activeIndex];
-  const previous = radios.length ? radios[(activeIndex - 1 + radios.length) % radios.length] : undefined;
-  const next = radios.length ? radios[(activeIndex + 1) % radios.length] : undefined;
-  const farPrevious = radios.length > 3 ? radios[(activeIndex - 2 + radios.length) % radios.length] : undefined;
-  const farNext = radios.length > 3 ? radios[(activeIndex + 2) % radios.length] : undefined;
+  const safeActiveIndex = safeRadioIndex(radios.length, activeIndex);
+  const active = safeActiveIndex >= 0 ? radios[safeActiveIndex] : undefined;
+  const previous = safeActiveIndex >= 0 ? radios[(safeActiveIndex - 1 + radios.length) % radios.length] : undefined;
+  const next = safeActiveIndex >= 0 ? radios[(safeActiveIndex + 1) % radios.length] : undefined;
+  const farPrevious = safeActiveIndex >= 0 && radios.length > 3 ? radios[(safeActiveIndex - 2 + radios.length) % radios.length] : undefined;
+  const farNext = safeActiveIndex >= 0 && radios.length > 3 ? radios[(safeActiveIndex + 2) % radios.length] : undefined;
   const centerStyle = useCardAnimatedStyle(0, motion, direction, dragX, reduceMotion);
   const previousStyle = useCardAnimatedStyle(-1, motion, direction, dragX, reduceMotion);
   const nextStyle = useCardAnimatedStyle(1, motion, direction, dragX, reduceMotion);
@@ -164,6 +166,18 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     motion.set(withTiming(1, { duration: 360, easing: Easing.bezier(0.16, 1, 0.3, 1) }));
     return undefined;
   }, [activeIndex, dragX, motion, reduceMotion]);
+
+  useEffect(() => {
+    isMounted.set(true);
+    return () => {
+      isMounted.set(false);
+      isTransitioning.set(false);
+      cancelAnimation(motion);
+      cancelAnimation(dragX);
+      cancelAnimation(glow);
+      cancelAnimation(equalizer);
+    };
+  }, [dragX, equalizer, glow, isMounted, isTransitioning, motion]);
 
   useEffect(() => {
     cancelAnimation(glow);
@@ -213,20 +227,27 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     .failOffsetY([-24, 24])
     .shouldCancelWhenOutside(false)
     .onBegin(() => {
+      if (!isMounted.get()) return;
       // Un nuevo gesto siempre puede tomar el control; esto evita una zona muerta
       // mientras la carátula anterior termina de encajar.
       cancelAnimation(dragX);
       isTransitioning.set(false);
     })
     .onUpdate((event) => {
-      if (reduceMotion) return;
+      if (!isMounted.get() || reduceMotion) return;
       const translation = event.translationX;
       const elasticDrag = translation / (1 + Math.abs(translation) / 300);
       dragX.set(Math.max(-DRAG_LIMIT, Math.min(DRAG_LIMIT, elasticDrag)));
     })
     .onEnd((event) => {
+      if (!isMounted.get()) return;
       const limitedVelocity = Math.max(-MAX_GESTURE_VELOCITY, Math.min(MAX_GESTURE_VELOCITY, event.velocityX));
-      const swipeDirection = horizontalSwipeDirection(event.translationX, limitedVelocity, { distance: SWIPE_DISTANCE, velocity: SWIPE_VELOCITY });
+      // Keep this calculation entirely on the UI thread. Calling a regular JS
+      // helper from a Reanimated worklet can terminate Android release builds.
+      const projectedTranslation = event.translationX + limitedVelocity * 0.2;
+      const swipeDirection = Math.abs(projectedTranslation) < SWIPE_DISTANCE && Math.abs(limitedVelocity) < SWIPE_VELOCITY
+        ? 0
+        : projectedTranslation < 0 ? 1 : -1;
       if (swipeDirection === 0) {
         dragX.set(withTiming(0, { duration: 150, easing: Easing.bezier(0.2, 0.85, 0.28, 1) }));
         return;
@@ -243,13 +264,18 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         withDecay({ velocity: limitedVelocity, deceleration: 0.99, clamp: [-SWIPE_EXIT_DISTANCE, SWIPE_EXIT_DISTANCE] }),
         withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
           isTransitioning.set(false);
-          if (!finished) return;
+          if (!finished || !isMounted.get()) return;
           dragX.set(0);
           runOnJS(commitSwipe)(swipeDirection);
         })
       );
       dragX.set(inertiaThenSnap);
-    }), [commitSwipe, direction, dragX, isTransitioning, reduceMotion]);
+    })
+    .onFinalize(() => {
+      // A vertical dismiss or parent ScrollView can cancel the pan before onEnd.
+      // Reset only when no exit animation owns the shared value.
+      if (!isTransitioning.get()) dragX.set(0);
+    }), [commitSwipe, direction, dragX, isMounted, isTransitioning, reduceMotion]);
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
