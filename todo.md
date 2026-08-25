@@ -1304,3 +1304,10 @@
 - [x] Sincronizar el índice visual, la carátula central y `playRadio` en cada navegación
 - [x] Implementar arrastre con inercia, encaje y transición continua tipo Cover Flow
 - [x] Validar cambios rápidos, crossfade, buffering y controles nativos
+
+## Refinamiento cinemático del Cover Flow
+
+- [x] Hacer que la carátula central y las laterales sigan el dedo de forma proporcional
+- [x] Ajustar perspectiva, escala, opacidad e inercia para una profundidad tipo Cover Flow
+- [x] Afinar el umbral de velocidad y el encaje al centro sin perder la selección de emisora
+- [x] Validar reducción de movimiento, botones y cambios rápidos en móvil

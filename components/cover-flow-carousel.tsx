@@ -28,6 +28,11 @@ const EQUALIZER_VALUES = [
   [0.62, 0.34, 0.82, 0.98, 0.62],
 ] as const;
 
+const DRAG_LIMIT = 156;
+const SWIPE_DISTANCE = 52;
+const SWIPE_VELOCITY = 480;
+const SWIPE_EXIT_DISTANCE = 176;
+
 function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
     const dir = direction.get();
@@ -50,9 +55,9 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
     const targetRotation = side === -1 ? 34 : side === 1 ? -34 : 0;
     const progress = motion.get();
     const drag = dragX.get();
-    const dragStrength = Math.min(Math.abs(drag) / 108, 1);
-    const dragDirection = drag < 0 ? 1 : -1;
-    const incoming = side === dragDirection;
+    const dragProgress = Math.max(-1, Math.min(1, drag / DRAG_LIMIT));
+    const dragStrength = Math.abs(dragProgress);
+    const incoming = side !== 0 && side * dragProgress < 0;
     const settledX = interpolate(progress, [0, 1], [startX, endX], Extrapolation.CLAMP);
     const settledRotation = interpolate(progress, [0, 1], [startRotation, targetRotation], Extrapolation.CLAMP);
     const settledScale = side === 0
@@ -61,14 +66,14 @@ function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction
 
     return {
       opacity: side === 0
-        ? interpolate(progress, [0, 0.7, 1], [0.35, 0.8, 1], Extrapolation.CLAMP) - dragStrength * 0.1
-        : interpolate(progress, [0, 1], [0.35, 0.85], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.15 : -dragStrength * 0.08),
+        ? interpolate(progress, [0, 0.7, 1], [0.35, 0.8, 1], Extrapolation.CLAMP) - dragStrength * 0.38
+        : interpolate(progress, [0, 1], [0.35, 0.85], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.23 : -dragStrength * 0.14),
       transform: [
         { perspective: 900 },
-        { translateX: settledX + (side === 0 ? drag : incoming ? -side * dragStrength * 52 : side * dragStrength * 16) },
-        { translateY: interpolate(progress, [0, 1], side === 0 ? [8, 0] : [12, 4], Extrapolation.CLAMP) },
-        { scale: settledScale + (side === 0 ? -dragStrength * 0.11 : incoming ? dragStrength * 0.17 : -dragStrength * 0.04) },
-        { rotateY: `${settledRotation + (side === 0 ? -dragDirection * dragStrength * 25 : incoming ? dragDirection * dragStrength * 34 : 0)}deg` },
+        { translateX: settledX + (side === 0 ? dragProgress * 164 : incoming ? dragProgress * 144 : dragProgress * 26) },
+        { translateY: interpolate(progress, [0, 1], side === 0 ? [8, 0] : [12, 4], Extrapolation.CLAMP) + (side === 0 ? dragStrength * 8 : -dragStrength * 4) },
+        { scale: settledScale + (side === 0 ? -dragStrength * 0.18 : incoming ? dragStrength * 0.2 : -dragStrength * 0.07) },
+        { rotateY: `${settledRotation + (side === 0 ? dragProgress * 38 : incoming ? -dragProgress * 34 : dragProgress * 9)}deg` },
       ],
     };
   }, [direction, dragX, motion, reduceMotion, side]);
@@ -173,11 +178,14 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     })
     .onUpdate((event) => {
       if (reduceMotion) return;
-      dragX.set(Math.max(-108, Math.min(108, event.translationX * 0.72)));
+      const translation = event.translationX;
+      const elasticDrag = translation / (1 + Math.abs(translation) / 300);
+      dragX.set(Math.max(-DRAG_LIMIT, Math.min(DRAG_LIMIT, elasticDrag)));
     })
     .onEnd((event) => {
-      const swipeDirection = event.translationX < 0 ? 1 : -1;
-      const shouldAdvance = Math.abs(event.translationX) >= 42 || Math.abs(event.velocityX) >= 520;
+      const projectedTranslation = event.translationX + event.velocityX * 0.16;
+      const swipeDirection = projectedTranslation < 0 ? 1 : -1;
+      const shouldAdvance = Math.abs(projectedTranslation) >= SWIPE_DISTANCE || Math.abs(event.velocityX) >= SWIPE_VELOCITY;
       if (!shouldAdvance) {
         dragX.set(withTiming(0, { duration: 180, easing: Easing.out(Easing.cubic) }));
         return;
@@ -187,7 +195,8 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         runOnJS(commitSwipe)(swipeDirection);
         return;
       }
-      dragX.set(withTiming(swipeDirection > 0 ? -138 : 138, { duration: 110, easing: Easing.out(Easing.cubic) }, (finished) => {
+      const exitDuration = Math.max(130, Math.min(245, 245 - Math.abs(event.velocityX) / 7));
+      dragX.set(withTiming(swipeDirection > 0 ? -SWIPE_EXIT_DISTANCE : SWIPE_EXIT_DISTANCE, { duration: exitDuration, easing: Easing.bezier(0.2, 0.85, 0.24, 1) }, (finished) => {
         if (!finished) return;
         dragX.set(0);
         runOnJS(commitSwipe)(swipeDirection);
