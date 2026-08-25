@@ -39,6 +39,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playerStatusSubscriptionRef = useRef<{ remove: () => void } | null>(null);
   const playRequestRef = useRef(0);
   const startupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const crossfadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const crossfadeTokenRef = useRef(0);
+  const crossfadeStartedRequestRef = useRef(0);
+  const crossfadeOutgoingRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
   const [currentRadio, setCurrentRadio] = useState<Radio | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +58,17 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playbackIntentRef = useRef(false);
 
   const disposeCurrentPlayer = useCallback((preserveMediaSession = false) => {
+    crossfadeTokenRef.current += 1;
+    if (crossfadeTimerRef.current) {
+      clearInterval(crossfadeTimerRef.current);
+      crossfadeTimerRef.current = null;
+    }
+    const fadingOut = crossfadeOutgoingRef.current;
+    crossfadeOutgoingRef.current = null;
+    if (fadingOut && fadingOut !== playerRef.current) {
+      try { fadingOut.pause(); } catch { /* no-op */ }
+      try { fadingOut.remove(); } catch { /* no-op */ }
+    }
     if (startupTimeoutRef.current) {
       clearTimeout(startupTimeoutRef.current);
       startupTimeoutRef.current = null;
@@ -70,6 +85,51 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       clearNativeMediaSession();
       abandonAudioFocus();
     }
+  }, []);
+
+  const detachCurrentPlayerForCrossfade = useCallback(() => {
+    if (startupTimeoutRef.current) {
+      clearTimeout(startupTimeoutRef.current);
+      startupTimeoutRef.current = null;
+    }
+    playerStatusSubscriptionRef.current?.remove();
+    playerStatusSubscriptionRef.current = null;
+    const outgoing = playerRef.current;
+    playerRef.current = null;
+    return outgoing;
+  }, []);
+
+  const startCrossfade = useCallback((outgoing: ReturnType<typeof createAudioPlayer> | null, incoming: ReturnType<typeof createAudioPlayer>, requestId: number) => {
+    if (!outgoing || outgoing === incoming) {
+      incoming.volume = 1;
+      return;
+    }
+    const token = ++crossfadeTokenRef.current;
+    crossfadeOutgoingRef.current = outgoing;
+    if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
+    const startedAt = Date.now();
+    const durationMs = 900;
+    try { outgoing.volume = 1; } catch { /* no-op */ }
+    try { incoming.volume = 0; } catch { /* no-op */ }
+    crossfadeTimerRef.current = setInterval(() => {
+      if (token !== crossfadeTokenRef.current || requestId !== playRequestRef.current) {
+        if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
+        crossfadeTimerRef.current = null;
+        return;
+      }
+      const progress = Math.min(1, (Date.now() - startedAt) / durationMs);
+      const eased = progress * progress * (3 - 2 * progress);
+      try { outgoing.volume = 1 - eased; } catch { /* no-op */ }
+      try { incoming.volume = eased; } catch { /* no-op */ }
+      if (progress >= 1) {
+        if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
+        crossfadeTimerRef.current = null;
+        try { outgoing.pause(); } catch { /* no-op */ }
+        try { outgoing.remove(); } catch { /* no-op */ }
+        if (crossfadeOutgoingRef.current === outgoing) crossfadeOutgoingRef.current = null;
+        try { incoming.volume = 1; } catch { /* no-op */ }
+      }
+    }, 50);
   }, []);
 
   const refreshCatalog = useCallback(async (): Promise<Radio[]> => {
@@ -101,10 +161,24 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
   const playRadio = useCallback(async (radio: Radio, preserveMediaSession = false) => {
     const requestId = ++playRequestRef.current;
+    crossfadeTokenRef.current += 1;
+    if (crossfadeTimerRef.current) {
+      clearInterval(crossfadeTimerRef.current);
+      crossfadeTimerRef.current = null;
+    }
+    if (crossfadeOutgoingRef.current) {
+      try { crossfadeOutgoingRef.current.pause(); } catch { /* no-op */ }
+      try { crossfadeOutgoingRef.current.remove(); } catch { /* no-op */ }
+      crossfadeOutgoingRef.current = null;
+    }
+    const outgoingRadio = currentRadio;
+    const outgoingPlayer = detachCurrentPlayerForCrossfade();
+    if (outgoingPlayer) {
+      try { outgoingPlayer.volume = 1; } catch { /* no-op */ }
+    }
     if (preserveMediaSession && backgroundPlaybackEnabled) {
       setNativeMediaSession(lockScreenMetadata(radio), false);
     }
-    disposeCurrentPlayer(preserveMediaSession);
     setCurrentRadio(radio);
     AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
     // El control debe mostrar la intención de reproducción desde el primer cuadro;
@@ -124,6 +198,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         const focusResult = requestAudioFocus();
         if (focusResult === "failed") throw new Error("Audio focus unavailable");
         candidate = createAudioPlayer({ uri: radio.streamUrl });
+        if (outgoingPlayer) {
+          try { candidate.volume = 0; } catch { /* no-op */ }
+        }
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
           candidate.remove();
@@ -140,6 +217,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
             updateNativeMediaState(status.playing);
           }
           if (status.playing) {
+            if (crossfadeStartedRequestRef.current !== requestId) {
+              crossfadeStartedRequestRef.current = requestId;
+              startCrossfade(outgoingPlayer, candidate as ReturnType<typeof createAudioPlayer>, requestId);
+            }
             playbackIntentRef.current = false;
             if (startupTimeoutRef.current) {
               clearTimeout(startupTimeoutRef.current);
@@ -176,11 +257,22 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           setPlaybackError(`No se pudo iniciar el audio de ${radio.name}`);
           try { candidate?.pause(); } catch { /* no-op */ }
           try { candidate?.remove(); } catch { /* no-op */ }
-          playerRef.current = null;
+          if (outgoingPlayer && outgoingRadio) {
+            try { outgoingPlayer.volume = 1; outgoingPlayer.play(); } catch { /* no-op */ }
+            playerRef.current = outgoingPlayer;
+            setCurrentRadio(outgoingRadio);
+            setIsPlaying(true);
+            updateNativeMediaState(true);
+            setNativeMediaSession(lockScreenMetadata(outgoingRadio), true);
+          } else {
+            playerRef.current = null;
+          }
           // Mantener la MediaSession visible en estado pausado permite que el usuario
           // intente otra emisora desde la notificación sin cerrar la actividad.
-          setNativeMediaSession(lockScreenMetadata(radio), false);
-          abandonAudioFocus();
+          if (!outgoingPlayer || !outgoingRadio) {
+            setNativeMediaSession(lockScreenMetadata(radio), false);
+            abandonAudioFocus();
+          }
         }, 8000);
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
@@ -198,14 +290,23 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
         if (attempt === MAX_PLAYBACK_RETRIES) {
           playbackIntentRef.current = false;
-          setIsPlaying(false);
           setPlaybackError(`No se pudo conectar con ${radio.name}`);
           setIsLoading(false);
-          setNativeMediaSession(lockScreenMetadata(radio), false);
+          if (outgoingPlayer && outgoingRadio) {
+            try { outgoingPlayer.volume = 1; outgoingPlayer.play(); } catch { /* no-op */ }
+            playerRef.current = outgoingPlayer;
+            setCurrentRadio(outgoingRadio);
+            setIsPlaying(true);
+            updateNativeMediaState(true);
+            setNativeMediaSession(lockScreenMetadata(outgoingRadio), true);
+          } else {
+            setIsPlaying(false);
+            setNativeMediaSession(lockScreenMetadata(radio), false);
+          }
         }
       }
     }
-  }, [backgroundPlaybackEnabled, disposeCurrentPlayer, syncLockScreenControls]);
+  }, [backgroundPlaybackEnabled, currentRadio, detachCurrentPlayerForCrossfade, startCrossfade, syncLockScreenControls]);
 
   const playAdjacent = useCallback(async (direction: -1 | 1, fromId?: string) => {
     const sourceId = fromId ?? currentRadio?.id;

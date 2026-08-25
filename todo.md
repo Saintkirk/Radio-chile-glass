@@ -1251,3 +1251,11 @@
 - [x] Animar el desplazamiento horizontal de las carátulas al deslizar
 - [x] Mantener fondo, controles y estado de reproducción estables durante la transición
 - [x] Validar reducción de movimiento, gesto táctil y pruebas automatizadas
+
+
+## Crossfade entre emisoras
+
+- [x] Añadir una transición de volumen cancelable entre la emisora anterior y la nueva
+- [x] Evitar solapamientos, fugas de reproductores y estados inconsistentes durante cambios rápidos
+- [x] Validar autoplay, errores de stream, segundo plano y controles de pantalla bloqueada
+- [x] Añadir pruebas deterministas para la secuencia de crossfade
