@@ -1297,3 +1297,10 @@
 - [x] Encontrar y validar una URL pública de streaming que responda como audio
 - [x] Actualizar el catálogo manteniendo el ID, logo y metadatos de Cooperativa
 - [x] Probar reproducción, buffering, crossfade y controles nativos de la emisora
+
+## Regresión de navegación del Cover Flow
+
+- [x] Restablecer el cambio real de emisora desde gesto y botones anterior/siguiente
+- [x] Sincronizar el índice visual, la carátula central y `playRadio` en cada navegación
+- [x] Implementar arrastre con inercia, encaje y transición continua tipo Cover Flow
+- [x] Validar cambios rápidos, crossfade, buffering y controles nativos

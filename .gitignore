@@ -63,4 +63,5 @@ Thumbs.db
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
+.manus/checkpoint_zip/
 .project-config.json

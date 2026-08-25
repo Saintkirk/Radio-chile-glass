@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { ItunesRadioCard } from "@/components/itunes-radio-card";
@@ -49,19 +49,11 @@ export default function HomeScreen() {
     const activeIndex = filtered.findIndex((radio) => radio.id === currentRadio.id);
     if (activeIndex >= 0) setFeaturedIndex(activeIndex);
   }, [currentRadio, filtered]);
-  const selectAndPlayRadio = (radio: Radio) => {
+  const selectAndPlayRadio = useCallback((radio: Radio) => {
     const nextIndex = filtered.findIndex((item) => item.id === radio.id);
     if (nextIndex >= 0) setFeaturedIndex(nextIndex);
     void playRadio(radio, Boolean(currentRadio && currentRadio.id !== radio.id));
-  };
-  const browseFeatured = (direction: number) => {
-    const total = filtered.length;
-    if (!total) return;
-    const nextIndex = (featuredIndex + direction + total) % total;
-    const nextRadio = filtered[nextIndex];
-    setFeaturedIndex(nextIndex);
-    selectAndPlayRadio(nextRadio);
-  };
+  }, [currentRadio, filtered, playRadio]);
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
   return (
@@ -80,7 +72,7 @@ export default function HomeScreen() {
               <Pressable onPress={() => router.push("/explore")} accessibilityRole="button" accessibilityLabel="Buscar emisoras" style={({ pressed }) => [styles.headerButton, pressed && styles.controlPressed]}><IconSymbol name="magnifyingglass" size={21} color="#F5F3EE" /></Pressable>
             </View>
             <View style={styles.liveHeader}><View style={styles.liveTitleRow}><View style={styles.liveDot} /><Text style={styles.liveTitle}>EN VIVO AHORA</Text></View><Pressable onPress={() => refreshCatalog()} accessibilityRole="button" accessibilityLabel="Actualizar catálogo de radios" style={({ pressed }) => [styles.syncButton, pressed && styles.controlPressed]}><Text style={styles.syncText}>{isRefreshingCatalog ? "Actualizando..." : catalogSource === "remote" ? "CATÁLOGO EN VIVO" : "MODO SIN CONEXIÓN"}</Text></Pressable></View>
-            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onChange={browseFeatured} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : selectAndPlayRadio(featured)} isPlaying={isPlaying} isLoading={isLoading && currentRadio?.id === featured.id} currentRadioId={currentRadio?.id} lightMode={lightMode} />
+            <CoverFlowCarousel radios={filtered} activeIndex={featuredIndex} onSelect={selectAndPlayRadio} onPlay={() => currentRadio?.id === featured.id ? togglePlay() : selectAndPlayRadio(featured)} isPlaying={isPlaying} isLoading={isLoading && currentRadio?.id === featured.id} currentRadioId={currentRadio?.id} lightMode={lightMode} />
             <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>EMISORAS DESTACADAS</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
