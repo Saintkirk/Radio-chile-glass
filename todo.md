@@ -1311,3 +1311,10 @@
 - [x] Ajustar perspectiva, escala, opacidad e inercia para una profundidad tipo Cover Flow
 - [x] Afinar el umbral de velocidad y el encaje al centro sin perder la selección de emisora
 - [x] Validar reducción de movimiento, botones y cambios rápidos en móvil
+
+## Inercia y encaje de alta precisión
+
+- [x] Calcular el destino de la salida según velocidad y distancia del gesto
+- [x] Aplicar desaceleración gradual antes del encaje de la carátula siguiente
+- [x] Limitar cada gesto a un cambio de emisora y cancelar rebotes obsoletos
+- [x] Validar flicks rápidos, arrastres cortos y reducción de movimiento

@@ -10,6 +10,7 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
+  withDecay,
   cancelAnimation,
   runOnJS,
   type SharedValue,
@@ -31,7 +32,8 @@ const EQUALIZER_VALUES = [
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 52;
 const SWIPE_VELOCITY = 480;
-const SWIPE_EXIT_DISTANCE = 176;
+const SWIPE_EXIT_DISTANCE = 224;
+const MAX_GESTURE_VELOCITY = 1800;
 
 function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
@@ -93,6 +95,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   const glow = useSharedValue(0);
   const equalizer = useSharedValue(0);
   const direction = useSharedValue(1);
+  const isTransitioning = useSharedValue(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const active = radios[activeIndex];
   const previous = radios.length ? radios[(activeIndex - 1 + radios.length) % radios.length] : undefined;
@@ -174,20 +177,23 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     .activeOffsetX([-10, 10])
     .failOffsetY([-12, 12])
     .onBegin(() => {
+      if (isTransitioning.get()) return;
       cancelAnimation(dragX);
     })
     .onUpdate((event) => {
-      if (reduceMotion) return;
+      if (reduceMotion || isTransitioning.get()) return;
       const translation = event.translationX;
       const elasticDrag = translation / (1 + Math.abs(translation) / 300);
       dragX.set(Math.max(-DRAG_LIMIT, Math.min(DRAG_LIMIT, elasticDrag)));
     })
     .onEnd((event) => {
-      const projectedTranslation = event.translationX + event.velocityX * 0.16;
+      if (isTransitioning.get()) return;
+      const limitedVelocity = Math.max(-MAX_GESTURE_VELOCITY, Math.min(MAX_GESTURE_VELOCITY, event.velocityX));
+      const projectedTranslation = event.translationX + limitedVelocity * 0.2;
       const swipeDirection = projectedTranslation < 0 ? 1 : -1;
-      const shouldAdvance = Math.abs(projectedTranslation) >= SWIPE_DISTANCE || Math.abs(event.velocityX) >= SWIPE_VELOCITY;
+      const shouldAdvance = Math.abs(projectedTranslation) >= SWIPE_DISTANCE || Math.abs(limitedVelocity) >= SWIPE_VELOCITY;
       if (!shouldAdvance) {
-        dragX.set(withTiming(0, { duration: 180, easing: Easing.out(Easing.cubic) }));
+        dragX.set(withTiming(0, { duration: 210, easing: Easing.bezier(0.2, 0.85, 0.28, 1) }));
         return;
       }
       direction.set(swipeDirection);
@@ -195,13 +201,20 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         runOnJS(commitSwipe)(swipeDirection);
         return;
       }
-      const exitDuration = Math.max(130, Math.min(245, 245 - Math.abs(event.velocityX) / 7));
-      dragX.set(withTiming(swipeDirection > 0 ? -SWIPE_EXIT_DISTANCE : SWIPE_EXIT_DISTANCE, { duration: exitDuration, easing: Easing.bezier(0.2, 0.85, 0.24, 1) }, (finished) => {
-        if (!finished) return;
-        dragX.set(0);
-        runOnJS(commitSwipe)(swipeDirection);
-      }));
-    }), [commitSwipe, direction, dragX, reduceMotion]);
+      isTransitioning.set(true);
+      const exitTarget = swipeDirection > 0 ? -SWIPE_EXIT_DISTANCE : SWIPE_EXIT_DISTANCE;
+      const finalSnapDuration = Math.max(105, Math.min(180, 180 - Math.abs(limitedVelocity) / 24));
+      const inertiaThenSnap = withSequence(
+        withDecay({ velocity: limitedVelocity, deceleration: 0.996, clamp: [-SWIPE_EXIT_DISTANCE, SWIPE_EXIT_DISTANCE] }),
+        withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
+          isTransitioning.set(false);
+          if (!finished) return;
+          dragX.set(0);
+          runOnJS(commitSwipe)(swipeDirection);
+        })
+      );
+      dragX.set(inertiaThenSnap);
+    }), [commitSwipe, direction, dragX, isTransitioning, reduceMotion]);
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
