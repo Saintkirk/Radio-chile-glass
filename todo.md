@@ -1238,3 +1238,9 @@
 - [x] Rediseñar tarjetas de emisoras con estética premium, acentos por marca y controles claros
 - [x] Elevar la navegación inferior y conservar el mini reproductor sin solapamientos
 - [x] Validar composición en viewport móvil 9:16 y ejecución de pruebas
+
+
+## Ajuste final del Cover Flow sobre fondo
+
+- [x] Eliminar el panel negro envolvente y dejar el carrusel flotando sobre el fondo
+- [x] Validar el cambio visual en viewport móvil y repetir typecheck, lint y 37 pruebas Vitest

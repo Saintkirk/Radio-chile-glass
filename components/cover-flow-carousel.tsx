@@ -166,8 +166,8 @@ export function CoverFlowCarousel({ radios, activeIndex, onChange, onPlay, isPla
 }
 
 const styles = StyleSheet.create({
-  root: { height: 454, borderRadius: 26, overflow: "hidden", backgroundColor: "#08090ED9", borderWidth: 1, borderColor: "#FFFFFF22", marginBottom: 24, paddingTop: 10, shadowColor: "#000", shadowOpacity: 0.35, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 8 },
-  rootLight: { backgroundColor: "#08090ED9", borderColor: "#FFFFFF22" },
+  root: { height: 454, borderRadius: 0, overflow: "visible", backgroundColor: "transparent", borderWidth: 0, marginBottom: 24, paddingTop: 10 },
+  rootLight: { backgroundColor: "transparent", borderColor: "transparent" },
   stage: { height: 334, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
   sideSlot: { position: "absolute", top: 34, width: 136, height: 250, zIndex: 1, alignItems: "center" },
   sideLeft: { left: -2 },
