@@ -4,9 +4,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, type LockScreenMetadata } from "./player-utils";
+import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
+
+type RadioAudioPlayer = ReturnType<typeof createAudioPlayer>;
+
+function pauseAndRemovePlayer(player: RadioAudioPlayer | null) {
+  if (!player) return;
+  try { player.pause(); } catch { /* no-op */ }
+  try { player.remove(); } catch { /* no-op */ }
+}
 
 export { RADIOS, type Radio } from "./radios";
 
@@ -33,12 +41,14 @@ type PlayerContextValue = {
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 const LAST_RADIO_KEY = "radio-last-played-id";
+const AUDIO_CROSSFADE_MS = 260;
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
   const playerStatusSubscriptionRef = useRef<{ remove: () => void } | null>(null);
   const playRequestRef = useRef(0);
   const startupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const replayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const crossfadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const crossfadeTokenRef = useRef(0);
   const crossfadeStartedRequestRef = useRef(0);
@@ -58,40 +68,46 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playbackIntentRef = useRef(false);
   const currentRadioRef = useRef<Radio | null>(null);
 
+  const cleanupCrossfadeOutgoing = useCallback((except: RadioAudioPlayer | null = null) => {
+    const outgoing = crossfadeOutgoingRef.current;
+    crossfadeOutgoingRef.current = null;
+    if (outgoing && outgoing !== except) pauseAndRemovePlayer(outgoing);
+  }, []);
+
   const disposeCurrentPlayer = useCallback((preserveMediaSession = false) => {
     crossfadeTokenRef.current += 1;
     if (crossfadeTimerRef.current) {
       clearInterval(crossfadeTimerRef.current);
       crossfadeTimerRef.current = null;
     }
-    const fadingOut = crossfadeOutgoingRef.current;
-    crossfadeOutgoingRef.current = null;
-    if (fadingOut && fadingOut !== playerRef.current) {
-      try { fadingOut.pause(); } catch { /* no-op */ }
-      try { fadingOut.remove(); } catch { /* no-op */ }
-    }
+    cleanupCrossfadeOutgoing(playerRef.current);
     if (startupTimeoutRef.current) {
       clearTimeout(startupTimeoutRef.current);
       startupTimeoutRef.current = null;
+    }
+    if (replayTimeoutRef.current) {
+      clearTimeout(replayTimeoutRef.current);
+      replayTimeoutRef.current = null;
     }
     playerStatusSubscriptionRef.current?.remove();
     playerStatusSubscriptionRef.current = null;
     const player = playerRef.current;
     playerRef.current = null;
-    if (player) {
-      try { player.pause(); } catch { /* no-op */ }
-      try { player.remove(); } catch { /* no-op */ }
-    }
+    pauseAndRemovePlayer(player);
     if (!preserveMediaSession) {
       clearNativeMediaSession();
       abandonAudioFocus();
     }
-  }, []);
+  }, [cleanupCrossfadeOutgoing]);
 
   const detachCurrentPlayerForCrossfade = useCallback(() => {
     if (startupTimeoutRef.current) {
       clearTimeout(startupTimeoutRef.current);
       startupTimeoutRef.current = null;
+    }
+    if (replayTimeoutRef.current) {
+      clearTimeout(replayTimeoutRef.current);
+      replayTimeoutRef.current = null;
     }
     playerStatusSubscriptionRef.current?.remove();
     playerStatusSubscriptionRef.current = null;
@@ -109,13 +125,17 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     crossfadeOutgoingRef.current = outgoing;
     if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
     const startedAt = Date.now();
-    const durationMs = 900;
+    const durationMs = AUDIO_CROSSFADE_MS;
     try { outgoing.volume = 1; } catch { /* no-op */ }
     try { incoming.volume = 0; } catch { /* no-op */ }
     crossfadeTimerRef.current = setInterval(() => {
-      if (token !== crossfadeTokenRef.current || requestId !== playRequestRef.current) {
+      if (!shouldContinueCrossfade(requestId, playRequestRef.current, token, crossfadeTokenRef.current)) {
         if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
         crossfadeTimerRef.current = null;
+        if (crossfadeOutgoingRef.current === outgoing) {
+          crossfadeOutgoingRef.current = null;
+          pauseAndRemovePlayer(outgoing);
+        }
         return;
       }
       const progress = Math.min(1, (Date.now() - startedAt) / durationMs);
@@ -167,11 +187,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       clearInterval(crossfadeTimerRef.current);
       crossfadeTimerRef.current = null;
     }
-    if (crossfadeOutgoingRef.current) {
-      try { crossfadeOutgoingRef.current.pause(); } catch { /* no-op */ }
-      try { crossfadeOutgoingRef.current.remove(); } catch { /* no-op */ }
-      crossfadeOutgoingRef.current = null;
-    }
+    cleanupCrossfadeOutgoing();
     const outgoingRadio = currentRadioRef.current;
     const outgoingPlayer = detachCurrentPlayerForCrossfade();
     if (outgoingPlayer) {
@@ -241,7 +257,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
         updateNativeMediaState(true);
         setNativeMediaSession(lockScreenMetadata(radio), true);
-        setTimeout(() => {
+        if (replayTimeoutRef.current) clearTimeout(replayTimeoutRef.current);
+        replayTimeoutRef.current = setTimeout(() => {
+          replayTimeoutRef.current = null;
           if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && !activeCandidate.playing) {
             try {
               activeCandidate.play();

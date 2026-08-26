@@ -1401,3 +1401,19 @@
 - [x] Validar la composición del carrusel en viewport móvil
 - [x] Confirmar que las capas visuales no interceptan los gestos
 - [x] Registrar el resultado y guardar checkpoint verificado
+
+## Nueva APK para prueba Android
+
+- [x] Preparar la compilación desde el checkpoint más reciente
+- [x] Ejecutar el workflow nativo de GitHub Actions
+- [x] Verificar el resultado del job y el artefacto APK
+- [x] Validar integridad y checksum del archivo
+- [x] Entregar la APK y el enlace del workflow
+
+## Solapamiento de audio y salto del Cover Flow
+
+- [x] Garantizar que solo exista un reproductor activo al cambiar de emisora
+- [x] Ignorar callbacks obsoletos de emisoras anteriores durante crossfade o buffering
+- [x] Eliminar el salto visual al encajar el carrusel después del gesto
+- [x] Añadir pruebas deterministas de cambio rápido de emisora y transición continua
+- [x] Validar en móvil y generar una APK corregida

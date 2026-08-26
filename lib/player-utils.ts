@@ -21,6 +21,19 @@ export function isCurrentPlaybackRequest(requestId: number, currentRequestId: nu
   return requestId === currentRequestId;
 }
 
+/** A crossfade is valid only while both its request and cancellation token are current. */
+export function shouldContinueCrossfade(requestId: number, currentRequestId: number, token: number, currentToken: number): boolean {
+  return requestId === currentRequestId && token === currentToken;
+}
+
+export type CarouselSettleMode = "gesture" | "instant" | "entrance";
+
+/** Selects the visual settle path after the active station changes. */
+export function carouselSettleMode(committedBySwipe: boolean, reduceMotion: boolean): CarouselSettleMode {
+  if (reduceMotion) return "instant";
+  return committedBySwipe ? "gesture" : "entrance";
+}
+
 export function retryDelayMs(attempt: number): number {
   return [0, 800, 1800, 3500][Math.max(0, Math.min(attempt, MAX_PLAYBACK_RETRIES))];
 }

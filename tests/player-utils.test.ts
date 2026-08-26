@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, horizontalSwipeDirection, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -70,6 +70,18 @@ describe("player interaction utilities", () => {
   it("ignores stale playback callbacks after a newer station request", () => {
     expect(isCurrentPlaybackRequest(4, 4)).toBe(true);
     expect(isCurrentPlaybackRequest(3, 4)).toBe(false);
+  });
+
+  it("invalidates a crossfade when its request or token is stale", () => {
+    expect(shouldContinueCrossfade(4, 4, 8, 8)).toBe(true);
+    expect(shouldContinueCrossfade(4, 5, 8, 8)).toBe(false);
+    expect(shouldContinueCrossfade(4, 4, 7, 8)).toBe(false);
+  });
+
+  it("keeps the deck continuous after a swipe commit", () => {
+    expect(carouselSettleMode(true, false)).toBe("gesture");
+    expect(carouselSettleMode(false, false)).toBe("entrance");
+    expect(carouselSettleMode(true, true)).toBe("instant");
   });
 
   it("maps Android audio focus transitions to safe player actions", () => {

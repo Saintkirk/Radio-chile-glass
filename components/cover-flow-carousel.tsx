@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -18,7 +18,7 @@ import Animated, {
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
-import { safeRadioIndex } from "@/lib/player-utils";
+import { carouselSettleMode, safeRadioIndex } from "@/lib/player-utils";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 
 type Side = -1 | 0 | 1;
@@ -130,6 +130,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   const isTransitioning = useSharedValue(false);
   const isMounted = useSharedValue(true);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const swipeCommitRef = useRef(false);
   const safeActiveIndex = safeRadioIndex(radios.length, activeIndex);
   const active = safeActiveIndex >= 0 ? radios[safeActiveIndex] : undefined;
   const previous = safeActiveIndex >= 0 ? radios[(safeActiveIndex - 1 + radios.length) % radios.length] : undefined;
@@ -156,10 +157,20 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   ];
 
   useEffect(() => {
+    const committedBySwipe = swipeCommitRef.current;
+    swipeCommitRef.current = false;
     cancelAnimation(motion);
     cancelAnimation(dragX);
+    const settleMode = carouselSettleMode(committedBySwipe, reduceMotion);
+    if (settleMode === "gesture") {
+      // The outgoing animation already moved the shared deck off-center. Keep
+      // motion at 1 and only bring the newly active card back to rest; resetting
+      // motion to 0 here caused the visible one-frame jump on Android.
+      dragX.set(withTiming(0, { duration: 150, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }));
+      return undefined;
+    }
     dragX.set(0);
-    if (reduceMotion) {
+    if (settleMode === "instant") {
       motion.set(1);
       return undefined;
     }
@@ -219,9 +230,12 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     onSelect(radio);
   }, [direction, onSelect]);
 
-  const commitSwipe = useCallback((nextDirection: number) => {
-    requestChange(nextDirection < 0 ? previous : next, nextDirection);
-  }, [next, previous, requestChange]);
+  const commitSwipeFromGesture = useCallback((nextDirection: number) => {
+    const target = nextDirection < 0 ? previous : next;
+    if (!target || !active || target.id === active.id) return;
+    swipeCommitRef.current = true;
+    requestChange(target, nextDirection);
+  }, [active, next, previous, requestChange]);
 
   const panGesture = useMemo(() => Gesture.Pan()
     .activeOffsetX([-3, 3])
@@ -255,7 +269,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       }
       direction.set(swipeDirection);
       if (reduceMotion) {
-        runOnJS(commitSwipe)(swipeDirection);
+        runOnJS(commitSwipeFromGesture)(swipeDirection);
         return;
       }
       isTransitioning.set(true);
@@ -267,15 +281,14 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       dragX.set(withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
         isTransitioning.set(false);
         if (!finished || !isMounted.get()) return;
-        dragX.set(0);
-        runOnJS(commitSwipe)(swipeDirection);
+        runOnJS(commitSwipeFromGesture)(swipeDirection);
       }));
     })
     .onFinalize(() => {
       // A vertical dismiss or parent ScrollView can cancel the pan before onEnd.
       // Reset only when no exit animation owns the shared value.
       if (!isTransitioning.get()) dragX.set(0);
-    }), [commitSwipe, direction, dragX, isMounted, isTransitioning, reduceMotion]);
+    }), [commitSwipeFromGesture, direction, dragX, isMounted, isTransitioning, reduceMotion]);
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
