@@ -1455,6 +1455,19 @@
 
 ## Nueva APK de corrección de audio y Cover Flow
 
-- [ ] Sincronizar el checkpoint 92043f66 con GitHub
-- [ ] Ejecutar el workflow nativo Android y revisar el resultado
-- [ ] Descargar, verificar y entregar la APK actualizada
+- [x] Sincronizar el checkpoint 92043f66 con GitHub
+- [x] Ejecutar el workflow nativo Android y revisar el resultado
+- [x] Descargar, verificar y entregar la APK actualizada
+
+## Giro perceptible del Cover Flow
+
+- [ ] Identificar por qué la rotación 3D no se percibe al cambiar de carátula
+- [ ] Implementar una transición giratoria visible y continua para gestos y botones
+- [ ] Validar la animación sin saltos en Inicio y Reproductor; guardar checkpoint
+
+## Carrusel radial tipo tambor de revólver
+
+- [x] Definir posiciones radiales y profundidad para las cinco carátulas
+- [x] Implementar giro visible al deslizar y al usar anterior/siguiente
+- [x] Mantener audio exclusivo, zonas táctiles y soporte de reducción de movimiento
+- [x] Validar la transición radial, pruebas y composición móvil; guardar checkpoint

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -31,6 +31,10 @@ const EQUALIZER_VALUES = [
 ] as const;
 
 const FLOW_STEP = 116;
+const BARREL_RADIUS = 210;
+const BARREL_ANGLE_STEP = 0.68;
+const BARREL_MAX_ANGLE = 1.42;
+const BARREL_VERTICAL_RADIUS = 34;
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
@@ -40,34 +44,41 @@ type FlowSlot = -2 | -1 | 0 | 1 | 2;
 
 function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
-    const baseX = slot === -2 ? -198 : slot === -1 ? -156 : slot === 1 ? 156 : slot === 2 ? 198 : 0;
-    const visualX = baseX + dragX.get();
-    const normalized = visualX / FLOW_STEP;
+    // Each card travels on the surface of an invisible horizontal drum. A
+    // fractional slot changes its angle, x-position, height and scale together,
+    // making the selected cover feel like it is rotating through a cylinder.
+    const normalized = slot + dragX.get() / FLOW_STEP;
+    const angle = Math.max(-BARREL_MAX_ANGLE, Math.min(BARREL_MAX_ANGLE, normalized * BARREL_ANGLE_STEP));
+    const depth = Math.max(0.18, Math.cos(angle));
     const distance = Math.min(2.6, Math.abs(normalized));
+    const visualX = Math.sin(angle) * BARREL_RADIUS;
+    const visualY = (1 - depth) * BARREL_VERTICAL_RADIUS;
+    const rotation = `${-angle * 57.2958}deg`;
+    const scale = 0.64 + depth * 0.36;
 
     if (reduceMotion) {
       return {
-        opacity: slot === 0 ? 1 : 0.52,
-        zIndex: slot === 0 ? 100 : 80,
+        opacity: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.82 : 0.42,
+        zIndex: slot === 0 ? 100 : Math.round(100 - Math.abs(slot) * 12),
         transform: [
-          { perspective: 720 },
-          { translateX: baseX },
-          { translateY: slot === 0 ? 0 : slot === -1 || slot === 1 ? 10 : 22 },
-          { scale: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.84 : 0.7 },
-          { rotateY: slot === -2 ? "64deg" : slot === -1 ? "40deg" : slot === 1 ? "-40deg" : slot === 2 ? "-64deg" : "0deg" },
+          { perspective: 680 },
+          { translateX: visualX },
+          { translateY: visualY },
+          { scale },
+          { rotateY: rotation },
         ],
       };
     }
 
     return {
-      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.92, 0.66, 0.24], Extrapolation.CLAMP),
+      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.94, 0.7, 0.3], Extrapolation.CLAMP),
       zIndex: Math.round(100 - distance * 10),
       transform: [
-        { perspective: 720 },
+        { perspective: 680 },
         { translateX: visualX },
-        { translateY: interpolate(distance, [0, 1, 2], [0, 5, 20], Extrapolation.CLAMP) },
-        { scale: interpolate(distance, [0, 1, 2], [1, 0.84, 0.7], Extrapolation.CLAMP) },
-        { rotateY: `${interpolate(normalized, [-2, -1, 0, 1, 2], [64, 40, 0, -40, -64], Extrapolation.CLAMP)}deg` },
+        { translateY: visualY },
+        { scale },
+        { rotateY: rotation },
       ],
     };
   }, [dragX, reduceMotion, slot]);
@@ -156,17 +167,40 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     return () => subscription.remove();
   }, []);
 
-  const requestChange = useCallback((radio: Radio | undefined, _nextDirection: number) => {
+  const requestChange = useCallback((radio: Radio | undefined, nextDirection: number) => {
     if (!radio) return;
-    dragX.set(0);
-    onSelect(radio);
-  }, [dragX, onSelect]);
+    if (reduceMotion) {
+      dragX.set(0);
+      onSelect(radio);
+      return;
+    }
+    cancelAnimation(dragX);
+    isSettling.set(true);
+    const targetOffset = -nextDirection * FLOW_STEP;
+    dragX.set(withTiming(targetOffset, {
+      duration: 230,
+      easing: Easing.bezier(0.18, 0.82, 0.22, 1),
+    }, (finished) => {
+      isSettling.set(false);
+      if (!finished || !isMounted.get()) return;
+      runOnJS(onSelect)(radio);
+    }));
+  }, [dragX, isMounted, isSettling, onSelect, reduceMotion]);
 
   const commitSwipeFromGesture = useCallback((nextDirection: number) => {
     const target = nextDirection < 0 ? previous : next;
     if (!target || !active || target.id === active.id) return;
-    requestChange(target, nextDirection);
-  }, [active, next, previous, requestChange]);
+    onSelect(target);
+  }, [active, next, onSelect, previous]);
+
+  useLayoutEffect(() => {
+    // Rebase the shared offset only after React has rendered the new active
+    // radio. The outgoing cover finishes its barrel arc first, then the new
+    // active cover is centered before the next frame is painted.
+    cancelAnimation(dragX);
+    dragX.set(0);
+    isSettling.set(false);
+  }, [active?.id, activeIndex, dragX, isSettling]);
 
   const panGesture = useMemo(() => Gesture.Pan()
     .activeOffsetX([-3, 3])
