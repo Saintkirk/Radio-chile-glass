@@ -1490,3 +1490,9 @@
 - [x] Analizar el eje, recorrido, profundidad y ritmo del tambor mostrado en el video
 - [x] Comparar el movimiento de referencia con el carrusel actual
 - [x] Aplicar los ajustes necesarios y validar la coincidencia visual
+
+## APK de prueba del tambor cilíndrico
+
+- [ ] Sincronizar la versión cilíndrica actual con GitHub
+- [ ] Ejecutar y revisar el workflow nativo de Android
+- [ ] Descargar, verificar y entregar el APK actualizado
