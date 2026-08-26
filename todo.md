@@ -1484,3 +1484,9 @@
 - [x] Hacer visible la rotación durante el arrastre y el cambio por botones
 - [x] Mantener selección, audio exclusivo, rendimiento y accesibilidad
 - [x] Validar la nueva interacción y guardar checkpoint
+
+## Análisis del video de referencia
+
+- [x] Analizar el eje, recorrido, profundidad y ritmo del tambor mostrado en el video
+- [x] Comparar el movimiento de referencia con el carrusel actual
+- [x] Aplicar los ajustes necesarios y validar la coincidencia visual
