@@ -34,7 +34,7 @@ const FLOW_STEP = 116;
 const BARREL_RADIUS = 210;
 const BARREL_ANGLE_STEP = 0.68;
 const BARREL_MAX_ANGLE = 1.42;
-const BARREL_VERTICAL_RADIUS = 34;
+const BARREL_VERTICAL_RADIUS = 96;
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
@@ -49,7 +49,7 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
     // making the selected cover feel like it is rotating through a cylinder.
     const normalized = slot + dragX.get() / FLOW_STEP;
     const angle = Math.max(-BARREL_MAX_ANGLE, Math.min(BARREL_MAX_ANGLE, normalized * BARREL_ANGLE_STEP));
-    const depth = Math.max(0.18, Math.cos(angle));
+    const depth = Math.max(0.12, Math.cos(angle));
     const distance = Math.min(2.6, Math.abs(normalized));
     const visualX = Math.sin(angle) * BARREL_RADIUS;
     const visualY = (1 - depth) * BARREL_VERTICAL_RADIUS;
@@ -59,7 +59,7 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
     if (reduceMotion) {
       return {
         opacity: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.82 : 0.42,
-        zIndex: slot === 0 ? 100 : Math.round(100 - Math.abs(slot) * 12),
+        zIndex: Math.round(58 + depth * 42),
         transform: [
           { perspective: 680 },
           { translateX: visualX },
@@ -72,7 +72,7 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
 
     return {
       opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.94, 0.7, 0.3], Extrapolation.CLAMP),
-      zIndex: Math.round(100 - distance * 10),
+      zIndex: Math.round(58 + depth * 42),
       transform: [
         { perspective: 680 },
         { translateX: visualX },
@@ -293,6 +293,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     <GestureDetector gesture={panGesture}>
     <View style={[styles.root, lightMode && styles.rootLight]} accessibilityLabel="Carrusel de emisoras">
       <View style={styles.stage}>
+        <View style={[styles.drumTrack, nonInteractiveStyle]} />
         {outerCard(farPrevious, -2, farPreviousStyle)}
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
@@ -337,6 +338,7 @@ const styles = StyleSheet.create({
   root: { height: 556, borderRadius: 0, overflow: "visible", backgroundColor: "transparent", borderWidth: 0, marginBottom: 24, paddingTop: 10 },
   rootLight: { backgroundColor: "transparent", borderColor: "transparent" },
   stage: { height: 414, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
+  drumTrack: { position: "absolute", width: 430, height: 224, borderRadius: 220, borderWidth: 1, borderColor: "#FFFFFF10", backgroundColor: "#FFFFFF04", opacity: 0.82, transform: [{ rotate: "-3deg" }] },
   outerSlot: { position: "absolute", top: 92, left: "50%", marginLeft: -52, width: 104, height: 220, zIndex: 0, alignItems: "center" },
   outerLeft: {},
   outerRight: {},

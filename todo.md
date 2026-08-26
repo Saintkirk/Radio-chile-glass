@@ -1474,6 +1474,13 @@
 
 ## APK de prueba del giro radial
 
-- [ ] Sincronizar la versión radial actual con GitHub
-- [ ] Ejecutar y revisar la compilación nativa Android
-- [ ] Descargar, verificar y entregar el APK para prueba móvil
+- [x] Sincronizar la versión radial actual con GitHub
+- [x] Ejecutar y revisar la compilación nativa Android
+- [x] Descargar, verificar y entregar el APK para prueba móvil
+
+## Tambor giratorio real para el Cover Flow
+
+- [x] Replantear la trayectoria como un cilindro visual, no como tarjetas inclinadas
+- [x] Hacer visible la rotación durante el arrastre y el cambio por botones
+- [x] Mantener selección, audio exclusivo, rendimiento y accesibilidad
+- [x] Validar la nueva interacción y guardar checkpoint
