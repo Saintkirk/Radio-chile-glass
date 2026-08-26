@@ -1527,3 +1527,9 @@
 - [x] Auditar la física actual de arrastre, velocidad e inercia
 - [x] Suavizar la desaceleración y reducir tirones al encajar
 - [x] Validar gesto, selección, rendimiento y regresiones; guardar checkpoint
+
+## APK de prueba de inercia suave
+
+- [ ] Ejecutar el workflow Android desde el commit actual
+- [ ] Verificar y descargar el APK generado
+- [ ] Entregar el APK con checksum para prueba física
