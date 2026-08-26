@@ -1502,3 +1502,10 @@
 - [x] Revisar y clasificar el contenido adjunto
 - [x] Incorporar los elementos compatibles en los archivos del proyecto
 - [x] Validar TypeScript, pruebas, lint y guardar checkpoint
+
+## Control manual del tambor con el dedo
+
+- [x] Convertir el desplazamiento del dedo en ángulo continuo del cilindro
+- [x] Ajustar la velocidad de rotación según la velocidad del gesto
+- [x] Aplicar desaceleración y encaje magnético sin perder sincronización de audio
+- [x] Validar gestos, botones, reducción de movimiento y rendimiento; guardar checkpoint

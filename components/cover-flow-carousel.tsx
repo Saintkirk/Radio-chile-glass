@@ -7,6 +7,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withDecay,
   withRepeat,
   withSequence,
   withTiming,
@@ -40,6 +41,10 @@ const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
 const MAX_GESTURE_VELOCITY = 2200;
+const INERTIA_VELOCITY_FACTOR = 0.14;
+const INERTIA_DECELERATION = 0.84;
+const INERTIA_MIN_OFFSET = FLOW_STEP * 0.58;
+const INERTIA_MAX_OFFSET = FLOW_STEP * 1.55;
 
 type FlowSlot = -2 | -1 | 0 | 1 | 2;
 
@@ -240,13 +245,27 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       }
       isSettling.set(true);
       const settleTarget = -swipeDirection * FLOW_STEP;
-      // The finger-following phase already supplies the physical cue. A short
-      // timing curve only finishes the card slot and keeps the handoff immediate.
-      const finalSnapDuration = Math.max(105, Math.min(175, 175 - Math.abs(limitedVelocity) / 24));
-      dragX.set(withTiming(settleTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.2, 0.88, 0.28, 1) }, (finished) => {
-        isSettling.set(false);
-        if (!finished || !isMounted.get()) return;
-        runOnJS(commitSwipeFromGesture)(swipeDirection);
+      const inertiaClamp = swipeDirection > 0
+        ? [-INERTIA_MAX_OFFSET, -INERTIA_MIN_OFFSET] as [number, number]
+        : [INERTIA_MIN_OFFSET, INERTIA_MAX_OFFSET] as [number, number];
+      const inertiaVelocity = limitedVelocity * INERTIA_VELOCITY_FACTOR;
+      // Preserve the finger's release speed for a short, bounded momentum
+      // burst. The second animation is the magnetic snap to one exact slot.
+      dragX.set(withDecay({
+        velocity: inertiaVelocity,
+        deceleration: INERTIA_DECELERATION,
+        clamp: inertiaClamp,
+      }, (decayFinished) => {
+        if (!decayFinished || !isMounted.get()) {
+          isSettling.set(false);
+          return;
+        }
+        const finalSnapDuration = Math.max(105, Math.min(180, 180 - Math.abs(limitedVelocity) / 22));
+        dragX.set(withTiming(settleTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.2, 0.88, 0.28, 1) }, (finished) => {
+          isSettling.set(false);
+          if (!finished || !isMounted.get()) return;
+          runOnJS(commitSwipeFromGesture)(swipeDirection);
+        }));
       }));
     })
     .onFinalize(() => {
