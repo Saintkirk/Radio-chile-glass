@@ -31,10 +31,11 @@ const EQUALIZER_VALUES = [
 ] as const;
 
 const FLOW_STEP = 116;
-const BARREL_RADIUS = 210;
-const BARREL_ANGLE_STEP = 0.68;
-const BARREL_MAX_ANGLE = 1.42;
-const BARREL_VERTICAL_RADIUS = 96;
+const COVER_SIZE = 214;
+const BARREL_RADIUS = COVER_SIZE * 1.1;
+const BARREL_ANGLE_STEP = (40 * Math.PI) / 180;
+const BARREL_MAX_ANGLE = (82 * Math.PI) / 180;
+const BARREL_VERTICAL_RADIUS = 18;
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
@@ -54,31 +55,32 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
     const visualX = Math.sin(angle) * BARREL_RADIUS;
     const visualY = (1 - depth) * BARREL_VERTICAL_RADIUS;
     const rotation = `${-angle * 57.2958}deg`;
-    const scale = 0.64 + depth * 0.36;
+    const scale = Math.max(0.75, depth);
+    const opacity = Math.max(0.2, depth);
 
     if (reduceMotion) {
       return {
-        opacity: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.82 : 0.42,
+        opacity,
         zIndex: Math.round(58 + depth * 42),
         transform: [
-          { perspective: 680 },
+          { perspective: 900 },
           { translateX: visualX },
           { translateY: visualY },
-          { scale },
           { rotateY: rotation },
+          { scale },
         ],
       };
     }
 
     return {
-      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.94, 0.7, 0.3], Extrapolation.CLAMP),
+      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.78, 0.22, 0.2], Extrapolation.CLAMP),
       zIndex: Math.round(58 + depth * 42),
       transform: [
-        { perspective: 680 },
+        { perspective: 900 },
         { translateX: visualX },
         { translateY: visualY },
-        { scale },
         { rotateY: rotation },
+        { scale },
       ],
     };
   }, [dragX, reduceMotion, slot]);
