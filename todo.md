@@ -1377,3 +1377,11 @@
 - [x] Reducir trabajo visual no esencial durante la interacción sin perder el estilo 3D
 - [x] Validar typecheck, pruebas y composición móvil después de la optimización
 - [x] Guardar checkpoint y preparar una nueva APK optimizada
+
+## Auditoría de errores del proyecto
+
+- [x] Revisar logs recientes de Metro y del servidor
+- [x] Ejecutar typecheck, pruebas Vitest y lint
+- [x] Verificar configuración Expo y consistencia de dependencias
+- [x] Revisar la interfaz móvil y clasificar errores visuales o de navegación
+- [x] Corregir hallazgos confirmados y revalidar el proyecto
