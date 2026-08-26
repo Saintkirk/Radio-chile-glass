@@ -30,7 +30,7 @@ const EQUALIZER_VALUES = [
   [0.62, 0.34, 0.82, 0.98, 0.62],
 ] as const;
 
-const FLOW_STEP = 116;
+const FLOW_STEP = 124;
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
@@ -40,7 +40,7 @@ type FlowSlot = -2 | -1 | 0 | 1 | 2;
 
 function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
-    const baseX = slot === -2 ? -190 : slot === -1 ? -164 : slot === 1 ? 164 : slot === 2 ? 190 : 0;
+    const baseX = slot === -2 ? -206 : slot === -1 ? -172 : slot === 1 ? 172 : slot === 2 ? 206 : 0;
     const visualX = baseX + dragX.get();
     const normalized = visualX / FLOW_STEP;
     const distance = Math.min(2.6, Math.abs(normalized));
@@ -50,24 +50,24 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
         opacity: slot === 0 ? 1 : 0.52,
         zIndex: slot === 0 ? 100 : 80,
         transform: [
-          { perspective: 900 },
-          { translateX: slot * FLOW_STEP },
-          { translateY: slot === 0 ? 0 : 8 },
-          { scale: slot === 0 ? 1 : 0.8 },
-          { rotateY: slot < 0 ? "34deg" : slot > 0 ? "-34deg" : "0deg" },
+          { perspective: 760 },
+          { translateX: baseX },
+          { translateY: slot === 0 ? 0 : 7 },
+          { scale: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.83 : 0.66 },
+          { rotateY: slot === -2 ? "68deg" : slot === -1 ? "42deg" : slot === 1 ? "-42deg" : slot === 2 ? "-68deg" : "0deg" },
         ],
       };
     }
 
     return {
-      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.78, 0.34, 0.08], Extrapolation.CLAMP),
+      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.88, 0.58, 0.18], Extrapolation.CLAMP),
       zIndex: Math.round(100 - distance * 10),
       transform: [
-        { perspective: 900 },
+        { perspective: 760 },
         { translateX: visualX },
-        { translateY: interpolate(distance, [0, 1, 2], [0, 5, 22], Extrapolation.CLAMP) },
-        { scale: interpolate(distance, [0, 1, 2], [1, 0.8, 0.58], Extrapolation.CLAMP) },
-        { rotateY: `${interpolate(normalized, [-2, -1, 0, 1, 2], [56, 34, 0, -34, -56], Extrapolation.CLAMP)}deg` },
+        { translateY: interpolate(distance, [0, 1, 2], [0, 4, 18], Extrapolation.CLAMP) },
+        { scale: interpolate(distance, [0, 1, 2], [1, 0.83, 0.66], Extrapolation.CLAMP) },
+        { rotateY: `${interpolate(normalized, [-2, -1, 0, 1, 2], [68, 42, 0, -42, -68], Extrapolation.CLAMP)}deg` },
       ],
     };
   }, [dragX, reduceMotion, slot]);

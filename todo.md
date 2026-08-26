@@ -1432,3 +1432,10 @@
 - [x] Interpolar escala, perspectiva, opacidad y profundidad entre posiciones
 - [x] Implementar inercia controlada y encaje suave con selección sincronizada
 - [x] Validar gestos, rendimiento y navegación en móvil; guardar checkpoint
+
+## Ajuste de perspectiva y biblioteca lateral del Cover Flow
+
+- [x] Recalibrar la intensidad de la perspectiva 3D sin perder legibilidad de la carátula activa
+- [x] Aumentar la separación lateral y mostrar más carátulas simultáneamente
+- [x] Mantener zonas táctiles, reflejos, sombras y navegación sincronizadas
+- [x] Validar composición móvil, typecheck, pruebas y lint; guardar checkpoint
