@@ -1518,6 +1518,12 @@
 
 ## APK con corrección del bloqueo de arranque
 
-- [ ] Sincronizar el fallback del loader con GitHub
-- [ ] Ejecutar y revisar la compilación nativa Android
-- [ ] Descargar, verificar y entregar el APK para prueba física
+- [x] Sincronizar el fallback del loader con GitHub
+- [x] Ejecutar y revisar la compilación nativa Android
+- [x] Descargar, verificar y entregar el APK para prueba física
+
+## Inercia suave del tambor cilíndrico
+
+- [x] Auditar la física actual de arrastre, velocidad e inercia
+- [x] Suavizar la desaceleración y reducir tirones al encajar
+- [x] Validar gesto, selección, rendimiento y regresiones; guardar checkpoint

@@ -41,10 +41,12 @@ const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
 const MAX_GESTURE_VELOCITY = 2200;
-const INERTIA_VELOCITY_FACTOR = 0.14;
-const INERTIA_DECELERATION = 0.84;
-const INERTIA_MIN_OFFSET = FLOW_STEP * 0.58;
-const INERTIA_MAX_OFFSET = FLOW_STEP * 1.55;
+// The release should carry the finger's momentum without snapping or
+// stopping abruptly at the edge of the next slot.
+const INERTIA_VELOCITY_FACTOR = 0.18;
+const INERTIA_DECELERATION = 0.968;
+const INERTIA_MIN_OFFSET = FLOW_STEP * 0.52;
+const INERTIA_MAX_OFFSET = FLOW_STEP * 1.42;
 
 type FlowSlot = -2 | -1 | 0 | 1 | 2;
 
@@ -236,7 +238,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         ? 0
         : projectedTranslation < 0 ? 1 : -1;
       if (swipeDirection === 0) {
-        dragX.set(withTiming(0, { duration: 150, easing: Easing.bezier(0.2, 0.85, 0.28, 1) }));
+        dragX.set(withTiming(0, { duration: 220, easing: Easing.bezier(0.16, 0.78, 0.24, 1) }));
         return;
       }
       if (reduceMotion) {
@@ -260,8 +262,10 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
           isSettling.set(false);
           return;
         }
-        const finalSnapDuration = Math.max(105, Math.min(180, 180 - Math.abs(limitedVelocity) / 22));
-        dragX.set(withTiming(settleTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.2, 0.88, 0.28, 1) }, (finished) => {
+        // Faster releases get a slightly longer magnetic settle so the last
+        // part of the rotation remains readable instead of appearing to pop.
+        const finalSnapDuration = Math.max(210, Math.min(320, 220 + Math.abs(limitedVelocity) / 18));
+        dragX.set(withTiming(settleTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.16, 0.76, 0.24, 1) }, (finished) => {
           isSettling.set(false);
           if (!finished || !isMounted.get()) return;
           runOnJS(commitSwipeFromGesture)(swipeDirection);
@@ -271,7 +275,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     .onFinalize(() => {
       // A parent scroll or cancelled pan should return to center, but never
       // interrupt the settle animation that already owns the shared value.
-      if (!isSettling.get()) dragX.set(withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) }));
+      if (!isSettling.get()) dragX.set(withTiming(0, { duration: 180, easing: Easing.out(Easing.cubic) }));
     }), [commitSwipeFromGesture, dragX, isMounted, isSettling, reduceMotion]);
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useFlowCardAnimatedStyle>) => radio ? (
