@@ -30,7 +30,7 @@ const EQUALIZER_VALUES = [
   [0.62, 0.34, 0.82, 0.98, 0.62],
 ] as const;
 
-const FLOW_STEP = 124;
+const FLOW_STEP = 116;
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
@@ -40,7 +40,7 @@ type FlowSlot = -2 | -1 | 0 | 1 | 2;
 
 function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
-    const baseX = slot === -2 ? -206 : slot === -1 ? -172 : slot === 1 ? 172 : slot === 2 ? 206 : 0;
+    const baseX = slot === -2 ? -198 : slot === -1 ? -156 : slot === 1 ? 156 : slot === 2 ? 198 : 0;
     const visualX = baseX + dragX.get();
     const normalized = visualX / FLOW_STEP;
     const distance = Math.min(2.6, Math.abs(normalized));
@@ -50,24 +50,24 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
         opacity: slot === 0 ? 1 : 0.52,
         zIndex: slot === 0 ? 100 : 80,
         transform: [
-          { perspective: 760 },
+          { perspective: 720 },
           { translateX: baseX },
-          { translateY: slot === 0 ? 0 : 7 },
-          { scale: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.83 : 0.66 },
-          { rotateY: slot === -2 ? "68deg" : slot === -1 ? "42deg" : slot === 1 ? "-42deg" : slot === 2 ? "-68deg" : "0deg" },
+          { translateY: slot === 0 ? 0 : slot === -1 || slot === 1 ? 10 : 22 },
+          { scale: slot === 0 ? 1 : slot === -1 || slot === 1 ? 0.84 : 0.7 },
+          { rotateY: slot === -2 ? "64deg" : slot === -1 ? "40deg" : slot === 1 ? "-40deg" : slot === 2 ? "-64deg" : "0deg" },
         ],
       };
     }
 
     return {
-      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.88, 0.58, 0.18], Extrapolation.CLAMP),
+      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.92, 0.66, 0.24], Extrapolation.CLAMP),
       zIndex: Math.round(100 - distance * 10),
       transform: [
-        { perspective: 760 },
+        { perspective: 720 },
         { translateX: visualX },
-        { translateY: interpolate(distance, [0, 1, 2], [0, 4, 18], Extrapolation.CLAMP) },
-        { scale: interpolate(distance, [0, 1, 2], [1, 0.83, 0.66], Extrapolation.CLAMP) },
-        { rotateY: `${interpolate(normalized, [-2, -1, 0, 1, 2], [68, 42, 0, -42, -68], Extrapolation.CLAMP)}deg` },
+        { translateY: interpolate(distance, [0, 1, 2], [0, 5, 20], Extrapolation.CLAMP) },
+        { scale: interpolate(distance, [0, 1, 2], [1, 0.84, 0.7], Extrapolation.CLAMP) },
+        { rotateY: `${interpolate(normalized, [-2, -1, 0, 1, 2], [64, 40, 0, -40, -64], Extrapolation.CLAMP)}deg` },
       ],
     };
   }, [dragX, reduceMotion, slot]);
@@ -100,8 +100,8 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   const farPreviousStyle = useFlowCardAnimatedStyle(-2, dragX, reduceMotion);
   const farNextStyle = useFlowCardAnimatedStyle(2, dragX, reduceMotion);
   const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(glow.get(), [0, 1], [0.12, 0.32], Extrapolation.CLAMP),
-    transform: [{ scale: interpolate(glow.get(), [0, 1], [0.94, 1.08], Extrapolation.CLAMP) }],
+    opacity: interpolate(glow.get(), [0, 1], [0.04, 0.13], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(glow.get(), [0, 1], [0.98, 1.03], Extrapolation.CLAMP) }],
   }), [glow]);
   const innerGlowStyle = useAnimatedStyle(() => ({
     opacity: interpolate(glow.get(), [0, 1], [0.08, 0.18], Extrapolation.CLAMP),
@@ -263,7 +263,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
           <View style={[styles.centerContactShadow, nonInteractiveStyle]} />
-          <Animated.View style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }, nonInteractiveStyle]} />
+          <Animated.View style={[styles.outerGlow, glowStyle, nonInteractiveStyle]} />
           <View style={[styles.centerCover, { backgroundColor: `${active.accent}40` }]}>
             <Animated.View style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }, nonInteractiveStyle]} />
             <Pressable disabled={isLoading} onPress={onPlay} accessibilityRole="button" accessibilityLabel={isLoading ? `Conectando con ${active.name}` : currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
@@ -303,22 +303,22 @@ const styles = StyleSheet.create({
   root: { height: 556, borderRadius: 0, overflow: "visible", backgroundColor: "transparent", borderWidth: 0, marginBottom: 24, paddingTop: 10 },
   rootLight: { backgroundColor: "transparent", borderColor: "transparent" },
   stage: { height: 414, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
-  outerSlot: { position: "absolute", top: 86, left: "50%", marginLeft: -56, width: 112, height: 238, zIndex: 0, alignItems: "center" },
+  outerSlot: { position: "absolute", top: 92, left: "50%", marginLeft: -52, width: 104, height: 220, zIndex: 0, alignItems: "center" },
   outerLeft: {},
   outerRight: {},
-  sideSlot: { position: "absolute", top: 46, left: "50%", marginLeft: -75, width: 150, height: 316, zIndex: 1, alignItems: "center" },
+  sideSlot: { position: "absolute", top: 62, left: "50%", marginLeft: -68, width: 136, height: 288, zIndex: 1, alignItems: "center" },
   cardPressable: { width: "100%", height: "100%" },
   sideLeft: {},
   sideRight: {},
   centerSlot: { position: "absolute", top: 11, left: "50%", marginLeft: -135, width: 270, height: 392, zIndex: 3, alignItems: "center" },
   centerContactShadow: { position: "absolute", top: 374, width: 204, height: 16, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.34, transform: [{ scaleY: 0.2 }] },
-  outerGlow: { position: "absolute", width: 292, height: 402, borderRadius: 32, ...platformShadow({ color: "#FF5E67", opacity: 0.9, radius: 34, elevation: 16 }) },
+  outerGlow: { position: "absolute", width: 286, height: 394, borderRadius: 34, backgroundColor: "#FFFFFF0A", borderWidth: 1, borderColor: "#FFFFFF12", ...platformShadow({ color: "#FF5E67", opacity: 0.42, radius: 28, elevation: 10 }) },
   cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", ...platformShadow({ color: "#000", opacity: 0.7, radius: 26, offsetY: 16, elevation: 12 }) },
-  outerCover: { width: 112, height: 228, borderRadius: 18, borderColor: "#FFFFFF32", ...platformShadow({ color: "#000", opacity: 0.38, radius: 12, offsetY: 9, elevation: 3 }) },
-  outerContactShadow: { position: "absolute", top: 218, width: 84, height: 14, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.28, transform: [{ scaleY: 0.2 }] },
-  outerReflection: { position: "absolute", top: 226, width: 106, height: 34, opacity: 0.07, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 16, alignItems: "center" },
-  sideCover: { width: 150, height: 308, borderRadius: 24 },
-  sideContactShadow: { position: "absolute", top: 300, width: 112, height: 18, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.3, transform: [{ scaleY: 0.2 }] },
+  outerCover: { width: 104, height: 212, borderRadius: 17, borderColor: "#FFFFFF32", ...platformShadow({ color: "#000", opacity: 0.38, radius: 12, offsetY: 9, elevation: 3 }) },
+  outerContactShadow: { position: "absolute", top: 202, width: 78, height: 13, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.28, transform: [{ scaleY: 0.2 }] },
+  outerReflection: { position: "absolute", top: 210, width: 98, height: 32, opacity: 0.07, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 15, alignItems: "center" },
+  sideCover: { width: 136, height: 280, borderRadius: 22 },
+  sideContactShadow: { position: "absolute", top: 272, width: 104, height: 17, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.3, transform: [{ scaleY: 0.2 }] },
   centerCover: { width: 270, height: 382, borderRadius: 34, borderWidth: 2, borderColor: "#FFFFFFB8", ...platformShadow({ color: "#000", opacity: 0.92, radius: 38 }) },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
   bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 10 },
@@ -327,11 +327,11 @@ const styles = StyleSheet.create({
   bufferingText: { color: "#F5F3EE", fontSize: 11, fontWeight: "700", letterSpacing: 0.4 },
   liveBadge: { position: "absolute", bottom: 24, left: 46, right: 46, height: 34, borderRadius: 17, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, ...platformShadow({ color: "#FF5E67", opacity: 0.55, radius: 12, offsetY: 5, elevation: 7 }) }, liveBadgeText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
-  sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
-  outerShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B66" },
+  sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000022" },
+  outerShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B42" },
   centerGloss: { position: "absolute", top: 9, left: 14, right: 14, height: 52, backgroundColor: "#FFFFFF12" },
   diagonalSheen: { position: "absolute", width: 280, height: 34, top: 74, left: -36, backgroundColor: "#FFFFFF18", transform: [{ rotate: "-28deg" }] },
-  reflection: { position: "absolute", top: 307, width: 150, height: 52, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 20, alignItems: "center" },
+  reflection: { position: "absolute", top: 278, width: 136, height: 46, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 18, alignItems: "center" },
   centerReflection: { position: "absolute", top: 382, width: 270, height: 52, opacity: 0.08, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 28, alignItems: "center" },
   reflectionFadeStrong: { position: "absolute", left: 0, right: 0, top: 0, height: 12, backgroundColor: "#070811", opacity: 0.2 },
   reflectionFadeSoft: { position: "absolute", left: 0, right: 0, bottom: 0, height: 24, backgroundColor: "#070811", opacity: 0.48 },

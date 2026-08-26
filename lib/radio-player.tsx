@@ -116,41 +116,15 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     return outgoing;
   }, []);
 
-  const startCrossfade = useCallback((outgoing: ReturnType<typeof createAudioPlayer> | null, incoming: ReturnType<typeof createAudioPlayer>, requestId: number) => {
-    if (!outgoing || outgoing === incoming) {
-      incoming.volume = 1;
-      return;
+  const startCrossfade = useCallback((outgoing: ReturnType<typeof createAudioPlayer> | null, incoming: ReturnType<typeof createAudioPlayer>, _requestId: number) => {
+    // The previous player is already paused before the new stream is created.
+    // Keep this boundary synchronous so playback cannot overlap even when the
+    // native status callback arrives later than the play() call.
+    if (outgoing && outgoing !== incoming) {
+      crossfadeOutgoingRef.current = null;
+      pauseAndRemovePlayer(outgoing);
     }
-    const token = ++crossfadeTokenRef.current;
-    crossfadeOutgoingRef.current = outgoing;
-    if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
-    const startedAt = Date.now();
-    const durationMs = AUDIO_CROSSFADE_MS;
-    try { outgoing.volume = 1; } catch { /* no-op */ }
-    try { incoming.volume = 0; } catch { /* no-op */ }
-    crossfadeTimerRef.current = setInterval(() => {
-      if (!shouldContinueCrossfade(requestId, playRequestRef.current, token, crossfadeTokenRef.current)) {
-        if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
-        crossfadeTimerRef.current = null;
-        if (crossfadeOutgoingRef.current === outgoing) {
-          crossfadeOutgoingRef.current = null;
-          pauseAndRemovePlayer(outgoing);
-        }
-        return;
-      }
-      const progress = Math.min(1, (Date.now() - startedAt) / durationMs);
-      const eased = progress * progress * (3 - 2 * progress);
-      try { outgoing.volume = 1 - eased; } catch { /* no-op */ }
-      try { incoming.volume = eased; } catch { /* no-op */ }
-      if (progress >= 1) {
-        if (crossfadeTimerRef.current) clearInterval(crossfadeTimerRef.current);
-        crossfadeTimerRef.current = null;
-        try { outgoing.pause(); } catch { /* no-op */ }
-        try { outgoing.remove(); } catch { /* no-op */ }
-        if (crossfadeOutgoingRef.current === outgoing) crossfadeOutgoingRef.current = null;
-        try { incoming.volume = 1; } catch { /* no-op */ }
-      }
-    }, 50);
+    try { incoming.volume = 1; } catch { /* no-op */ }
   }, []);
 
   const refreshCatalog = useCallback(async (): Promise<Radio[]> => {
@@ -190,8 +164,12 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     cleanupCrossfadeOutgoing();
     const outgoingRadio = currentRadioRef.current;
     const outgoingPlayer = detachCurrentPlayerForCrossfade();
+    // Stop the old stream before opening the new one. A live radio must never
+    // leave two audible players during the handoff; the paused instance remains
+    // available only as a silent fallback if the new stream fails.
     if (outgoingPlayer) {
-      try { outgoingPlayer.volume = 1; } catch { /* no-op */ }
+      try { outgoingPlayer.volume = 0; } catch { /* no-op */ }
+      try { outgoingPlayer.pause(); } catch { /* no-op */ }
     }
     if (preserveMediaSession && backgroundPlaybackEnabled) {
       setNativeMediaSession(lockScreenMetadata(radio), false);
@@ -216,9 +194,6 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         const focusResult = requestAudioFocus();
         if (focusResult === "failed") throw new Error("Audio focus unavailable");
         candidate = createAudioPlayer({ uri: radio.streamUrl });
-        if (outgoingPlayer) {
-          try { candidate.volume = 0; } catch { /* no-op */ }
-        }
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
           candidate.remove();
@@ -304,9 +279,16 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         // si el stream no responde, el timeout lo revierte sin destruir la MediaSession.
         return;
       } catch {
-        if (candidate && candidate !== playerRef.current) {
-          try { candidate.pause(); } catch { /* no-op */ }
-          try { candidate.remove(); } catch { /* no-op */ }
+        if (candidate) {
+          // The candidate can already be playerRef.current when play() or a
+          // native callback throws. Detach and remove it in that case too;
+          // otherwise a failed handoff can keep emitting beside the fallback.
+          if (candidate === playerRef.current) {
+            playerStatusSubscriptionRef.current?.remove();
+            playerStatusSubscriptionRef.current = null;
+            playerRef.current = null;
+          }
+          pauseAndRemovePlayer(candidate);
         }
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
         if (attempt === MAX_PLAYBACK_RETRIES) {

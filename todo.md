@@ -1442,6 +1442,13 @@
 
 ## Generación y entrega de APK actualizada
 
-- [ ] Sincronizar el checkpoint actual con el repositorio de GitHub
-- [ ] Ejecutar el workflow nativo Android y revisar sus logs
-- [ ] Verificar el artefacto APK y entregarlo para prueba física
+- [x] Sincronizar el checkpoint actual con el repositorio de GitHub
+- [x] Ejecutar el workflow nativo Android y revisar sus logs
+- [x] Verificar el artefacto APK y entregarlo para prueba física
+
+## Regresión de audio y estética del giro Cover Flow
+
+- [x] Auditar el cambio de emisora para invalidar y detener cualquier reproductor anterior
+- [x] Garantizar que solo la emisora seleccionada pueda emitir y actualizar el estado multimedia
+- [x] Recuperar un giro Cover Flow visible, equilibrado y visualmente coherente entre slots
+- [x] Validar cambios rápidos, gestos, typecheck, pruebas y composición móvil; guardar checkpoint
