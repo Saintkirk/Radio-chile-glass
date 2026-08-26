@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -18,10 +18,9 @@ import Animated, {
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
-import { carouselSettleMode, safeRadioIndex } from "@/lib/player-utils";
+import { safeRadioIndex } from "@/lib/player-utils";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 
-type Side = -1 | 0 | 1;
 type OuterSide = -2 | 2;
 
 const EQUALIZER_VALUES = [
@@ -31,86 +30,47 @@ const EQUALIZER_VALUES = [
   [0.62, 0.34, 0.82, 0.98, 0.62],
 ] as const;
 
+const FLOW_STEP = 116;
 const DRAG_LIMIT = 156;
 const SWIPE_DISTANCE = 26;
 const SWIPE_VELOCITY = 300;
-const SWIPE_EXIT_DISTANCE = 196;
 const MAX_GESTURE_VELOCITY = 2200;
-const CARD_SETTLE_DURATION = 210;
 
-function useCardAnimatedStyle(side: Side, motion: SharedValue<number>, direction: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
+type FlowSlot = -2 | -1 | 0 | 1 | 2;
+
+function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, reduceMotion: boolean) {
   return useAnimatedStyle(() => {
-    const dir = direction.get();
+    const baseX = slot === -2 ? -190 : slot === -1 ? -164 : slot === 1 ? 164 : slot === 2 ? 190 : 0;
+    const visualX = baseX + dragX.get();
+    const normalized = visualX / FLOW_STEP;
+    const distance = Math.min(2.6, Math.abs(normalized));
+
     if (reduceMotion) {
       return {
-        opacity: 1,
+        opacity: slot === 0 ? 1 : 0.52,
+        zIndex: slot === 0 ? 100 : 80,
         transform: [
           { perspective: 900 },
-          { translateX: 0 },
-          { translateY: 0 },
-          { scale: side === 0 ? 1 : 0.82 },
-          { rotateY: "0deg" },
+          { translateX: slot * FLOW_STEP },
+          { translateY: slot === 0 ? 0 : 8 },
+          { scale: slot === 0 ? 1 : 0.8 },
+          { rotateY: slot < 0 ? "34deg" : slot > 0 ? "-34deg" : "0deg" },
         ],
       };
     }
 
-    const startX = side === 0 ? dir * 230 : side === -dir ? side * 156 : side * 190;
-    const endX = side === 0 ? 0 : side * 8;
-    const startRotation = side === 0 ? (dir > 0 ? -28 : 28) : side === -dir ? 0 : side === -1 ? 42 : -42;
-    const targetRotation = side === -1 ? 34 : side === 1 ? -34 : 0;
-    const progress = motion.get();
-    const drag = dragX.get();
-    const dragProgress = Math.max(-1, Math.min(1, drag / DRAG_LIMIT));
-    const dragStrength = Math.abs(dragProgress);
-    const incoming = side !== 0 && side * dragProgress < 0;
-    const settledX = interpolate(progress, [0, 1], [startX, endX], Extrapolation.CLAMP);
-    const settledRotation = interpolate(progress, [0, 1], [startRotation, targetRotation], Extrapolation.CLAMP);
-    const settledScale = side === 0
-      ? interpolate(progress, [0, 0.72, 1], [0.84, 0.96, 1], Extrapolation.CLAMP)
-      : interpolate(progress, [0, 1], [0.68, 0.82], Extrapolation.CLAMP);
-
     return {
-      opacity: side === 0
-        ? interpolate(progress, [0, 0.7, 1], [0.35, 0.8, 1], Extrapolation.CLAMP) - dragStrength * 0.38
-        : interpolate(progress, [0, 1], [0.35, 0.85], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.23 : -dragStrength * 0.14),
+      opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.78, 0.34, 0.08], Extrapolation.CLAMP),
+      zIndex: Math.round(100 - distance * 10),
       transform: [
         { perspective: 900 },
-        { translateX: settledX + (side === 0 ? dragProgress * 164 : incoming ? dragProgress * 144 : dragProgress * 26) },
-        { translateY: interpolate(progress, [0, 1], side === 0 ? [8, 0] : [12, 4], Extrapolation.CLAMP) + (side === 0 ? dragStrength * 8 : -dragStrength * 4) },
-        { scale: settledScale + (side === 0 ? -dragStrength * 0.18 : incoming ? dragStrength * 0.2 : -dragStrength * 0.07) },
-        { rotateY: `${settledRotation + (side === 0 ? dragProgress * 38 : incoming ? -dragProgress * 34 : dragProgress * 9)}deg` },
+        { translateX: visualX },
+        { translateY: interpolate(distance, [0, 1, 2], [0, 5, 22], Extrapolation.CLAMP) },
+        { scale: interpolate(distance, [0, 1, 2], [1, 0.8, 0.58], Extrapolation.CLAMP) },
+        { rotateY: `${interpolate(normalized, [-2, -1, 0, 1, 2], [56, 34, 0, -34, -56], Extrapolation.CLAMP)}deg` },
       ],
     };
-  }, [direction, dragX, motion, reduceMotion, side]);
-}
-
-function useOuterCardAnimatedStyle(side: OuterSide, motion: SharedValue<number>, dragX: SharedValue<number>, reduceMotion: boolean) {
-  return useAnimatedStyle(() => {
-    if (reduceMotion) {
-      return {
-        opacity: 0.42,
-        transform: [{ perspective: 900 }, { scale: 0.58 }, { rotateY: side < 0 ? "56deg" : "-56deg" }],
-      };
-    }
-
-    const progress = motion.get();
-    const dragProgress = Math.max(-1, Math.min(1, dragX.get() / DRAG_LIMIT));
-    const dragStrength = Math.abs(dragProgress);
-    const incoming = side * dragProgress < 0;
-    const baseRotation = side < 0 ? 62 : -62;
-    const baseShift = side < 0 ? -10 : 10;
-
-    return {
-      opacity: interpolate(progress, [0, 1], [0.08, 0.38], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.2 : -dragStrength * 0.08),
-      transform: [
-        { perspective: 900 },
-        { translateX: baseShift + dragProgress * (incoming ? 54 : 12) },
-        { translateY: 28 - dragStrength * 8 },
-        { scale: interpolate(progress, [0, 1], [0.44, 0.58], Extrapolation.CLAMP) + (incoming ? dragStrength * 0.1 : -dragStrength * 0.04) },
-        { rotateY: `${baseRotation - dragProgress * 20}deg` },
-      ],
-    };
-  }, [dragX, motion, reduceMotion, side]);
+  }, [dragX, reduceMotion, slot]);
 }
 
 function useEqualizerBarStyle(equalizer: SharedValue<number>, index: number, reduceMotion: boolean) {
@@ -122,26 +82,23 @@ function useEqualizerBarStyle(equalizer: SharedValue<number>, index: number, red
 }
 
 export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPlaying, isLoading, currentRadioId, lightMode = false }: { radios: Radio[]; activeIndex: number; onSelect: (radio: Radio) => void; onPlay: () => void; isPlaying: boolean; isLoading: boolean; currentRadioId?: string; lightMode?: boolean }) {
-  const motion = useSharedValue(1);
   const dragX = useSharedValue(0);
   const glow = useSharedValue(0);
   const equalizer = useSharedValue(0);
-  const direction = useSharedValue(1);
-  const isTransitioning = useSharedValue(false);
+  const isSettling = useSharedValue(false);
   const isMounted = useSharedValue(true);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const swipeCommitRef = useRef(false);
   const safeActiveIndex = safeRadioIndex(radios.length, activeIndex);
   const active = safeActiveIndex >= 0 ? radios[safeActiveIndex] : undefined;
   const previous = safeActiveIndex >= 0 ? radios[(safeActiveIndex - 1 + radios.length) % radios.length] : undefined;
   const next = safeActiveIndex >= 0 ? radios[(safeActiveIndex + 1) % radios.length] : undefined;
   const farPrevious = safeActiveIndex >= 0 && radios.length > 3 ? radios[(safeActiveIndex - 2 + radios.length) % radios.length] : undefined;
   const farNext = safeActiveIndex >= 0 && radios.length > 3 ? radios[(safeActiveIndex + 2) % radios.length] : undefined;
-  const centerStyle = useCardAnimatedStyle(0, motion, direction, dragX, reduceMotion);
-  const previousStyle = useCardAnimatedStyle(-1, motion, direction, dragX, reduceMotion);
-  const nextStyle = useCardAnimatedStyle(1, motion, direction, dragX, reduceMotion);
-  const farPreviousStyle = useOuterCardAnimatedStyle(-2, motion, dragX, reduceMotion);
-  const farNextStyle = useOuterCardAnimatedStyle(2, motion, dragX, reduceMotion);
+  const centerStyle = useFlowCardAnimatedStyle(0, dragX, reduceMotion);
+  const previousStyle = useFlowCardAnimatedStyle(-1, dragX, reduceMotion);
+  const nextStyle = useFlowCardAnimatedStyle(1, dragX, reduceMotion);
+  const farPreviousStyle = useFlowCardAnimatedStyle(-2, dragX, reduceMotion);
+  const farNextStyle = useFlowCardAnimatedStyle(2, dragX, reduceMotion);
   const glowStyle = useAnimatedStyle(() => ({
     opacity: interpolate(glow.get(), [0, 1], [0.12, 0.32], Extrapolation.CLAMP),
     transform: [{ scale: interpolate(glow.get(), [0, 1], [0.94, 1.08], Extrapolation.CLAMP) }],
@@ -157,39 +114,15 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   ];
 
   useEffect(() => {
-    const committedBySwipe = swipeCommitRef.current;
-    swipeCommitRef.current = false;
-    cancelAnimation(motion);
-    cancelAnimation(dragX);
-    const settleMode = carouselSettleMode(committedBySwipe, reduceMotion);
-    if (settleMode === "gesture") {
-      // The outgoing animation already moved the shared deck off-center. Keep
-      // motion at 1 and only bring the newly active card back to rest; resetting
-      // motion to 0 here caused the visible one-frame jump on Android.
-      dragX.set(withTiming(0, { duration: 150, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }));
-      return undefined;
-    }
-    dragX.set(0);
-    if (settleMode === "instant") {
-      motion.set(1);
-      return undefined;
-    }
-    motion.set(0);
-    motion.set(withTiming(1, { duration: CARD_SETTLE_DURATION, easing: Easing.bezier(0.16, 1, 0.3, 1) }));
-    return undefined;
-  }, [activeIndex, dragX, motion, reduceMotion]);
-
-  useEffect(() => {
     isMounted.set(true);
     return () => {
       isMounted.set(false);
-      isTransitioning.set(false);
-      cancelAnimation(motion);
+      isSettling.set(false);
       cancelAnimation(dragX);
       cancelAnimation(glow);
       cancelAnimation(equalizer);
     };
-  }, [dragX, equalizer, glow, isMounted, isTransitioning, motion]);
+  }, [dragX, equalizer, glow, isMounted, isSettling]);
 
   useEffect(() => {
     cancelAnimation(glow);
@@ -223,17 +156,15 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     return () => subscription.remove();
   }, []);
 
-  const requestChange = useCallback((radio: Radio | undefined, nextDirection: number) => {
+  const requestChange = useCallback((radio: Radio | undefined, _nextDirection: number) => {
     if (!radio) return;
-    const normalized = nextDirection < 0 ? -1 : 1;
-    direction.set(normalized);
+    dragX.set(0);
     onSelect(radio);
-  }, [direction, onSelect]);
+  }, [dragX, onSelect]);
 
   const commitSwipeFromGesture = useCallback((nextDirection: number) => {
     const target = nextDirection < 0 ? previous : next;
     if (!target || !active || target.id === active.id) return;
-    swipeCommitRef.current = true;
     requestChange(target, nextDirection);
   }, [active, next, previous, requestChange]);
 
@@ -246,7 +177,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
       // Un nuevo gesto siempre puede tomar el control; esto evita una zona muerta
       // mientras la carátula anterior termina de encajar.
       cancelAnimation(dragX);
-      isTransitioning.set(false);
+      isSettling.set(false);
     })
     .onUpdate((event) => {
       if (!isMounted.get() || reduceMotion) return;
@@ -267,57 +198,59 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         dragX.set(withTiming(0, { duration: 150, easing: Easing.bezier(0.2, 0.85, 0.28, 1) }));
         return;
       }
-      direction.set(swipeDirection);
       if (reduceMotion) {
         runOnJS(commitSwipeFromGesture)(swipeDirection);
         return;
       }
-      isTransitioning.set(true);
-      const exitTarget = swipeDirection > 0 ? -SWIPE_EXIT_DISTANCE : SWIPE_EXIT_DISTANCE;
-      // A long decay makes station changes feel delayed on mid-range Android
-      // devices. The finger-following phase already provides the inertia cue;
-      // a short timing curve keeps the handoff immediate and deterministic.
-      const finalSnapDuration = Math.max(95, Math.min(165, 165 - Math.abs(limitedVelocity) / 26));
-      dragX.set(withTiming(exitTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.18, 0.9, 0.26, 1) }, (finished) => {
-        isTransitioning.set(false);
+      isSettling.set(true);
+      const settleTarget = -swipeDirection * FLOW_STEP;
+      // The finger-following phase already supplies the physical cue. A short
+      // timing curve only finishes the card slot and keeps the handoff immediate.
+      const finalSnapDuration = Math.max(105, Math.min(175, 175 - Math.abs(limitedVelocity) / 24));
+      dragX.set(withTiming(settleTarget, { duration: finalSnapDuration, easing: Easing.bezier(0.2, 0.88, 0.28, 1) }, (finished) => {
+        isSettling.set(false);
         if (!finished || !isMounted.get()) return;
         runOnJS(commitSwipeFromGesture)(swipeDirection);
       }));
     })
     .onFinalize(() => {
-      // A vertical dismiss or parent ScrollView can cancel the pan before onEnd.
-      // Reset only when no exit animation owns the shared value.
-      if (!isTransitioning.get()) dragX.set(0);
-    }), [commitSwipeFromGesture, direction, dragX, isMounted, isTransitioning, reduceMotion]);
+      // A parent scroll or cancelled pan should return to center, but never
+      // interrupt the settle animation that already owns the shared value.
+      if (!isSettling.get()) dragX.set(withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) }));
+    }), [commitSwipeFromGesture, dragX, isMounted, isSettling, reduceMotion]);
 
-  const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
-    <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
-      <Animated.View style={[styles.sideContactShadow, animatedStyle, nonInteractiveStyle]} />
-      <Animated.View style={[styles.cover, styles.sideCover, animatedStyle, { backgroundColor: `${radio.accent}32` }]}>
+  const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useFlowCardAnimatedStyle>) => radio ? (
+    <Animated.View style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight, animatedStyle]}>
+      <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={styles.cardPressable}>
+      <View style={[styles.sideContactShadow, nonInteractiveStyle]} />
+      <View style={[styles.cover, styles.sideCover, { backgroundColor: `${radio.accent}32` }]}>
         <StationLogo radio={radio} size={122} radius={22} />
         <View style={styles.sideShade} />
-      </Animated.View>
-      <Animated.View style={[styles.reflection, animatedStyle, nonInteractiveStyle]}>
+      </View>
+      <View style={[styles.reflection, nonInteractiveStyle]}>
         <StationLogo radio={radio} size={122} radius={22} />
         <View style={styles.reflectionFadeStrong} />
         <View style={styles.reflectionFadeSoft} />
-      </Animated.View>
-    </Pressable>
+      </View>
+      </Pressable>
+    </Animated.View>
   ) : null;
 
-  const outerCard = (radio: Radio | undefined, side: OuterSide, animatedStyle: ReturnType<typeof useOuterCardAnimatedStyle>) => radio ? (
-    <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight]}>
-      <Animated.View style={[styles.outerContactShadow, animatedStyle, nonInteractiveStyle]} />
-      <Animated.View style={[styles.cover, styles.outerCover, animatedStyle, { backgroundColor: `${radio.accent}2A` }]}>
+  const outerCard = (radio: Radio | undefined, side: OuterSide, animatedStyle: ReturnType<typeof useFlowCardAnimatedStyle>) => radio ? (
+    <Animated.View style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight, animatedStyle]}>
+      <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={styles.cardPressable}>
+      <View style={[styles.outerContactShadow, nonInteractiveStyle]} />
+      <View style={[styles.cover, styles.outerCover, { backgroundColor: `${radio.accent}2A` }]}>
         <StationLogo radio={radio} size={100} radius={17} />
         <View style={styles.outerShade} />
-      </Animated.View>
-      <Animated.View style={[styles.outerReflection, animatedStyle, nonInteractiveStyle]}>
+      </View>
+      <View style={[styles.outerReflection, nonInteractiveStyle]}>
         <StationLogo radio={radio} size={92} radius={16} />
         <View style={styles.reflectionFadeStrong} />
         <View style={styles.reflectionFadeSoft} />
-      </Animated.View>
-    </Pressable>
+      </View>
+      </Pressable>
+    </Animated.View>
   ) : null;
 
   if (!active) return null;
@@ -370,13 +303,14 @@ const styles = StyleSheet.create({
   root: { height: 556, borderRadius: 0, overflow: "visible", backgroundColor: "transparent", borderWidth: 0, marginBottom: 24, paddingTop: 10 },
   rootLight: { backgroundColor: "transparent", borderColor: "transparent" },
   stage: { height: 414, alignItems: "center", justifyContent: "center", position: "relative", overflow: "visible" },
-  outerSlot: { position: "absolute", top: 86, width: 112, height: 238, zIndex: 0, alignItems: "center" },
-  outerLeft: { left: -64 },
-  outerRight: { right: -64 },
-  sideSlot: { position: "absolute", top: 46, width: 150, height: 316, zIndex: 1, alignItems: "center" },
-  sideLeft: { left: -2 },
-  sideRight: { right: -2 },
-  centerSlot: { width: 270, height: 392, zIndex: 3, alignItems: "center", position: "relative" },
+  outerSlot: { position: "absolute", top: 86, left: "50%", marginLeft: -56, width: 112, height: 238, zIndex: 0, alignItems: "center" },
+  outerLeft: {},
+  outerRight: {},
+  sideSlot: { position: "absolute", top: 46, left: "50%", marginLeft: -75, width: 150, height: 316, zIndex: 1, alignItems: "center" },
+  cardPressable: { width: "100%", height: "100%" },
+  sideLeft: {},
+  sideRight: {},
+  centerSlot: { position: "absolute", top: 11, left: "50%", marginLeft: -135, width: 270, height: 392, zIndex: 3, alignItems: "center" },
   centerContactShadow: { position: "absolute", top: 374, width: 204, height: 16, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.34, transform: [{ scaleY: 0.2 }] },
   outerGlow: { position: "absolute", width: 292, height: 402, borderRadius: 32, ...platformShadow({ color: "#FF5E67", opacity: 0.9, radius: 34, elevation: 16 }) },
   cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", ...platformShadow({ color: "#000", opacity: 0.7, radius: 26, offsetY: 16, elevation: 12 }) },

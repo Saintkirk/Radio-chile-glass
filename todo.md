@@ -1417,3 +1417,18 @@
 - [x] Eliminar el salto visual al encajar el carrusel después del gesto
 - [x] Añadir pruebas deterministas de cambio rápido de emisora y transición continua
 - [x] Validar en móvil y generar una APK corregida
+
+## APK de correcciones de audio y Cover Flow
+
+- [x] Sincronizar el checkpoint 61c716bf con GitHub
+- [x] Ejecutar el workflow nativo Android en GitHub Actions
+- [x] Verificar el job, el APK y su checksum
+- [x] Entregar el APK para pruebas físicas en Android
+
+## Cover Flow tipo iPhone
+
+- [x] Analizar el video y documentar las diferencias de movimiento frente al comportamiento esperado
+- [x] Hacer que el arrastre sea continuo y siga al dedo sin saltos
+- [x] Interpolar escala, perspectiva, opacidad y profundidad entre posiciones
+- [x] Implementar inercia controlada y encaje suave con selección sincronizada
+- [x] Validar gestos, rendimiento y navegación en móvil; guardar checkpoint
