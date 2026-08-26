@@ -1509,3 +1509,9 @@
 - [x] Ajustar la velocidad de rotación según la velocidad del gesto
 - [x] Aplicar desaceleración y encaje magnético sin perder sincronización de audio
 - [x] Validar gestos, botones, reducción de movimiento y rendimiento; guardar checkpoint
+
+## Bloqueo en Preparando tus emisoras
+
+- [x] Auditar la inicialización del catálogo y la pantalla de carga
+- [x] Añadir timeout, fallback local y salida de emergencia al inicio
+- [x] Validar arranque con red lenta, sin conexión y con emisora guardada; guardar checkpoint

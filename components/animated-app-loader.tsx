@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Image, StyleSheet, Text, View } from "react-native";
 
-import { getAppLoaderDuration } from "@/lib/app-loader";
+import { APP_LOADER_EMERGENCY_FALLBACK_MS, getAppLoaderDuration } from "@/lib/app-loader";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 
 export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; onFinished: () => void }) {
@@ -11,6 +11,13 @@ export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; o
   const logoScale = useRef(new Animated.Value(0.86)).current;
   const glowOpacity = useRef(new Animated.Value(0.08)).current;
   const onFinishedRef = useRef(onFinished);
+  const finishedRef = useRef(false);
+
+  const finishOnce = () => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    onFinishedRef.current();
+  };
 
   useEffect(() => {
     onFinishedRef.current = onFinished;
@@ -25,6 +32,7 @@ export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; o
   useEffect(() => {
     if (!visible) return undefined;
 
+    finishedRef.current = false;
     opacity.setValue(1);
     logoOpacity.setValue(0);
     logoScale.setValue(0.86);
@@ -53,12 +61,18 @@ export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; o
     const finishTimer = setTimeout(() => {
       pulse.stop();
       exit.start(({ finished }) => {
-        if (finished) onFinishedRef.current();
+        if (finished) finishOnce();
       });
     }, getAppLoaderDuration(reduceMotion));
+    const emergencyTimer = setTimeout(() => {
+      pulse.stop();
+      exit.stop();
+      finishOnce();
+    }, APP_LOADER_EMERGENCY_FALLBACK_MS);
 
     return () => {
       clearTimeout(finishTimer);
+      clearTimeout(emergencyTimer);
       entrance.stop();
       pulse.stop();
       exit.stop();

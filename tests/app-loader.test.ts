@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   APP_LOADER_DURATION_MS,
+  APP_LOADER_EMERGENCY_FALLBACK_MS,
   REDUCED_APP_LOADER_DURATION_MS,
   getAppLoaderDuration,
 } from "../lib/app-loader";
@@ -17,5 +18,10 @@ describe("animated app loader", () => {
     expect(getAppLoaderDuration(true)).toBe(REDUCED_APP_LOADER_DURATION_MS);
     expect(REDUCED_APP_LOADER_DURATION_MS).toBeLessThan(APP_LOADER_DURATION_MS);
     expect(REDUCED_APP_LOADER_DURATION_MS).toBeGreaterThan(0);
+  });
+
+  it("keeps an emergency escape hatch longer than the branded animation", () => {
+    expect(APP_LOADER_EMERGENCY_FALLBACK_MS).toBeGreaterThan(APP_LOADER_DURATION_MS);
+    expect(APP_LOADER_EMERGENCY_FALLBACK_MS).toBeLessThan(5000);
   });
 });
