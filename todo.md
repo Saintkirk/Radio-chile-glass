@@ -1452,3 +1452,9 @@
 - [x] Garantizar que solo la emisora seleccionada pueda emitir y actualizar el estado multimedia
 - [x] Recuperar un giro Cover Flow visible, equilibrado y visualmente coherente entre slots
 - [x] Validar cambios rápidos, gestos, typecheck, pruebas y composición móvil; guardar checkpoint
+
+## Nueva APK de corrección de audio y Cover Flow
+
+- [ ] Sincronizar el checkpoint 92043f66 con GitHub
+- [ ] Ejecutar el workflow nativo Android y revisar el resultado
+- [ ] Descargar, verificar y entregar la APK actualizada
