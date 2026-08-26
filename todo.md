@@ -1515,3 +1515,9 @@
 - [x] Auditar la inicialización del catálogo y la pantalla de carga
 - [x] Añadir timeout, fallback local y salida de emergencia al inicio
 - [x] Validar arranque con red lenta, sin conexión y con emisora guardada; guardar checkpoint
+
+## APK con corrección del bloqueo de arranque
+
+- [ ] Sincronizar el fallback del loader con GitHub
+- [ ] Ejecutar y revisar la compilación nativa Android
+- [ ] Descargar, verificar y entregar el APK para prueba física
