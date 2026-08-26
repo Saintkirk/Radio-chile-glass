@@ -1439,3 +1439,9 @@
 - [x] Aumentar la separación lateral y mostrar más carátulas simultáneamente
 - [x] Mantener zonas táctiles, reflejos, sombras y navegación sincronizadas
 - [x] Validar composición móvil, typecheck, pruebas y lint; guardar checkpoint
+
+## Generación y entrega de APK actualizada
+
+- [ ] Sincronizar el checkpoint actual con el repositorio de GitHub
+- [ ] Ejecutar el workflow nativo Android y revisar sus logs
+- [ ] Verificar el artefacto APK y entregarlo para prueba física
