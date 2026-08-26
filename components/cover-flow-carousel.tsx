@@ -19,6 +19,7 @@ import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
 import { safeRadioIndex } from "@/lib/player-utils";
+import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 
 type Side = -1 | 0 | 1;
 type OuterSide = -2 | 2;
@@ -278,12 +279,12 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight]}>
-      <Animated.View pointerEvents="none" style={[styles.sideContactShadow, animatedStyle]} />
+      <Animated.View style={[styles.sideContactShadow, animatedStyle, nonInteractiveStyle]} />
       <Animated.View style={[styles.cover, styles.sideCover, animatedStyle, { backgroundColor: `${radio.accent}32` }]}>
         <StationLogo radio={radio} size={122} radius={22} />
         <View style={styles.sideShade} />
       </Animated.View>
-      <Animated.View pointerEvents="none" style={[styles.reflection, animatedStyle]}>
+      <Animated.View style={[styles.reflection, animatedStyle, nonInteractiveStyle]}>
         <StationLogo radio={radio} size={122} radius={22} />
         <View style={styles.reflectionFadeStrong} />
         <View style={styles.reflectionFadeSoft} />
@@ -293,12 +294,12 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
 
   const outerCard = (radio: Radio | undefined, side: OuterSide, animatedStyle: ReturnType<typeof useOuterCardAnimatedStyle>) => radio ? (
     <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight]}>
-      <Animated.View pointerEvents="none" style={[styles.outerContactShadow, animatedStyle]} />
+      <Animated.View style={[styles.outerContactShadow, animatedStyle, nonInteractiveStyle]} />
       <Animated.View style={[styles.cover, styles.outerCover, animatedStyle, { backgroundColor: `${radio.accent}2A` }]}>
         <StationLogo radio={radio} size={100} radius={17} />
         <View style={styles.outerShade} />
       </Animated.View>
-      <Animated.View pointerEvents="none" style={[styles.outerReflection, animatedStyle]}>
+      <Animated.View style={[styles.outerReflection, animatedStyle, nonInteractiveStyle]}>
         <StationLogo radio={radio} size={92} radius={16} />
         <View style={styles.reflectionFadeStrong} />
         <View style={styles.reflectionFadeSoft} />
@@ -315,24 +316,24 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         {outerCard(farPrevious, -2, farPreviousStyle)}
         {sideCard(previous, -1, previousStyle)}
         <Animated.View style={[styles.centerSlot, centerStyle]}>
-          <View pointerEvents="none" style={styles.centerContactShadow} />
-          <Animated.View pointerEvents="none" style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }]} />
+          <View style={[styles.centerContactShadow, nonInteractiveStyle]} />
+          <Animated.View style={[styles.outerGlow, glowStyle, { backgroundColor: active.accent }, nonInteractiveStyle]} />
           <View style={[styles.centerCover, { backgroundColor: `${active.accent}40` }]}>
-            <Animated.View pointerEvents="none" style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }]} />
+            <Animated.View style={[styles.innerGlow, innerGlowStyle, { backgroundColor: active.accent }, nonInteractiveStyle]} />
             <Pressable disabled={isLoading} onPress={onPlay} accessibilityRole="button" accessibilityLabel={isLoading ? `Conectando con ${active.name}` : currentRadioId === active.id && isPlaying ? `Pausar ${active.name}` : `Reproducir ${active.name}`} style={styles.centerPressable}>
               <StationLogo radio={active} size={214} radius={30} />
-              <View pointerEvents="none" style={[styles.liveBadge, { borderColor: `${active.accent}CC`, backgroundColor: `${active.accent}DD` }]}><IconSymbol name="waveform" size={15} color="#FFFFFF" /><Text style={styles.liveBadgeText}>EN VIVO</Text></View>
-              {isLoading && <View pointerEvents="none" style={styles.bufferingOverlay} accessible accessibilityLabel={`Almacenando en búfer ${active.name}`}>
+              <View style={[styles.liveBadge, { borderColor: `${active.accent}CC`, backgroundColor: `${active.accent}DD` }, nonInteractiveStyle]}><IconSymbol name="waveform" size={15} color="#FFFFFF" /><Text style={styles.liveBadgeText}>EN VIVO</Text></View>
+              {isLoading && <View style={[styles.bufferingOverlay, nonInteractiveStyle]} accessible accessibilityLabel={`Almacenando en búfer ${active.name}`}>
                 <View style={styles.equalizer}>
                   {equalizerStyles.map((animatedStyle, index) => <Animated.View key={index} style={[styles.equalizerBar, { backgroundColor: active.accent }, animatedStyle]} />)}
                 </View>
                 <Text style={styles.bufferingText}>Conectando…</Text>
               </View>}
-              <View pointerEvents="none" style={styles.diagonalSheen} />
-              <View pointerEvents="none" style={styles.centerGloss} />
+              <View style={[styles.diagonalSheen, nonInteractiveStyle]} />
+              <View style={[styles.centerGloss, nonInteractiveStyle]} />
             </Pressable>
           </View>
-          <View pointerEvents="none" style={styles.centerReflection}>
+          <View style={[styles.centerReflection, nonInteractiveStyle]}>
             <StationLogo radio={active} size={184} radius={27} />
             <View style={styles.reflectionFadeStrong} />
             <View style={styles.reflectionFadeSoft} />
@@ -364,20 +365,20 @@ const styles = StyleSheet.create({
   sideRight: { right: -2 },
   centerSlot: { width: 270, height: 392, zIndex: 3, alignItems: "center", position: "relative" },
   centerContactShadow: { position: "absolute", top: 374, width: 204, height: 16, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.34, transform: [{ scaleY: 0.2 }] },
-  outerGlow: { position: "absolute", width: 292, height: 402, borderRadius: 32, shadowColor: "#FF5E67", shadowOpacity: 0.9, shadowRadius: 34, shadowOffset: { width: 0, height: 0 }, elevation: 16 },
-  cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.7, shadowRadius: 26, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
-  outerCover: { width: 112, height: 228, borderRadius: 18, borderColor: "#FFFFFF32", shadowOpacity: 0.38, shadowRadius: 12, shadowOffset: { width: 0, height: 9 }, elevation: 3 },
+  outerGlow: { position: "absolute", width: 292, height: 402, borderRadius: 32, ...platformShadow({ color: "#FF5E67", opacity: 0.9, radius: 34, elevation: 16 }) },
+  cover: { overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF52", alignItems: "center", justifyContent: "center", ...platformShadow({ color: "#000", opacity: 0.7, radius: 26, offsetY: 16, elevation: 12 }) },
+  outerCover: { width: 112, height: 228, borderRadius: 18, borderColor: "#FFFFFF32", ...platformShadow({ color: "#000", opacity: 0.38, radius: 12, offsetY: 9, elevation: 3 }) },
   outerContactShadow: { position: "absolute", top: 218, width: 84, height: 14, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.28, transform: [{ scaleY: 0.2 }] },
   outerReflection: { position: "absolute", top: 226, width: 106, height: 34, opacity: 0.07, transform: [{ scaleY: -1 }], overflow: "hidden", borderRadius: 16, alignItems: "center" },
   sideCover: { width: 150, height: 308, borderRadius: 24 },
   sideContactShadow: { position: "absolute", top: 300, width: 112, height: 18, borderRadius: 999, backgroundColor: "#05060B", opacity: 0.3, transform: [{ scaleY: 0.2 }] },
-  centerCover: { width: 270, height: 382, borderRadius: 34, borderWidth: 2, borderColor: "#FFFFFFB8", shadowRadius: 38, shadowOpacity: 0.92 },
+  centerCover: { width: 270, height: 382, borderRadius: 34, borderWidth: 2, borderColor: "#FFFFFFB8", ...platformShadow({ color: "#000", opacity: 0.92, radius: 38 }) },
   centerPressable: { width: "100%", height: "100%", alignItems: "center", justifyContent: "center" },
   bufferingOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", backgroundColor: "#08090EB8", gap: 10 },
   equalizer: { height: 42, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5 },
-  equalizerBar: { width: 6, height: 34, borderRadius: 3, shadowColor: "#FFFFFF", shadowOpacity: 0.35, shadowRadius: 6, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
+  equalizerBar: { width: 6, height: 34, borderRadius: 3, ...platformShadow({ color: "#FFFFFF", opacity: 0.35, radius: 6, elevation: 4 }) },
   bufferingText: { color: "#F5F3EE", fontSize: 11, fontWeight: "700", letterSpacing: 0.4 },
-  liveBadge: { position: "absolute", bottom: 24, left: 46, right: 46, height: 34, borderRadius: 17, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, shadowColor: "#FF5E67", shadowOpacity: 0.55, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 7 }, liveBadgeText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
+  liveBadge: { position: "absolute", bottom: 24, left: 46, right: 46, height: 34, borderRadius: 17, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, ...platformShadow({ color: "#FF5E67", opacity: 0.55, radius: 12, offsetY: 5, elevation: 7 }) }, liveBadgeText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
   innerGlow: { ...StyleSheet.absoluteFillObject, borderRadius: 4 },
   sideShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#00000038" },
   outerShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B66" },

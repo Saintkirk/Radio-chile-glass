@@ -4,6 +4,7 @@ import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from "
 import { StationLogo } from "@/components/station-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
+import { platformShadow } from "@/lib/platform-styles";
 
 export function ItunesRadioCard({
   radio,
@@ -86,18 +87,18 @@ export function ItunesRadioCard({
 }
 
 const styles = StyleSheet.create({
-  card: { minHeight: 116, borderRadius: 24, backgroundColor: "#14151BD9", borderWidth: 1, borderColor: "#FFFFFF2A", padding: 12, marginBottom: 12, flexDirection: "row", alignItems: "center", shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  card: { minHeight: 116, borderRadius: 24, backgroundColor: "#14151BD9", borderWidth: 1, borderColor: "#FFFFFF2A", padding: 12, marginBottom: 12, flexDirection: "row", alignItems: "center", ...platformShadow({ color: "#000", opacity: 0.3, radius: 16, offsetY: 8, elevation: 6 }) },
   cardLight: { backgroundColor: "#14151BD9", borderColor: "#FFFFFF2A" },
-  cardHovered: { backgroundColor: "#1ED76016", borderColor: "#1ED76066", shadowColor: "#1ED760", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
+  cardHovered: { backgroundColor: "#1ED76016", borderColor: "#1ED76066", ...platformShadow({ color: "#1ED760", opacity: 0.22, radius: 16, offsetY: 4, elevation: 4 }) },
   cardPressed: { opacity: 0.82, transform: [{ scale: 0.985 }] },
-  coverStage: { width: 86, height: 86, borderRadius: 20, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF22", shadowColor: "#000", shadowOpacity: 0.5, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  coverStage: { width: 86, height: 86, borderRadius: 20, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 1, borderColor: "#FFFFFF22", ...platformShadow({ color: "#000", opacity: 0.5, radius: 12, offsetY: 5, elevation: 5 }) },
   coverBack: { position: "absolute", width: 68, height: 68, borderRadius: 18, borderWidth: 1, transform: [{ translateX: 9 }, { rotate: "8deg" }], opacity: 0.75 },
   info: { flex: 1, marginLeft: 14, minWidth: 0 },
   name: { color: "#F5F3EE", fontSize: 17, fontWeight: "700" },
   nameLight: { color: "#172033" },
   meta: { color: "#C0C5D2", fontSize: 13, marginTop: 7 },
   metaLight: { color: "#5B667B" },
-  play: { width: 54, height: 54, borderRadius: 27, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", marginLeft: 8, shadowColor: "#FF5E67", shadowOpacity: 0.32, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 7 },
+  play: { width: 54, height: 54, borderRadius: 27, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center", marginLeft: 8, ...platformShadow({ color: "#FF5E67", opacity: 0.32, radius: 14, offsetY: 5, elevation: 7 }) },
   playLight: { backgroundColor: "#172033" },
   playActive: { backgroundColor: "#15883E" },
   playLoading: { backgroundColor: "#D94B4B" },

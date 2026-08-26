@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet, Text } from "react-native";
 import { useColors } from "@/hooks/use-colors";
+import { platformShadow } from "@/lib/platform-styles";
 
 export function FavoriteToast({ message }: { message: string | null }) {
   const colors = useColors();
@@ -37,6 +38,6 @@ export function FavoriteToast({ message }: { message: string | null }) {
 }
 
 const styles = StyleSheet.create({
-  toast: { position: "absolute", alignSelf: "center", bottom: 88, borderRadius: 18, paddingHorizontal: 16, paddingVertical: 11, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  toast: { position: "absolute", alignSelf: "center", bottom: 88, borderRadius: 18, paddingHorizontal: 16, paddingVertical: 11, ...platformShadow({ color: "#000", opacity: 0.18, radius: 12, offsetY: 5, elevation: 5 }) },
   text: { fontSize: 13, fontWeight: "700" },
 });

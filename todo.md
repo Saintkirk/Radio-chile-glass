@@ -1385,3 +1385,11 @@
 - [x] Verificar configuración Expo y consistencia de dependencias
 - [x] Revisar la interfaz móvil y clasificar errores visuales o de navegación
 - [x] Corregir hallazgos confirmados y revalidar el proyecto
+
+## Migración de estilos web obsoletos
+
+- [x] Localizar todas las propiedades shadow* y pointerEvents que generan avisos
+- [x] Migrar sombras a boxShadow solo donde sea compatible sin degradar Android
+- [x] Migrar pointerEvents a style.pointerEvents sin bloquear gestos ni controles
+- [x] Ejecutar pruebas, lint y revisión de logs después de la migración
+- [x] Validar la apariencia móvil y guardar checkpoint actualizado

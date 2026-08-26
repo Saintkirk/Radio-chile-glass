@@ -8,6 +8,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { useThemeContext } from "@/lib/theme-provider";
 import { useColors } from "@/hooks/use-colors";
+import { platformShadow } from "@/lib/platform-styles";
 
 export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number }) {
   const router = useRouter();
@@ -74,7 +75,7 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
 }
 
 const styles = StyleSheet.create({
-  container: { position: "absolute", left: 16, right: 16, minHeight: 68, borderRadius: 20, backgroundColor: "#171D2BF7", borderWidth: 1, borderColor: "#FFFFFF22", padding: 9, flexDirection: "row", alignItems: "center", gap: 12, shadowColor: "#000", shadowOpacity: 0.24, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
+  container: { position: "absolute", left: 16, right: 16, minHeight: 68, borderRadius: 20, backgroundColor: "#171D2BF7", borderWidth: 1, borderColor: "#FFFFFF22", padding: 9, flexDirection: "row", alignItems: "center", gap: 12, ...platformShadow({ color: "#000", opacity: 0.24, radius: 18, offsetY: 8, elevation: 8 }) },
   main: { flex: 1, flexDirection: "row", alignItems: "center", gap: 11 },
   info: { flex: 1 },
   name: { color: "#F5F3EE", fontSize: 14, fontWeight: "700" },

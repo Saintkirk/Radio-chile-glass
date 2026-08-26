@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Image, StyleSheet, Text, View } from "react-native";
 
 import { getAppLoaderDuration } from "@/lib/app-loader";
+import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 
 export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; onFinished: () => void }) {
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -69,7 +70,7 @@ export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; o
   return (
     <Animated.View accessibilityRole="progressbar" accessibilityLabel="Cargando Radio Chile Glass" style={[StyleSheet.absoluteFillObject, styles.overlay, { opacity }]}>
       <View style={styles.backdrop}>
-        <Animated.View pointerEvents="none" style={[styles.glow, { opacity: glowOpacity }]} />
+        <Animated.View style={[styles.glow, { opacity: glowOpacity }, nonInteractiveStyle]} />
         <Animated.View style={[styles.logoFrame, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}>
           <Image source={require("../assets/images/icon.png")} style={styles.logo} resizeMode="contain" accessibilityIgnoresInvertColors />
         </Animated.View>
@@ -87,14 +88,14 @@ export function AnimatedAppLoader({ visible, onFinished }: { visible: boolean; o
 const styles = StyleSheet.create({
   overlay: { zIndex: 1000, elevation: 1000 },
   backdrop: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#08090F", paddingHorizontal: 32 },
-  glow: { position: "absolute", width: 270, height: 270, borderRadius: 135, backgroundColor: "#6A35A5", shadowColor: "#FF6B5A", shadowOpacity: 0.7, shadowRadius: 70, shadowOffset: { width: 0, height: 0 }, elevation: 10 },
-  logoFrame: { width: 142, height: 142, borderRadius: 38, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF3B", shadowColor: "#FF6B5A", shadowOpacity: 0.34, shadowRadius: 24, shadowOffset: { width: 0, height: 10 }, elevation: 12 },
+  glow: { position: "absolute", width: 270, height: 270, borderRadius: 135, backgroundColor: "#6A35A5", ...platformShadow({ color: "#FF6B5A", opacity: 0.7, radius: 70, elevation: 10 }) },
+  logoFrame: { width: 142, height: 142, borderRadius: 38, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF3B", ...platformShadow({ color: "#FF6B5A", opacity: 0.34, radius: 24, offsetY: 10, elevation: 12 }) },
   logo: { width: 112, height: 112, borderRadius: 28 },
   title: { color: "#F5F3EE", fontSize: 29, fontWeight: "500", letterSpacing: -0.8, marginTop: 28 },
   titleRadio: { color: "#FF6B5A" },
   titleGlass: { color: "#B66BFF" },
   subtitle: { color: "#D5CBD8", fontSize: 9, fontWeight: "700", letterSpacing: 3.1, marginTop: 7 },
   loadingRow: { flexDirection: "row", alignItems: "center", marginTop: 34, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 18, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF1A" },
-  loadingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#FF6B5A", marginRight: 8, shadowColor: "#FF6B5A", shadowOpacity: 0.9, shadowRadius: 8, shadowOffset: { width: 0, height: 0 }, elevation: 3 },
+  loadingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#FF6B5A", marginRight: 8, ...platformShadow({ color: "#FF6B5A", opacity: 0.9, radius: 8, elevation: 3 }) },
   loadingText: { color: "#A8B0C2", fontSize: 12, fontWeight: "600" },
 });

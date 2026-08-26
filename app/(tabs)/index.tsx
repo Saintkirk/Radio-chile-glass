@@ -12,6 +12,7 @@ import { favoriteAddedHaptic, favoriteRemovedHaptic } from "@/lib/haptics";
 import { FavoriteToast } from "@/components/favorite-toast";
 import { AnimatedFavoriteIcon } from "@/components/animated-favorite-icon";
 import { prefetchLogo } from "@/lib/logo-cache";
+import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 
 const prefetchedFeaturedLogos = new Set<string>();
 
@@ -59,7 +60,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenContainer containerClassName="bg-background" className="px-4 pt-2">
-      <View pointerEvents="none" style={styles.ambientLayer}><ImageBackground source={require("../../assets/images/santiago-radio-hero.jpg")} resizeMode="cover" style={styles.ambient} imageStyle={styles.ambientImage}><View style={styles.ambientTint} /><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></ImageBackground></View>
+      <View style={[styles.ambientLayer, nonInteractiveStyle]}><ImageBackground source={require("../../assets/images/santiago-radio-hero.jpg")} resizeMode="cover" style={styles.ambient} imageStyle={styles.ambientImage}><View style={styles.ambientTint} /><View style={styles.ambientCoral} /><View style={styles.ambientViolet} /><View style={styles.ambientHorizon} /></ImageBackground></View>
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -90,14 +91,14 @@ const styles = StyleSheet.create({
   ambientLayer: { ...StyleSheet.absoluteFillObject }, ambient: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#08090E" }, ambientImage: { opacity: 1 }, ambientTint: { ...StyleSheet.absoluteFillObject, backgroundColor: "#05060B52" }, ambientCoral: { position: "absolute", width: 330, height: 240, borderRadius: 180, top: 100, left: -120, backgroundColor: "#B52F3C20", transform: [{ rotate: "-12deg" }] }, ambientViolet: { position: "absolute", width: 300, height: 260, borderRadius: 180, top: 120, right: -120, backgroundColor: "#6A35A526", transform: [{ rotate: "18deg" }] }, ambientHorizon: { position: "absolute", left: -40, right: -40, top: 260, height: 2, backgroundColor: "#FF6B5A52", opacity: 0.45 },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingTop: 8 },
   brandLockup: { alignItems: "center", flex: 1 }, brandLine: { flexDirection: "row", alignItems: "baseline" }, brandRadio: { color: "#FF6B5A", fontSize: 29, fontWeight: "400", letterSpacing: -1 }, brandChile: { color: "#F5F3EE", fontSize: 29, fontWeight: "400", letterSpacing: -1 }, brandChileLight: { color: "#241B24" }, brandGlass: { color: "#B66BFF", fontSize: 29, fontWeight: "400", letterSpacing: -1 }, brandTagline: { color: "#E2D5DF", fontSize: 10, letterSpacing: 3.7, marginTop: 5 },
-  headerButton: { width: 48, height: 48, borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF2E", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF12", shadowColor: "#FFFFFF", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  headerButton: { width: 48, height: 48, borderRadius: 18, borderWidth: 1, borderColor: "#FFFFFF2E", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF12", ...platformShadow({ color: "#FFFFFF", opacity: 0.08, radius: 10, offsetY: 4, elevation: 3 }) },
   eyebrow: { color: "#FF6B5A", fontSize: 12, fontWeight: "700", letterSpacing: 2.1, marginBottom: 8 },
   title: { color: "#F5F3EE", fontSize: 34, lineHeight: 39, fontWeight: "700", letterSpacing: -1.2 }, titleLight: { color: "#172033" },
   settingsButton: { width: 42, height: 42, borderRadius: 15, borderWidth: 1, borderColor: "#FFFFFF1C", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF0D" },
   searchWrap: { height: 48, borderRadius: 16, backgroundColor: "#FFFFFF0D", borderWidth: 1, borderColor: "#FFFFFF14", flexDirection: "row", alignItems: "center", paddingHorizontal: 15, marginBottom: 28 }, searchWrapLight: { backgroundColor: "#FFFFFF", borderColor: "#D9E0EC" },
   searchInput: { flex: 1, marginLeft: 10, color: "#F5F3EE", fontSize: 14 }, searchInputLight: { color: "#172033" },
   sectionLabel: { color: "#D8DCE6", fontSize: 11, fontWeight: "800", letterSpacing: 1.8, marginBottom: 12 }, sectionLabelLight: { color: "#5B667B" },
-  liveHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }, liveTitleRow: { flexDirection: "row", alignItems: "center" }, liveTitle: { color: "#F5F3EE", fontSize: 11, fontWeight: "800", letterSpacing: 1.8 }, liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#FF5A5F", marginRight: 8, shadowColor: "#FF5A5F", shadowOpacity: 0.9, shadowRadius: 8, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
+  liveHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }, liveTitleRow: { flexDirection: "row", alignItems: "center" }, liveTitle: { color: "#F5F3EE", fontSize: 11, fontWeight: "800", letterSpacing: 1.8 }, liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#FF5A5F", marginRight: 8, ...platformShadow({ color: "#FF5A5F", opacity: 0.9, radius: 8, elevation: 4 }) },
   syncRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }, syncRowLight: { },
   syncButton: { marginBottom: 12 }, syncText: { color: "#FF6B5A", fontSize: 10, fontWeight: "600" },
   heroLight: { borderColor: "#CBD5E1" }, hero: { height: 244, borderRadius: 26, overflow: "hidden", padding: 20, marginBottom: 28, borderWidth: 1, borderColor: "#FFFFFF20", justifyContent: "space-between" },
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
   controlPressed: { opacity: 0.62, transform: [{ scale: 0.94 }] }, iconButtonActive: { backgroundColor: "#D94B4B1C", borderRadius: 12 }, playMiniActive: { backgroundColor: "#B83E46" },
   radioRowLight: { backgroundColor: "#14151BD9", borderColor: "#FFFFFF2A" }, radioNameLight: { color: "#F5F3EE" }, radioMetaLight: { color: "#C0C5D2" }, playMiniLight: { backgroundColor: "#172033" },
   radioRow: { minHeight: 116, borderRadius: 24, backgroundColor: "#14151BD9", borderWidth: 1, borderColor: "#FFFFFF2A", padding: 12, marginBottom: 12, flexDirection: "row", alignItems: "center" },
-  radioRowHovered: { backgroundColor: "#FF6B5A16", borderColor: "#FF6B5A66", shadowColor: "#FF6B5A", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 4, transform: [{ translateY: -1 }] },
+  radioRowHovered: { backgroundColor: "#FF6B5A16", borderColor: "#FF6B5A66", ...platformShadow({ color: "#FF6B5A", opacity: 0.22, radius: 16, offsetY: 4, elevation: 4 }), transform: [{ translateY: -1 }] },
   radioInfo: { flex: 1, marginLeft: 13 },
   radioName: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
   radioMeta: { color: "#8D95A7", fontSize: 12, marginTop: 5 },

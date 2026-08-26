@@ -3,6 +3,7 @@ import { View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/haptic-tab";
+import { platformShadow } from "@/lib/platform-styles";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { PersistentMiniPlayer } from "@/components/persistent-mini-player";
@@ -30,11 +31,7 @@ export default function TabLayout() {
           backgroundColor: "#15161DD9",
           borderColor: "#FFFFFF2A",
           borderWidth: 1,
-          shadowColor: "#000",
-          shadowOpacity: 0.45,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 12,
+          ...platformShadow({ color: "#000", opacity: 0.45, radius: 18, offsetY: 8, elevation: 12 }),
         },
       }}
     >
