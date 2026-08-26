@@ -1471,3 +1471,9 @@
 - [x] Implementar giro visible al deslizar y al usar anterior/siguiente
 - [x] Mantener audio exclusivo, zonas táctiles y soporte de reducción de movimiento
 - [x] Validar la transición radial, pruebas y composición móvil; guardar checkpoint
+
+## APK de prueba del giro radial
+
+- [ ] Sincronizar la versión radial actual con GitHub
+- [ ] Ejecutar y revisar la compilación nativa Android
+- [ ] Descargar, verificar y entregar el APK para prueba móvil
