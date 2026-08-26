@@ -1393,3 +1393,11 @@
 - [x] Migrar pointerEvents a style.pointerEvents sin bloquear gestos ni controles
 - [x] Ejecutar pruebas, lint y revisión de logs después de la migración
 - [x] Validar la apariencia móvil y guardar checkpoint actualizado
+
+## Verificación de fluidez tras migración de estilos
+
+- [x] Revisar transformaciones, encaje y capas no interactivas del Cover Flow
+- [x] Ejecutar typecheck, pruebas, lint y escaneo de warnings
+- [x] Validar la composición del carrusel en viewport móvil
+- [x] Confirmar que las capas visuales no interceptan los gestos
+- [x] Registrar el resultado y guardar checkpoint verificado
