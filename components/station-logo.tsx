@@ -6,6 +6,8 @@ import { prefetchLogo } from "@/lib/logo-cache";
 import type { Radio } from "@/lib/radios";
 
 type StationLogoProps = { radio: Pick<Radio, "id" | "favicon" | "initials" | "accent">; size?: number; radius?: number };
+type LogoImageSource = number | { uri: string };
+type DisplayedLogo = { key: string; source: LogoImageSource };
 
 const LOCAL_LOGOS: Record<string, number> = {
   fmlatina: require("@/assets/images/radios/fmlatina.png"),
@@ -33,18 +35,25 @@ const LOCAL_LOGOS: Record<string, number> = {
 };
 
 export const StationLogo = memo(function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
-  const [failed, setFailed] = useState(false);
   const sourceKey = `${radio.id}:${radio.favicon ?? ""}`;
-  const currentSourceKeyRef = useRef(sourceKey);
   const hasLocalLogo = Boolean(LOCAL_LOGOS[radio.id]);
+  const source: LogoImageSource | null = hasLocalLogo
+    ? LOCAL_LOGOS[radio.id]
+    : radio.favicon
+      ? { uri: radio.favicon }
+      : null;
+  const [displayedLogo, setDisplayedLogo] = useState<DisplayedLogo | null>(() => source ? { key: sourceKey, source } : null);
+  const [failed, setFailed] = useState(false);
+  const currentSourceKeyRef = useRef(sourceKey);
 
   useEffect(() => {
     currentSourceKeyRef.current = sourceKey;
     setFailed(false);
     if (radio.favicon && !hasLocalLogo) void prefetchLogo(radio.favicon);
+    // Deliberadamente no se limpia displayedLogo: la portada anterior permanece
+    // debajo de la nueva hasta que expo-image confirme que la nueva está lista.
   }, [hasLocalLogo, radio.favicon, radio.id, sourceKey]);
 
-  const showLogo = Boolean((hasLocalLogo || radio.favicon) && !failed);
   const fallback = (
     <LinearGradient colors={[`${radio.accent}66`, "#181818"]} style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}>
       <View style={[styles.glassOrb, { width: size * 0.7, height: size * 0.7, borderRadius: size }]} />
@@ -52,18 +61,35 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
     </LinearGradient>
   );
 
+  const currentReady = displayedLogo?.key === sourceKey;
+  const canShowCurrent = Boolean(source && !failed);
   return (
     <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}>
       {fallback}
-      {showLogo && (
+      {displayedLogo && (
         <Image
-          key={sourceKey}
-          source={LOCAL_LOGOS[radio.id] ?? { uri: radio.favicon }}
+          source={displayedLogo.source}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
           contentFit="contain"
           contentPosition="center"
           cachePolicy="memory-disk"
-          transition={hasLocalLogo ? 0 : 120}
+          transition={0}
+        />
+      )}
+      {canShowCurrent && !currentReady && (
+        <Image
+          key={sourceKey}
+          source={source}
+          style={[styles.image, { width: size, height: size, borderRadius: radius }]}
+          contentFit="contain"
+          contentPosition="center"
+          cachePolicy="memory-disk"
+          transition={hasLocalLogo ? 0 : 90}
+          onLoad={() => {
+            if (currentSourceKeyRef.current === sourceKey && source) {
+              setDisplayedLogo({ key: sourceKey, source });
+            }
+          }}
           onError={() => {
             if (currentSourceKeyRef.current === sourceKey) setFailed(true);
           }}

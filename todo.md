@@ -1624,4 +1624,10 @@
 - [x] Auditar la ventana de carátulas visibles y próximas durante el gesto
 - [x] Precargar favicons priorizados sin bloquear la interacción
 - [x] Reutilizar caché de imágenes y limitar memoria de la precarga
-- [ ] Añadir pruebas de precarga y generar APK optimizada
+- [x] Añadir pruebas de precarga y generar APK optimizada
+
+## Regresión: la tarjeta pierde todas las portadas durante el cambio
+- [x] Mantener la portada actual visible mientras carga la siguiente
+- [x] Precargar y superponer la próxima portada sin desmontar el artwork activo
+- [x] Evitar que el cambio de emisora reinicie todas las carátulas de la tarjeta
+- [ ] Añadir prueba de transición persistente y generar APK corregida
