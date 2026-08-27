@@ -1612,4 +1612,4 @@
 - [x] Estabilizar carga, identidad y fallback de carátulas durante cambios rápidos
 - [x] Evitar que una emisora sin audio real quede publicada como reproduciendo desde pantalla bloqueada
 - [x] Añadir pruebas de regresión para navegación, artwork y cambio nativo de emisora
-- [ ] Validar build Android y entregar APK corregida
+- [x] Validar build Android y entregar APK corregida
