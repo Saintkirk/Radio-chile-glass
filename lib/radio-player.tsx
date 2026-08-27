@@ -161,6 +161,11 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const playRadio = useCallback(async (radio: Radio, preserveMediaSession = false) => {
+    // Every UI surface calls this same function. If the requested station is
+    // already loading or audible, treat the request as idempotent instead of
+    // creating a second native player for the same stream.
+    if (currentRadioRef.current?.id === radio.id && (playbackIntentRef.current || playerRef.current?.playing)) return;
+
     const requestId = ++playRequestRef.current;
     crossfadeTokenRef.current += 1;
     if (crossfadeTimerRef.current) {
@@ -341,7 +346,15 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
   const setPlayingState = useCallback(async (shouldPlay: boolean) => {
     const player = playerRef.current;
-    if (!player) return;
+    if (!player) {
+      if (shouldPlay && currentRadio) {
+        // A native player can disappear after process reclaim or an interrupted
+        // reopen. Reset the intent and re-enter through the same serialized path.
+        playbackIntentRef.current = false;
+        void playRadio(currentRadio, true);
+      }
+      return;
+    }
     if (!shouldPlay) {
       playbackIntentRef.current = false;
       resumeAfterFocusGainRef.current = false;
@@ -353,7 +366,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     }
     // Audio Focus nativo puede estar temporalmente ocupado; no bloqueamos el
     // player por ese resultado y dejamos que Expo Audio resuelva la ruta real.
+    const requestId = playRequestRef.current;
     await requestAudioFocus();
+    if (requestId !== playRequestRef.current || playerRef.current !== player) return;
     playbackIntentRef.current = true;
     setPlaybackError(null);
     setIsLoading(true);
@@ -369,7 +384,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       updateNativeMediaState(false);
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
     }
-  }, [currentRadio]);
+  }, [currentRadio, playRadio]);
 
   const togglePlay = useCallback(() => {
     setPlayingState(!isPlaying);
@@ -396,12 +411,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
     AsyncStorage.getItem("radio-background-playback").then((value) => { if (value !== null) setBackgroundPlaybackEnabled(value !== "false"); });
-    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: "mixWithOthers" }).catch(() => undefined);
+    const audioModeReady = setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: "mixWithOthers" }).catch(() => undefined);
     void prefetchFrequentLogos(RADIOS);
 
     const startInitialPlayback = async () => {
       const lastRadioId = await AsyncStorage.getItem(LAST_RADIO_KEY).catch(() => null);
       const catalog = await refreshCatalog().catch(() => RADIOS);
+      await audioModeReady;
       if (cancelled || autoplayStartedRef.current || playRequestRef.current !== 0) return;
       const initialRadio = selectStartupRadio(catalog, lastRadioId);
       if (!initialRadio) return;
@@ -459,9 +475,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         playbackIntentRef.current = false;
         resumeAfterFocusGainRef.current = false;
         disposeCurrentPlayer();
+        currentRadioRef.current = null;
+        setCurrentRadio(null);
+        setPlaybackError(null);
         setIsPlaying(false);
         setIsLoading(false);
       }
+
     });
     return () => subscription.remove();
   }, [disposeCurrentPlayer, playAdjacent, setPlayingState]);

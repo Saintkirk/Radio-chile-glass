@@ -6,7 +6,6 @@ import { HapticTab } from "@/components/haptic-tab";
 import { platformShadow } from "@/lib/platform-styles";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
-import { PersistentMiniPlayer } from "@/components/persistent-mini-player";
 
 export default function TabLayout() {
   const colors = useColors();
@@ -57,7 +56,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-    <PersistentMiniPlayer bottomOffset={tabBarHeight + 6} />
     </View>
   );
 }

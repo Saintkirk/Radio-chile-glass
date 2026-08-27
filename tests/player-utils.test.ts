@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, nearestCarouselSlot, playbackHandoff, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, spinLandingIndex, toggleFavoriteId, wrapCarouselIndex } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -53,6 +53,14 @@ describe("player interaction utilities", () => {
     expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
   });
 
+  it("uses one handoff decision for route, card, and mini-player starts", () => {
+    expect(playbackHandoff("fmlatina", "cooperativa", true, false, false)).toBe("start");
+    expect(playbackHandoff("fmlatina", "fmlatina", false, false, false)).toBe("resume");
+    expect(playbackHandoff("fmlatina", "fmlatina", false, true, false)).toBe("none");
+    expect(playbackHandoff("fmlatina", "fmlatina", true, false, false)).toBe("none");
+    expect(playbackHandoff("fmlatina", "fmlatina", true, true, true)).toBe("start");
+  });
+
   it("starts autoplay when opening a different or paused station", () => {
     expect(shouldAutoplayStation("fmlatina", "cooperativa", true)).toBe(true);
     expect(shouldAutoplayStation("fmlatina", "fmlatina", false)).toBe(true);
@@ -65,6 +73,27 @@ describe("player interaction utilities", () => {
     expect(safeRadioIndex(4, 1.9)).toBe(1);
     expect(safeRadioIndex(0, 0)).toBe(-1);
     expect(safeRadioIndex(4, Number.NaN)).toBe(-1);
+  });
+
+  it("wraps infinite visual slots back to a logical station", () => {
+    expect(wrapCarouselIndex(-1, 4)).toBe(3);
+    expect(wrapCarouselIndex(4, 4)).toBe(0);
+    expect(wrapCarouselIndex(9, 4)).toBe(1);
+    expect(wrapCarouselIndex(2, 0)).toBe(-1);
+  });
+
+  it("lands a multi-turn spin on the correct station", () => {
+    expect(spinLandingIndex(3, 6, 4)).toBe(1);
+    expect(spinLandingIndex(0, 9, 4)).toBe(1);
+    expect(spinLandingIndex(0, 2.9, 4)).toBe(2);
+    expect(spinLandingIndex(0, 2, 0)).toBe(-1);
+  });
+
+  it("snaps pixel offsets to the nearest centered slot", () => {
+    expect(nearestCarouselSlot(0, 122)).toBe(0);
+    expect(nearestCarouselSlot(61, 122)).toBe(1);
+    expect(nearestCarouselSlot(-185, 122)).toBe(-2);
+    expect(nearestCarouselSlot(20, 0)).toBe(0);
   });
 
   it("accepts short flicks and keeps tiny taps centered", () => {

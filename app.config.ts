@@ -88,8 +88,6 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
-    "expo-asset",
-    "expo-font",
     "expo-web-browser",
     "./plugins/with-radio-media-controls",
     [

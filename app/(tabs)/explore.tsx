@@ -5,7 +5,6 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ItunesRadioCard } from "@/components/itunes-radio-card";
 import { regionFromCity } from "@/lib/radios";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
-import { shouldAutoplayStation } from "@/lib/player-utils";
 import { useRouter } from "expo-router";
 import { useThemeContext } from "@/lib/theme-provider";
 import { useColors } from "@/hooks/use-colors";
@@ -43,7 +42,7 @@ export default function ExploreScreen() {
     <SectionList
       sections={sections}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => { const playing = isPlaying && currentRadio?.id === item.id; return <ItunesRadioCard radio={item} lightMode={lightMode} onOpen={() => { if (shouldAutoplayStation(currentRadio?.id, item.id, isPlaying)) void playRadio(item, true); router.push(`/radio/${item.id}`); }} onPlay={() => playing ? togglePlay() : playRadio(item)} playing={playing} loading={isLoading && currentRadio?.id === item.id} />; }}
+      renderItem={({ item }) => { const playing = isPlaying && currentRadio?.id === item.id; return <ItunesRadioCard radio={item} lightMode={lightMode} onOpen={() => { router.push(`/radio/${item.id}`); }} onPlay={() => playing ? togglePlay() : playRadio(item)} playing={playing} loading={isLoading && currentRadio?.id === item.id} />; }}
       renderSectionHeader={({ section }) => <View style={styles.sectionHeader}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>{section.title}</Text><Text style={[styles.sectionCount, { color: colors.primary }]}>{section.data.length}</Text></View>}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.content}

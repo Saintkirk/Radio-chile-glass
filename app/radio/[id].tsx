@@ -12,6 +12,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CoverFlowCarousel } from "@/components/cover-flow-carousel";
 import { NowPlayingLabel } from "@/components/now-playing-label";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
+import { playbackHandoff } from "@/lib/player-utils";
 import { useThemeContext } from "@/lib/theme-provider";
 import { detailOpenedHaptic } from "@/lib/haptics";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
@@ -46,9 +47,10 @@ export default function RadioDetailScreen() {
   useEffect(() => {
     if (!id || !radio || selectedRadioId !== id || routePlaybackStartedRef.current === id) return;
     routePlaybackStartedRef.current = id;
-    const shouldStartRouteRadio = currentRadio?.id !== id || (!isPlaying && !isLoading && !playbackError);
-    if (shouldStartRouteRadio) void playRadio(radio, true);
-  }, [currentRadio?.id, id, isLoading, isPlaying, playRadio, playbackError, radio, selectedRadioId]);
+    const handoff = playbackHandoff(currentRadio?.id, id, isPlaying, isLoading, Boolean(playbackError));
+    if (handoff === "start") void playRadio(radio, true);
+    else if (handoff === "resume") togglePlay();
+  }, [currentRadio?.id, id, isLoading, isPlaying, playRadio, playbackError, radio, selectedRadioId, togglePlay]);
 
   useEffect(() => {
     // The route id is authoritative on the first render (for example, when a

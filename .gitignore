@@ -59,6 +59,8 @@ Thumbs.db
 # Build files
 *.tgz
 *.tar.gz
+*.apk
+dist-apk*/
 .cache/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)

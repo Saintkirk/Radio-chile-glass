@@ -133,15 +133,13 @@ class RadioMediaControlsModule(
     } catch (_: Exception) {
       // expo-audio remains the primary playback service.
     }
-    // Android puede conservar una sesión de una instancia anterior del bridge
-    // tras un reload o una restauración del proceso. Reclamar el registro antes
-    // de activar evita que SystemUI muestre una segunda emisora obsoleta.
-    val previousSession = RadioMediaSessionRegistry.session
+    // Reclamar el registro de forma atómica evita que dos instancias del bridge
+    // publiquen sesiones simultáneas o que una instancia antigua borre la nueva.
+    val previousSession = RadioMediaSessionRegistry.claim(mediaSession)
     if (previousSession != null && previousSession !== mediaSession) {
       try { previousSession.isActive = false } catch (_: Exception) { /* no-op */ }
       try { previousSession.release() } catch (_: Exception) { /* no-op */ }
     }
-    RadioMediaSessionRegistry.session = mediaSession
     mediaSession.isActive = true
     updateMetadata(title, artist, artworkUrl, radioId)
     updatePlaybackState(playing)
@@ -223,7 +221,8 @@ class RadioMediaControlsModule(
   @ReactMethod
   fun deactivate() {
     abandonAudioFocus()
-    if (mediaSessionDelegate.isInitialized()) {
+    val ownsSession = mediaSessionDelegate.isInitialized() && RadioMediaSessionRegistry.releaseIfOwner(mediaSession)
+    if (ownsSession) {
       mediaSession.setPlaybackState(
         PlaybackStateCompat.Builder()
           .setActions(0)
@@ -233,7 +232,6 @@ class RadioMediaControlsModule(
       mediaSession.setMetadata(MediaMetadataCompat.Builder().build())
       mediaSession.isActive = false
     }
-    RadioMediaSessionRegistry.session = null
     active = false
     lastArtwork = null
     lastArtworkUrl = null
@@ -363,5 +361,19 @@ class RadioMediaControlsModule(
 }
 
 object RadioMediaSessionRegistry {
-  @Volatile var session: MediaSessionCompat? = null
+  @Volatile private var currentSession: MediaSessionCompat? = null
+
+  @Synchronized
+  fun claim(session: MediaSessionCompat): MediaSessionCompat? {
+    val previous = currentSession
+    currentSession = session
+    return previous
+  }
+
+  @Synchronized
+  fun releaseIfOwner(session: MediaSessionCompat): Boolean {
+    if (currentSession !== session) return false
+    currentSession = null
+    return true
+  }
 }

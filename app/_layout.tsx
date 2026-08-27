@@ -12,11 +12,13 @@ import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { RadioPlayerProvider } from "@/lib/radio-player";
 import { LockScreenNowPlayingSync } from "@/components/lock-screen-now-playing-sync";
+import { PersistentMiniPlayer } from "@/components/persistent-mini-player";
 import { AnimatedAppLoader } from "@/components/animated-app-loader";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
   SafeAreaProvider,
+  useSafeAreaInsets,
   initialWindowMetrics,
 } from "react-native-safe-area-context";
 import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
@@ -36,6 +38,14 @@ if (Platform.OS !== "web") {
   setTimeout(() => SplashScreen.hideAsync().catch(() => undefined), 4500);
 }
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
+
+function GlobalMiniPlayerHost() {
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
+  const isTabSurface = pathname === "/explore" || pathname === "/favorites" || pathname === "/(tabs)/explore" || pathname === "/(tabs)/favorites";
+  const bottomOffset = isTabSurface ? 84 + Math.max(insets.bottom, 8) : 18 + insets.bottom;
+  return <PersistentMiniPlayer bottomOffset={bottomOffset} />;
+}
 
 function NotificationRouteBridge() {
   const url = Linking.useURL();
@@ -146,6 +156,7 @@ export default function RootLayout() {
               }}
             />
           </Stack>
+          <GlobalMiniPlayerHost />
           <NotificationRouteBridge />
           <LockScreenNowPlayingSync />
           <StatusBar style="auto" />

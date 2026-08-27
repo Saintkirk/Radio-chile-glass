@@ -6,7 +6,6 @@ import { ItunesRadioCard } from "@/components/itunes-radio-card";
 import { CoverFlowCarousel } from "@/components/cover-flow-carousel";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
-import { shouldAutoplayStation } from "@/lib/player-utils";
 import { useThemeContext } from "@/lib/theme-provider";
 import { favoriteAddedHaptic, favoriteRemovedHaptic } from "@/lib/haptics";
 import { FavoriteToast } from "@/components/favorite-toast";
@@ -78,7 +77,7 @@ export default function HomeScreen() {
             <View style={styles.sectionHeader}><Text style={[styles.sectionLabel, lightMode && styles.sectionLabelLight]}>EMISORAS DESTACADAS</Text><Pressable onPress={() => router.push("/explore")}><Text style={styles.seeAll}>Ver todas</Text></Pressable></View>
           </>
         }
-        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => { if (shouldAutoplayStation(currentRadio?.id, item.id, isPlaying)) void playRadio(item, true); router.push(`/radio/${item.id}`); }} onPlay={() => currentRadio?.id === item.id ? togglePlay() : selectAndPlayRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
+        renderItem={({ item }) => <RadioRow radio={item} lightMode={lightMode} loading={isLoading && currentRadio?.id === item.id} playing={isPlaying && currentRadio?.id === item.id} onOpen={() => { router.push(`/radio/${item.id}`); }} onPlay={() => currentRadio?.id === item.id ? togglePlay() : selectAndPlayRadio(item)} onFavorite={() => handleFavorite(item.id, item.name)} favorite={isFavorite(item.id)} />}
         ListEmptyComponent={<Text style={styles.empty}>No encontramos una radio con ese nombre.</Text>}
         ListFooterComponent={<View style={{ height: currentRadio ? 156 : 24 }} />}
       />

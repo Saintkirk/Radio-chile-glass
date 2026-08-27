@@ -75,7 +75,40 @@ export function safeRadioIndex(length: number, currentIndex: number): number {
   return Math.max(0, Math.min(length - 1, Math.trunc(currentIndex)));
 }
 
+/** Wraps a logical carousel position so duplicated visual slots never expose a gap. */
+export function wrapCarouselIndex(index: number, length: number): number {
+  if (length < 1 || !Number.isFinite(index)) return -1;
+  return ((Math.trunc(index) % length) + length) % length;
+}
+
+/** Returns the station that a completed multi-turn spin should land on. */
+export function spinLandingIndex(currentIndex: number, travelledSlots: number, length: number): number {
+  if (length < 1 || !Number.isFinite(currentIndex) || !Number.isFinite(travelledSlots)) return -1;
+  return wrapCarouselIndex(currentIndex + Math.trunc(travelledSlots), length);
+}
+
+/** Converts a pixel offset to the nearest centered slot. */
+export function nearestCarouselSlot(offset: number, step: number): number {
+  if (!Number.isFinite(offset) || !Number.isFinite(step) || step <= 0) return 0;
+  return Math.round(offset / step);
+}
+
 /** Returns whether opening a station should start or restart its stream. */
+export type PlaybackHandoff = "start" | "resume" | "none";
+
+/** Keeps route/card handoffs on the singleton player instead of recreating the same stream. */
+export function playbackHandoff(
+  currentRadioId: string | null | undefined,
+  targetRadioId: string,
+  isPlaying: boolean,
+  isLoading: boolean,
+  hasError: boolean,
+): PlaybackHandoff {
+  if (currentRadioId !== targetRadioId || hasError) return "start";
+  if (!isPlaying && !isLoading) return "resume";
+  return "none";
+}
+
 export function shouldAutoplayStation(currentRadioId: string | null | undefined, targetRadioId: string, isPlaying: boolean): boolean {
   return currentRadioId !== targetRadioId || !isPlaying;
 }

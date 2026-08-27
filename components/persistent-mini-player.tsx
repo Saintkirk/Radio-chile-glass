@@ -53,7 +53,7 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
   const displayRadio = currentRadio ?? miniRadio;
   // Inicio ya muestra el control completo dentro de cada tarjeta; el mini reproductor
   // permanece visible en las otras pestañas y rutas para no cubrir el Cover Flow.
-  if (!displayRadio || pathname === "/" || pathname === "/(tabs)") return null;
+  if (!displayRadio || pathname === "/" || pathname === "/(tabs)" || pathname.startsWith("/radio/")) return null;
   const lightMode = colorScheme === "light";
   // bottomOffset ya incluye la altura de la barra y el inset inferior; no duplicarlo.
   const bottom = bottomOffset;

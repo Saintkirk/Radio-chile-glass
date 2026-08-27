@@ -1582,4 +1582,27 @@
 - [x] Invalidar callbacks, timers y metadata de la emisora anterior
 - [x] Asegurar que la tarjeta seleccionada actualice el player principal de forma atómica
 - [x] Añadir pruebas para cambio rápido, radio muerta y segunda slide obsoleta
-- [ ] Validar y generar APK corregida
+- [x] Validar y generar APK corregida
+
+## Auditoría y limpieza de proyecto solicitada
+- [x] Inventariar archivos, assets, dependencias y workflows heredados
+- [x] Clasificar elementos necesarios, dudosos y seguros de retirar
+- [x] Eliminar código muerto y reducir peso sin afectar la app
+- [x] Validar typecheck, Vitest, lint, prebuild y bundle
+- [x] Documentar hallazgos y guardar checkpoint
+
+## Infinite horizontal slot-machine carousel
+- [x] Replace the featured radio carousel with a continuous horizontal slot-machine layout
+- [x] Add spin trigger, progressive blur, ease-out deceleration, and centered landing
+- [x] Add square radio cards, reflections, and central selection marker
+- [x] Add deterministic tests for wrapping, spin landing, and nearest-slot snapping
+- [ ] Save checkpoint for the slot-machine carousel
+
+## Estabilidad global del reproductor solicitada
+- [x] Auditar todas las entradas a reproducción y confirmar un único player global
+- [x] Evitar carreras, callbacks y timers de radios anteriores
+- [x] Hacer funcional y consistente el mini reproductor desde cualquier pantalla
+- [x] Estabilizar restauración al cerrar y reabrir la app sin play manual
+- [x] Garantizar una sola MediaSession activa en notificación y pantalla de bloqueo
+- [x] Añadir pruebas de concurrencia, restauración y navegación compartida
+- [ ] Validar preview, prebuild y generar APK corregida

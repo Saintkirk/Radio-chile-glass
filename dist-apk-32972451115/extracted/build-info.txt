@@ -1,8 +1,0 @@
-commit=1b5877670b605a9f1ec006d56b97337eed4d7e3a
-workflow_run=32972451115
-build_system=Gradle
-profile=release
-version=1.0.2
-package=com.app.radiochileglass
-signing=debug-keystore-testing-only
-size_bytes=33274637
