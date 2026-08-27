@@ -1618,4 +1618,10 @@
 - [x] Evitar saltos o desmontajes visibles de carátulas durante carga y cambio
 - [x] Mostrar el asset real de cada emisora en la tarjeta de reproducción
 - [x] Unificar el render de portadas entre menú principal y tarjeta sin perder fluidez
-- [ ] Añadir pruebas de identidad de asset y validar build Android
+- [x] Añadir pruebas de identidad de asset y validar build Android
+
+## Optimización de precarga de favicons
+- [x] Auditar la ventana de carátulas visibles y próximas durante el gesto
+- [x] Precargar favicons priorizados sin bloquear la interacción
+- [x] Reutilizar caché de imágenes y limitar memoria de la precarga
+- [ ] Añadir pruebas de precarga y generar APK optimizada

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
+import { getLogoPrefetchUris } from "@/lib/logo-prefetch";
 
 type LogoSource = { id: string; favicon?: string | null };
 type LogoCache = Record<string, { uri: string; updatedAt: number }>;
@@ -23,6 +24,7 @@ const FREQUENT_RADIO_IDS = [
 
 let memoryCache: LogoCache | null = null;
 let loadPromise: Promise<LogoCache> | null = null;
+const inFlightUris = new Set<string>();
 
 async function readCache(): Promise<LogoCache> {
   if (memoryCache) return memoryCache;
@@ -63,14 +65,38 @@ export async function rememberLogo(uri: string): Promise<void> {
 }
 
 export async function prefetchLogo(uri: string): Promise<boolean> {
-  if (!uri) return false;
+  if (!uri || inFlightUris.has(uri)) return false;
+  if (await getCachedLogo(uri)) return true;
+
+  inFlightUris.add(uri);
   try {
     const loaded = await Image.prefetch(uri, "memory-disk");
     if (loaded) await rememberLogo(uri);
     return loaded;
   } catch {
     return false;
+  } finally {
+    inFlightUris.delete(uri);
   }
+}
+
+/** Precarga solo la ventana que el usuario puede alcanzar en el siguiente gesto. */
+export async function prefetchLogoWindow(
+  radios: LogoSource[],
+  centerIndex: number,
+  radius = 5,
+): Promise<void> {
+  if (!radios.length) return;
+
+  // Tres descargas concurrentes reducen el placeholder sin saturar red, JS ni Audio Focus.
+  const queue = getLogoPrefetchUris(radios, centerIndex, radius);
+  const worker = async () => {
+    while (queue.length) {
+      const uri = queue.shift();
+      if (uri) await prefetchLogo(uri);
+    }
+  };
+  await Promise.all([worker(), worker(), worker()]);
 }
 
 /** Calienta primero los logos más usados y luego completa con el resto del catálogo. */
@@ -95,6 +121,7 @@ export async function prefetchFrequentLogos(radios: LogoSource[]): Promise<void>
 
 export async function clearLogoCache(): Promise<void> {
   memoryCache = {};
+  inFlightUris.clear();
   loadPromise = Promise.resolve(memoryCache);
   await AsyncStorage.removeItem(CACHE_KEY);
   await Image.clearMemoryCache();

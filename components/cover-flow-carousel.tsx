@@ -19,6 +19,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { Radio } from "@/lib/radio-player";
 import { safeRadioIndex, spinLandingIndex, wrapCarouselIndex } from "@/lib/player-utils";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
+import { prefetchLogoWindow } from "@/lib/logo-cache";
 
 const CARD_SIZE = 214;
 const CARD_STEP = 122;
@@ -260,6 +261,14 @@ export function CoverFlowCarousel({
       cancelAnimation(spinProgress);
     };
   }, [isMounted, spinProgress, spinning, wheelOffset]);
+
+  useEffect(() => {
+    if (renderIndex < 0 || radios.length < 1) return;
+    const handle = setTimeout(() => {
+      void prefetchLogoWindow(radios, renderIndex, 5);
+    }, 80);
+    return () => clearTimeout(handle);
+  }, [radios, renderIndex]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion).catch(() => undefined);
