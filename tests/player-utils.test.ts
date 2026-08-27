@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -87,6 +87,13 @@ describe("player interaction utilities", () => {
     expect(shouldContinueCrossfade(4, 4, 8, 8)).toBe(true);
     expect(shouldContinueCrossfade(4, 5, 8, 8)).toBe(false);
     expect(shouldContinueCrossfade(4, 4, 7, 8)).toBe(false);
+  });
+
+  it("accepts metadata only from the current radio", () => {
+    expect(isCurrentRadioId("fmlatina", "fmlatina")).toBe(true);
+    expect(isCurrentRadioId("fmlatina", "cooperativa")).toBe(false);
+    expect(isCurrentRadioId("fmlatina", null)).toBe(false);
+    expect(isCurrentRadioId(null, "fmlatina")).toBe(false);
   });
 
   it("keeps the deck continuous after a swipe commit", () => {

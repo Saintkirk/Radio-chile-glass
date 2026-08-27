@@ -32,6 +32,11 @@ export function isCurrentPlaybackRequest(requestId: number, currentRequestId: nu
   return requestId === currentRequestId;
 }
 
+/** Reject metadata or controls produced by a station that is no longer active. */
+export function isCurrentRadioId(activeRadioId: string | null | undefined, candidateRadioId: string | null | undefined): boolean {
+  return Boolean(activeRadioId && candidateRadioId && activeRadioId === candidateRadioId);
+}
+
 /** A crossfade is valid only while both its request and cancellation token are current. */
 export function shouldContinueCrossfade(requestId: number, currentRequestId: number, token: number, currentToken: number): boolean {
   return requestId === currentRequestId && token === currentToken;

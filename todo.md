@@ -1571,8 +1571,15 @@
 - [x] Generar y entregar APK Android actualizada mediante el workflow nativo
 
 ## Regresión: emisoras no reproducen en APK
-- [ ] Inspeccionar logs y ciclo de creación/reproducción de `expo-audio`
-- [ ] Validar URLs de streaming y compatibilidad Android
-- [ ] Diagnosticar Audio Focus, buffering y autoplay
-- [ ] Corregir el flujo y añadir regresiones automatizadas
-- [ ] Validar y generar APK corregida si procede
+- [x] Inspeccionar logs y ciclo de creación/reproducción de `expo-audio`
+- [x] Validar URLs de streaming y compatibilidad Android
+- [x] Diagnosticar Audio Focus, buffering y autoplay
+- [x] Corregir el flujo y añadir regresiones automatizadas
+- [x] Validar y generar APK corregida si procede
+
+## Regresión: tarjeta y MediaSession muestran emisoras distintas
+- [x] Rastrear player activo, radio actual e índice visual en Inicio y Reproductor
+- [x] Invalidar callbacks, timers y metadata de la emisora anterior
+- [x] Asegurar que la tarjeta seleccionada actualice el player principal de forma atómica
+- [x] Añadir pruebas para cambio rápido, radio muerta y segunda slide obsoleta
+- [ ] Validar y generar APK corregida

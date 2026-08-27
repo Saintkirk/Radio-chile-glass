@@ -133,6 +133,14 @@ class RadioMediaControlsModule(
     } catch (_: Exception) {
       // expo-audio remains the primary playback service.
     }
+    // Android puede conservar una sesión de una instancia anterior del bridge
+    // tras un reload o una restauración del proceso. Reclamar el registro antes
+    // de activar evita que SystemUI muestre una segunda emisora obsoleta.
+    val previousSession = RadioMediaSessionRegistry.session
+    if (previousSession != null && previousSession !== mediaSession) {
+      try { previousSession.isActive = false } catch (_: Exception) { /* no-op */ }
+      try { previousSession.release() } catch (_: Exception) { /* no-op */ }
+    }
     RadioMediaSessionRegistry.session = mediaSession
     mediaSession.isActive = true
     updateMetadata(title, artist, artworkUrl, radioId)
@@ -216,6 +224,13 @@ class RadioMediaControlsModule(
   fun deactivate() {
     abandonAudioFocus()
     if (mediaSessionDelegate.isInitialized()) {
+      mediaSession.setPlaybackState(
+        PlaybackStateCompat.Builder()
+          .setActions(0)
+          .setState(PlaybackStateCompat.STATE_NONE, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
+          .build(),
+      )
+      mediaSession.setMetadata(MediaMetadataCompat.Builder().build())
       mediaSession.isActive = false
     }
     RadioMediaSessionRegistry.session = null

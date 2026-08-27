@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
+import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
 
@@ -93,6 +93,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     playerStatusSubscriptionRef.current = null;
     const player = playerRef.current;
     playerRef.current = null;
+    if (player) {
+      try { player.clearLockScreenControls(); } catch { /* no-op on unsupported builds */ }
+    }
     pauseAndRemovePlayer(player);
     if (!preserveMediaSession) {
       clearNativeMediaSession();
@@ -113,6 +116,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     playerStatusSubscriptionRef.current = null;
     const outgoing = playerRef.current;
     playerRef.current = null;
+    if (outgoing) {
+      try { outgoing.clearLockScreenControls(); } catch { /* no-op on unsupported builds */ }
+    }
     return outgoing;
   }, []);
 
@@ -378,6 +384,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
   const updateLockScreenMetadata = useCallback((metadata: LockScreenMetadata) => {
     if (!backgroundPlaybackEnabled) return;
+    // ICY/now-playing puede resolver después de que el usuario cambió de
+    // emisora. Nunca permitas que esa respuesta tardía reviva el título,
+    // logo o estado de la radio anterior en la pantalla bloqueada.
+    if (metadata.radioId && !isCurrentRadioId(currentRadioRef.current?.id, metadata.radioId)) return;
     try { playerRef.current?.updateLockScreenMetadata(metadata); } catch { /* no-op */ }
     updateNativeMediaMetadata(metadata);
   }, [backgroundPlaybackEnabled]);
