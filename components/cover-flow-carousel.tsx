@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -72,7 +72,7 @@ type SlotCardProps = {
   onPlay: () => void;
 };
 
-function SlotCard({
+const SlotCard = memo(function SlotCard({
   radio,
   slot,
   wheelOffset,
@@ -135,7 +135,7 @@ function SlotCard({
       </Pressable>
     </Animated.View>
   );
-}
+});
 
 export function CoverFlowCarousel({
   radios,
@@ -168,7 +168,8 @@ export function CoverFlowCarousel({
   const awaitingParentSyncRef = useRef(false);
 
   const safeActiveIndex = safeRadioIndex(radios.length, activeIndex);
-  const active = selectedIndex >= 0 ? radios[selectedIndex] : undefined;
+  const renderIndex = safeRadioIndex(radios.length, selectedIndex);
+  const active = renderIndex >= 0 ? radios[renderIndex] : undefined;
   const slotValues = useMemo(() => Array.from({ length: SLOT_RADIUS * 2 + 1 }, (_, index) => index - SLOT_RADIUS), []);
 
   const setSelected = useCallback((index: number) => {
@@ -310,7 +311,7 @@ export function CoverFlowCarousel({
         <View style={styles.stage}>
           <View style={[styles.trackHint, nonInteractiveStyle]} />
           {slotValues.map((slot) => {
-            const radio = radios[wrapCarouselIndex(selectedIndex + slot, radios.length)];
+            const radio = radios[wrapCarouselIndex(renderIndex + slot, radios.length)];
             if (!radio) return null;
             return (
               <SlotCard
@@ -341,7 +342,7 @@ export function CoverFlowCarousel({
           <View style={styles.caption}>
             <Text style={[styles.stationName, lightMode && styles.stationNameLight]} numberOfLines={1}>{active.name}</Text>
             <Text style={[styles.stationMeta, lightMode && styles.stationMetaLight]}>{active.frequency}  ·  {active.genre}</Text>
-            <Text style={styles.counter}>{selectedIndex + 1} / {radios.length}</Text>
+            <Text style={styles.counter}>{renderIndex + 1} / {radios.length}</Text>
           </View>
           <Pressable onPress={() => selectSlot(1)} disabled={isSpinning} accessibilityRole="button" accessibilityLabel="Next station" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}>
             <IconSymbol name="chevron.right" size={20} color="#F5F3EE" />

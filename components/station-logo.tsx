@@ -64,13 +64,6 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
           contentPosition="center"
           cachePolicy="memory-disk"
           transition={hasLocalLogo ? 0 : 120}
-          onLoad={(event) => {
-            if (currentSourceKeyRef.current !== sourceKey) return;
-            const sourceWidth = event.source?.width ?? 0;
-            const sourceHeight = event.source?.height ?? 0;
-            const smallestSide = Math.min(sourceWidth, sourceHeight);
-            if (!hasLocalLogo && size >= 120 && smallestSide > 0 && smallestSide < size * 1.35) setFailed(true);
-          }}
           onError={() => {
             if (currentSourceKeyRef.current === sourceKey) setFailed(true);
           }}

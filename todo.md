@@ -1613,3 +1613,9 @@
 - [x] Evitar que una emisora sin audio real quede publicada como reproduciendo desde pantalla bloqueada
 - [x] Añadir pruebas de regresión para navegación, artwork y cambio nativo de emisora
 - [x] Validar build Android y entregar APK corregida
+
+## Regresión visual: fluidez y portadas en carrusel principal/tarjeta
+- [x] Evitar saltos o desmontajes visibles de carátulas durante carga y cambio
+- [x] Mostrar el asset real de cada emisora en la tarjeta de reproducción
+- [x] Unificar el render de portadas entre menú principal y tarjeta sin perder fluidez
+- [ ] Añadir pruebas de identidad de asset y validar build Android
