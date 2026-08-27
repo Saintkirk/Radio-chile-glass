@@ -2,6 +2,9 @@ package com.app.radiochileglass
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -18,6 +21,7 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.Promise
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.net.HttpURLConnection
 import java.net.URL
@@ -44,6 +48,13 @@ class RadioMediaControlsModule(
   }
   private val mediaSession: MediaSessionCompat get() = mediaSessionDelegate.value
   private val executor = Executors.newSingleThreadExecutor()
+  private var audioFocusRequest: AudioFocusRequest? = null
+  private val audioFocusListener = AudioManager.OnAudioFocusChangeListener { change ->
+    reactContext.runOnUiQueueThread {
+      reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+        .emit(AUDIO_FOCUS_EVENT, Arguments.createMap().apply { putInt("rawChange", change) })
+    }
+  }
   private var active = false
   private var lastTitle = "Radio Chile Glass"
   private var lastArtist = "Radio en vivo"
@@ -55,6 +66,50 @@ class RadioMediaControlsModule(
   private var lastPlaying = false
 
   override fun getName(): String = NAME
+
+  @ReactMethod
+  fun requestAudioFocus(promise: Promise) {
+    try {
+      val manager = reactContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+      val attributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_MEDIA)
+        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+        .build()
+      val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+          .setAudioAttributes(attributes)
+          .setAcceptsDelayedFocusGain(false)
+          .setWillPauseWhenDucked(false)
+          .setOnAudioFocusChangeListener(audioFocusListener)
+          .build()
+        manager.requestAudioFocus(audioFocusRequest!!)
+      } else {
+        @Suppress("DEPRECATION")
+        manager.requestAudioFocus(audioFocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+      }
+      promise.resolve(
+        when (result) {
+          AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> "granted"
+          AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> "delayed"
+          else -> "failed"
+        },
+      )
+    } catch (error: Exception) {
+      promise.reject("AUDIO_FOCUS_ERROR", error.message, error)
+    }
+  }
+
+  @ReactMethod
+  fun abandonAudioFocus() {
+    val manager = reactContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      audioFocusRequest?.let { manager.abandonAudioFocusRequest(it) }
+      audioFocusRequest = null
+    } else {
+      @Suppress("DEPRECATION")
+      manager.abandonAudioFocus(audioFocusListener)
+    }
+  }
 
   @ReactMethod
   fun activate(title: String, artist: String, artworkUrl: String?, playing: Boolean, radioId: String?) {
@@ -159,6 +214,7 @@ class RadioMediaControlsModule(
 
   @ReactMethod
   fun deactivate() {
+    abandonAudioFocus()
     if (mediaSessionDelegate.isInitialized()) {
       mediaSession.isActive = false
     }
@@ -279,6 +335,7 @@ class RadioMediaControlsModule(
   companion object {
     const val NAME = "RadioMediaControls"
     const val EVENT_NAME = "RadioMediaControls.action"
+    const val AUDIO_FOCUS_EVENT = "RadioMediaControls.audioFocus"
     const val ACTION_PLAY = "com.app.radiochileglass.PLAY"
     const val ACTION_PAUSE = "com.app.radiochileglass.PAUSE"
     const val ACTION_NEXT = "com.app.radiochileglass.NEXT"

@@ -174,6 +174,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     if (preserveMediaSession && backgroundPlaybackEnabled) {
       setNativeMediaSession(lockScreenMetadata(radio), false);
     }
+    resumeAfterFocusGainRef.current = false;
     currentRadioRef.current = radio;
     setCurrentRadio(radio);
     AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
@@ -191,8 +192,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
       let candidate: ReturnType<typeof createAudioPlayer> | null = null;
       try {
-        const focusResult = requestAudioFocus();
-        if (focusResult === "failed") throw new Error("Audio focus unavailable");
+        const focusResult = await requestAudioFocus();
+        if (focusResult === "failed" || focusResult === "delayed") {
+          throw new Error(`Audio focus ${focusResult}`);
+        }
         candidate = createAudioPlayer({ uri: radio.streamUrl });
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
@@ -226,12 +229,12 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         });
         const activeCandidate = candidate;
         activeCandidate.play();
-        // La acción del usuario es la fuente inmediata del estado visual; el timeout
-        // y el listener siguen siendo los encargados de revertirlo si el stream falla.
+        // La intención se refleja de inmediato, pero el estado de reproducción y la
+        // MediaSession permanecen en buffering hasta recibir status.playing === true.
         setIsPlaying(true);
-        setIsLoading(false);
-        updateNativeMediaState(true);
-        setNativeMediaSession(lockScreenMetadata(radio), true);
+        setIsLoading(true);
+        updateNativeMediaState(false);
+        setNativeMediaSession(lockScreenMetadata(radio), false);
         if (replayTimeoutRef.current) clearTimeout(replayTimeoutRef.current);
         replayTimeoutRef.current = setTimeout(() => {
           replayTimeoutRef.current = null;
@@ -320,24 +323,35 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     await playRadio(radios[nextIndex], true);
   }, [currentRadio?.id, playRadio, radios]);
 
-  const setPlayingState = useCallback((shouldPlay: boolean) => {
+  const setPlayingState = useCallback(async (shouldPlay: boolean) => {
     const player = playerRef.current;
     if (!player) return;
     if (!shouldPlay) {
       playbackIntentRef.current = false;
+      resumeAfterFocusGainRef.current = false;
       player.pause();
       setIsPlaying(false);
       updateNativeMediaState(false);
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
       return;
     }
-    const focusResult = requestAudioFocus();
-    if (focusResult === "failed") return;
+    const focusResult = await requestAudioFocus();
+    if (focusResult === "failed" || focusResult === "delayed") {
+      setPlaybackError("Otra aplicación está utilizando el audio");
+      return;
+    }
     playbackIntentRef.current = true;
+    setIsLoading(true);
     player.play();
     setIsPlaying(true);
-    updateNativeMediaState(true);
-    if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), true);
+    if (player.playing) {
+      setIsLoading(false);
+      updateNativeMediaState(true);
+      if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), true);
+    } else {
+      updateNativeMediaState(false);
+      if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
+    }
   }, [currentRadio]);
 
   const togglePlay = useCallback(() => {
@@ -390,7 +404,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       const player = playerRef.current;
       if (!player) return;
       if (action === "pause") {
-        resumeAfterFocusGainRef.current = isPlaying;
+        resumeAfterFocusGainRef.current = isPlaying && playbackIntentRef.current;
         player.pause();
         setIsPlaying(false);
         updateNativeMediaState(false);
@@ -398,6 +412,16 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         player.volume = 0.35;
       } else if (action === "restore") {
         player.volume = 1;
+        if (resumeAfterFocusGainRef.current && !player.playing) {
+          try {
+            player.play();
+            setIsPlaying(true);
+            updateNativeMediaState(true);
+            if (currentRadioRef.current) setNativeMediaSession(lockScreenMetadata(currentRadioRef.current), true);
+          } catch {
+            // The native status listener will keep the UI paused if playback cannot resume.
+          }
+        }
         resumeAfterFocusGainRef.current = false;
       }
     });
@@ -412,6 +436,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       else if (action === "pause") setPlayingState(false);
       else if (action === "stop") {
         playbackIntentRef.current = false;
+        resumeAfterFocusGainRef.current = false;
         disposeCurrentPlayer();
         setIsPlaying(false);
         setIsLoading(false);

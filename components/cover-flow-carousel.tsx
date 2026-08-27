@@ -55,7 +55,8 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
     // Each card travels on the surface of an invisible horizontal drum. A
     // fractional slot changes its angle, x-position, height and scale together,
     // making the selected cover feel like it is rotating through a cylinder.
-    const normalized = slot + dragX.get() / FLOW_STEP;
+    const dragProgress = dragX.get() / FLOW_STEP;
+    const normalized = slot + dragProgress;
     const angle = Math.max(-BARREL_MAX_ANGLE, Math.min(BARREL_MAX_ANGLE, normalized * BARREL_ANGLE_STEP));
     const depth = Math.max(0.12, Math.cos(angle));
     const distance = Math.min(2.6, Math.abs(normalized));
@@ -68,7 +69,9 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
     if (reduceMotion) {
       return {
         opacity,
-        zIndex: Math.round(58 + depth * 42),
+        // Keep layer ordering stable. Animating zIndex forces Android to
+        // rebuild the view hierarchy on every frame, which is expensive at 120 Hz.
+        zIndex: 90 - Math.abs(slot) * 12,
         transform: [
           { perspective: 900 },
           { translateX: visualX },
@@ -81,7 +84,9 @@ function useFlowCardAnimatedStyle(slot: FlowSlot, dragX: SharedValue<number>, re
 
     return {
       opacity: interpolate(distance, [0, 1, 2, 2.6], [1, 0.78, 0.22, 0.2], Extrapolation.CLAMP),
-      zIndex: Math.round(58 + depth * 42),
+      // The slot order is stable while the drum rotates; avoid per-frame
+      // zIndex changes so the GPU can keep each card on its hardware layer.
+      zIndex: 90 - Math.abs(slot) * 12,
       transform: [
         { perspective: 900 },
         { translateX: visualX },
@@ -279,7 +284,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
     }), [commitSwipeFromGesture, dragX, isMounted, isSettling, reduceMotion]);
 
   const sideCard = (radio: Radio | undefined, side: -1 | 1, animatedStyle: ReturnType<typeof useFlowCardAnimatedStyle>) => radio ? (
-    <Animated.View style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight, animatedStyle]}>
+    <Animated.View renderToHardwareTextureAndroid shouldRasterizeIOS style={[styles.sideSlot, side === -1 ? styles.sideLeft : styles.sideRight, animatedStyle]}>
       <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={styles.cardPressable}>
       <View style={[styles.sideContactShadow, nonInteractiveStyle]} />
       <View style={[styles.cover, styles.sideCover, { backgroundColor: `${radio.accent}32` }]}>
@@ -296,7 +301,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
   ) : null;
 
   const outerCard = (radio: Radio | undefined, side: OuterSide, animatedStyle: ReturnType<typeof useFlowCardAnimatedStyle>) => radio ? (
-    <Animated.View style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight, animatedStyle]}>
+    <Animated.View renderToHardwareTextureAndroid shouldRasterizeIOS style={[styles.outerSlot, side < 0 ? styles.outerLeft : styles.outerRight, animatedStyle]}>
       <Pressable onPress={() => requestChange(radio, side)} accessibilityRole="button" accessibilityLabel={`Ir a ${radio.name}`} style={styles.cardPressable}>
       <View style={[styles.outerContactShadow, nonInteractiveStyle]} />
       <View style={[styles.cover, styles.outerCover, { backgroundColor: `${radio.accent}2A` }]}>
@@ -321,7 +326,7 @@ export function CoverFlowCarousel({ radios, activeIndex, onSelect, onPlay, isPla
         <View style={[styles.drumTrack, nonInteractiveStyle]} />
         {outerCard(farPrevious, -2, farPreviousStyle)}
         {sideCard(previous, -1, previousStyle)}
-        <Animated.View style={[styles.centerSlot, centerStyle]}>
+        <Animated.View renderToHardwareTextureAndroid shouldRasterizeIOS style={[styles.centerSlot, centerStyle]}>
           <View style={[styles.centerContactShadow, nonInteractiveStyle]} />
           <Animated.View style={[styles.outerGlow, glowStyle, nonInteractiveStyle]} />
           <View style={[styles.centerCover, { backgroundColor: `${active.accent}40` }]}>

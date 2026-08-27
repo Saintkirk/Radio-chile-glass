@@ -1530,6 +1530,42 @@
 
 ## APK de prueba de inercia suave
 
-- [ ] Ejecutar el workflow Android desde el commit actual
-- [ ] Verificar y descargar el APK generado
-- [ ] Entregar el APK con checksum para prueba física
+- [x] Ejecutar el workflow Android desde el commit actual
+- [x] Verificar y descargar el APK generado
+- [x] Entregar el APK con checksum para prueba física
+
+## Optimización para pantallas de 120 Hz
+
+- [x] Auditar trabajo por frame, renders y estilos animados del Cover Flow
+- [x] Optimizar animaciones en el hilo UI y reducir trabajo del hilo JavaScript
+- [x] Mantener compatibilidad y sensación fluida en 60 Hz y 120 Hz
+- [x] Validar typecheck, pruebas, lint y composición móvil; guardar checkpoint
+
+## Auditoría integral del proyecto
+
+- [x] Revisar estructura, dependencias, configuración Expo y branding
+- [x] Auditar arranque, navegación, catálogo, audio y controles multimedia
+- [x] Auditar Cover Flow, rendimiento, accesibilidad y experiencia visual
+- [x] Ejecutar typecheck, pruebas, lint, Expo Doctor y revisar logs/workflow
+- [x] Consolidar hallazgos priorizados en un informe de auditoría
+
+## Integración de Audio Focus nativo Android
+
+- [x] Revisar documentación Expo Audio y el puente MediaSession actual
+- [x] Implementar AudioManager.OnAudioFocusChangeListener en el módulo nativo
+- [x] Integrar eventos de foco, ducking y restauración en RadioPlayerProvider
+- [x] Añadir pruebas deterministas y validar compilación Android; guardar checkpoint
+
+## Optimización pendiente del reproductor y controles multimedia
+
+- [x] Revisar ciclo de vida, buffering, reintentos y exclusión de reproductores
+- [x] Revisar foco de audio, MediaSession, notificación, metadata y artwork
+- [x] Revisar consumo en segundo plano, memoria y cobertura de pruebas
+- [x] Consolidar recomendaciones priorizadas en un informe
+
+## Implementación Audio Focus y buffering solicitada
+- [x] Exponer y manejar el resultado real de `requestAudioFocus` desde Android
+- [x] Mantener `isLoading` hasta confirmar reproducción o error del stream
+- [x] Añadir pruebas para foco denegado, foco diferido y buffering confirmado
+- [x] Validar TypeScript, Vitest y lint; guardar checkpoint
+- [ ] Generar y entregar APK Android actualizada mediante el workflow nativo
