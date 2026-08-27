@@ -6,7 +6,7 @@ import android.content.Intent
 
 class RadioMediaActionReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
-    val controls = RadioMediaSessionRegistry.session?.controller?.transportControls ?: return
+    val controls = RadioMediaSessionRegistry.current()?.controller?.transportControls ?: return
     try {
       when (intent.action) {
         RadioMediaControlsModule.ACTION_PLAY -> controls.play()

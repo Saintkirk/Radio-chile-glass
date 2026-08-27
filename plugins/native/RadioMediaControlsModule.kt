@@ -371,6 +371,9 @@ object RadioMediaSessionRegistry {
   }
 
   @Synchronized
+  fun current(): MediaSessionCompat? = currentSession
+
+  @Synchronized
   fun releaseIfOwner(session: MediaSessionCompat): Boolean {
     if (currentSession !== session) return false
     currentSession = null
