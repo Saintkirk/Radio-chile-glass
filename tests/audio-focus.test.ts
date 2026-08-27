@@ -12,6 +12,7 @@ import {
   normalizeAudioFocusRequestResult,
   normalizeNativeAudioFocusChange,
   requestAudioFocus,
+  requestAudioFocusFromModule,
 } from "../lib/audio-focus";
 
 describe("safe audio focus fallback", () => {
@@ -26,11 +27,42 @@ describe("safe audio focus fallback", () => {
   });
 });
 
+describe("audio focus request with native module", () => {
+  it("returns the native granted result", async () => {
+    const nativeModule = { requestAudioFocus: vi.fn().mockResolvedValue("granted") };
+
+    await expect(requestAudioFocusFromModule(nativeModule, 20)).resolves.toBe("granted");
+    expect(nativeModule.requestAudioFocus).toHaveBeenCalledTimes(1);
+  });
+
+  it("normalizes a native rejection as failed", async () => {
+    const nativeModule = { requestAudioFocus: vi.fn().mockRejectedValue(new Error("focus error")) };
+
+    await expect(requestAudioFocusFromModule(nativeModule, 20)).resolves.toBe("failed");
+  });
+
+  it("does not block playback when the native promise never resolves", async () => {
+    vi.useFakeTimers();
+    try {
+      const nativeModule = {
+        requestAudioFocus: vi.fn(() => new Promise<"granted">(() => undefined)),
+      };
+      const resultPromise = requestAudioFocusFromModule(nativeModule, 100);
+
+      await vi.advanceTimersByTimeAsync(100);
+      await expect(resultPromise).resolves.toBe("unavailable");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe("audio focus request result normalization", () => {
   it.each([
     ["granted", "granted"],
     ["delayed", "delayed"],
     ["failed", "failed"],
+    ["unavailable", "unavailable"],
     ["unexpected", "failed"],
     [null, "failed"],
   ] as const)("normalizes %s to %s", (result, expected) => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, toggleFavoriteId } from "../lib/player-utils";
+import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, toggleFavoriteId } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -34,6 +34,17 @@ describe("player interaction utilities", () => {
     expect(playbackStatus(true, false)).toBe("connecting");
     expect(playbackStatus(false, true)).toBe("playing");
     expect(playbackStatus(false, false)).toBe("ready");
+  });
+
+  it("does not confirm a player while it is buffering", () => {
+    expect(isPlaybackConfirmed({ playing: false, isLoaded: false, isBuffering: true })).toBe(false);
+    expect(isPlaybackConfirmed({ playing: true, isLoaded: true, isBuffering: true })).toBe(false);
+  });
+
+  it("confirms playback only after the native player is loaded and audible", () => {
+    expect(isPlaybackConfirmed({ playing: true, isLoaded: true, isBuffering: false })).toBe(true);
+    expect(isPlaybackConfirmed({ playing: true, isLoaded: false, isBuffering: false })).toBe(false);
+    expect(isPlaybackConfirmed({ playing: false, isLoaded: true, isBuffering: false })).toBe(false);
   });
 
   it("wraps previous and next navigation around the radio catalog", () => {

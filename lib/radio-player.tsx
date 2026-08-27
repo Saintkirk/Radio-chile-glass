@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
+import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
 
@@ -178,10 +178,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     currentRadioRef.current = radio;
     setCurrentRadio(radio);
     AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
-    // El control debe mostrar la intención de reproducción desde el primer cuadro;
-    // el listener nativo confirmará o revertirá el estado si el stream falla.
+    // La intención se registra de inmediato, pero el estado audible solo se
+    // confirma cuando Expo Audio informa que el player está listo y reproduciendo.
     playbackIntentRef.current = true;
-    setIsPlaying(true);
+    setIsPlaying(false);
     setIsLoading(true);
     setPlaybackError(null);
 
@@ -192,11 +192,18 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
       let candidate: ReturnType<typeof createAudioPlayer> | null = null;
       try {
-        const focusResult = await requestAudioFocus();
-        if (focusResult === "failed" || focusResult === "delayed") {
-          throw new Error(`Audio focus ${focusResult}`);
-        }
-        candidate = createAudioPlayer({ uri: radio.streamUrl });
+        // El foco nativo es best effort. Expo Audio es el dueño del player y
+        // debe poder iniciar aunque otro audio mantenga el foco temporalmente;
+        // de lo contrario una respuesta nativa incompleta deja todas las radios
+        // atrapadas en buffering sin llegar a crear el stream.
+        await requestAudioFocus();
+        candidate = createAudioPlayer({
+          uri: radio.streamUrl,
+          headers: {
+            "Icy-MetaData": "1",
+            "User-Agent": "RadioChileGlass/1.0",
+          },
+        });
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
           candidate.remove();
@@ -206,13 +213,18 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         syncLockScreenControls(candidate, radio, backgroundPlaybackEnabled, false);
         playerStatusSubscriptionRef.current = candidate.addListener("playbackStatusUpdate", (status) => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
-          // Algunos streams emiten playing=false durante el buffering inicial.
-          // No debe sobrescribir el estado optimista hasta que expire el timeout.
-          if (status.playing || (!startupTimeoutRef.current && !playbackIntentRef.current)) {
-            setIsPlaying(status.playing);
-            updateNativeMediaState(status.playing);
+          const confirmed = isPlaybackConfirmed(status);
+          // Algunos streams emiten playing=true mientras aún están llenando el
+          // buffer. Solo ese estado confirmado termina la conexión y actualiza
+          // la MediaSession como reproduciendo.
+          if (confirmed) {
+            setIsPlaying(true);
+            updateNativeMediaState(true);
+          } else if (!status.playing && !status.isBuffering && !playbackIntentRef.current) {
+            setIsPlaying(false);
+            updateNativeMediaState(false);
           }
-          if (status.playing) {
+          if (confirmed) {
             if (crossfadeStartedRequestRef.current !== requestId) {
               crossfadeStartedRequestRef.current = requestId;
               startCrossfade(outgoingPlayer, candidate as ReturnType<typeof createAudioPlayer>, requestId);
@@ -229,9 +241,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         });
         const activeCandidate = candidate;
         activeCandidate.play();
-        // La intención se refleja de inmediato, pero el estado de reproducción y la
-        // MediaSession permanecen en buffering hasta recibir status.playing === true.
-        setIsPlaying(true);
+        // La intención se refleja con el indicador de conexión; el estado de
+        // reproducción y la MediaSession esperan la confirmación nativa.
+        setIsPlaying(false);
         setIsLoading(true);
         updateNativeMediaState(false);
         setNativeMediaSession(lockScreenMetadata(radio), false);
@@ -241,8 +253,6 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && !activeCandidate.playing) {
             try {
               activeCandidate.play();
-              setIsPlaying(true);
-              updateNativeMediaState(true);
             } catch { /* status listener reports the real failure */ }
           }
         }, 350);
@@ -335,20 +345,21 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
       return;
     }
-    const focusResult = await requestAudioFocus();
-    if (focusResult === "failed" || focusResult === "delayed") {
-      setPlaybackError("Otra aplicación está utilizando el audio");
-      return;
-    }
+    // Audio Focus nativo puede estar temporalmente ocupado; no bloqueamos el
+    // player por ese resultado y dejamos que Expo Audio resuelva la ruta real.
+    await requestAudioFocus();
     playbackIntentRef.current = true;
+    setPlaybackError(null);
     setIsLoading(true);
+    setIsPlaying(false);
     player.play();
-    setIsPlaying(true);
     if (player.playing) {
       setIsLoading(false);
+      setIsPlaying(true);
       updateNativeMediaState(true);
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), true);
     } else {
+      setIsPlaying(false);
       updateNativeMediaState(false);
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
     }
@@ -375,7 +386,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
     AsyncStorage.getItem("radio-background-playback").then((value) => { if (value !== null) setBackgroundPlaybackEnabled(value !== "false"); });
-    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
+    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: "mixWithOthers" }).catch(() => undefined);
     void prefetchFrequentLogos(RADIOS);
 
     const startInitialPlayback = async () => {
@@ -395,7 +406,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, [disposeCurrentPlayer, playRadio, refreshCatalog]);
 
   useEffect(() => {
-    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled }).catch(() => undefined);
+    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled, interruptionMode: "mixWithOthers" }).catch(() => undefined);
   }, [backgroundPlaybackEnabled]);
 
   useEffect(() => {

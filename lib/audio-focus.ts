@@ -10,8 +10,9 @@ export type AudioFocusChangeEvent = {
 };
 
 export const NATIVE_AUDIO_FOCUS_EVENT = "RadioMediaControls.audioFocus";
+export const AUDIO_FOCUS_REQUEST_TIMEOUT_MS = 1200;
 
-type NativeAudioFocusModule = {
+export type NativeAudioFocusModule = {
   requestAudioFocus?: () => Promise<AudioFocusRequestResult>;
   abandonAudioFocus?: () => void;
 };
@@ -22,7 +23,7 @@ function getNativeAudioFocusModule(): NativeAudioFocusModule | null {
 }
 
 export function normalizeAudioFocusRequestResult(result: unknown): AudioFocusRequestResult {
-  return result === "granted" || result === "delayed" || result === "failed" ? result : "failed";
+  return result === "granted" || result === "delayed" || result === "failed" || result === "unavailable" ? result : "failed";
 }
 
 export function normalizeNativeAudioFocusChange(rawChange: number): AudioFocusChange {
@@ -47,16 +48,30 @@ export function addAudioFocusChangeListener(
   });
 }
 
-/** Requests media focus and reports the native Android result. */
-export async function requestAudioFocus(): Promise<AudioFocusRequestResult> {
-  const nativeModule = getNativeAudioFocusModule();
+/** Requests media focus from an injected module so the timeout is deterministic in tests. */
+export async function requestAudioFocusFromModule(
+  nativeModule: NativeAudioFocusModule | null | undefined,
+  timeoutMs = AUDIO_FOCUS_REQUEST_TIMEOUT_MS,
+): Promise<AudioFocusRequestResult> {
   if (!nativeModule?.requestAudioFocus) return "unavailable";
+
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
   try {
-    const result = await nativeModule.requestAudioFocus();
+    const timeout = new Promise<AudioFocusRequestResult>((resolve) => {
+      timeoutHandle = setTimeout(() => resolve("unavailable"), timeoutMs);
+    });
+    const result = await Promise.race([nativeModule.requestAudioFocus(), timeout]);
     return normalizeAudioFocusRequestResult(result);
   } catch {
     return "failed";
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
   }
+}
+
+/** Requests media focus and reports the native Android result. */
+export async function requestAudioFocus(): Promise<AudioFocusRequestResult> {
+  return requestAudioFocusFromModule(getNativeAudioFocusModule());
 }
 
 export function abandonAudioFocus(): void {

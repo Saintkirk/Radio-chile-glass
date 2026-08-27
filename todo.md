@@ -1568,4 +1568,11 @@
 - [x] Mantener `isLoading` hasta confirmar reproducción o error del stream
 - [x] Añadir pruebas para foco denegado, foco diferido y buffering confirmado
 - [x] Validar TypeScript, Vitest y lint; guardar checkpoint
-- [ ] Generar y entregar APK Android actualizada mediante el workflow nativo
+- [x] Generar y entregar APK Android actualizada mediante el workflow nativo
+
+## Regresión: emisoras no reproducen en APK
+- [ ] Inspeccionar logs y ciclo de creación/reproducción de `expo-audio`
+- [ ] Validar URLs de streaming y compatibilidad Android
+- [ ] Diagnosticar Audio Focus, buffering y autoplay
+- [ ] Corregir el flujo y añadir regresiones automatizadas
+- [ ] Validar y generar APK corregida si procede

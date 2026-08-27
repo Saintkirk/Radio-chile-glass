@@ -15,6 +15,17 @@ export function playbackStatus(isLoading: boolean, isPlaying: boolean): "connect
   return isPlaying ? "playing" : "ready";
 }
 
+export type PlaybackStatusSnapshot = {
+  playing?: boolean;
+  isLoaded?: boolean;
+  isBuffering?: boolean;
+};
+
+/** Only finish the connection state after the native player is ready and audible. */
+export function isPlaybackConfirmed(status: PlaybackStatusSnapshot): boolean {
+  return status.playing === true && status.isLoaded === true && status.isBuffering !== true;
+}
+
 export const MAX_PLAYBACK_RETRIES = 3;
 
 export function isCurrentPlaybackRequest(requestId: number, currentRequestId: number): boolean {
