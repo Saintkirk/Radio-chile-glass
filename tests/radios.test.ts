@@ -35,7 +35,13 @@ describe("catálogo de radios chilenas", () => {
 
   it("mantiene una selección amplia de emisoras destacadas para Inicio", () => {
     expect(RADIOS.filter((radio) => radio.featured).length).toBeGreaterThanOrEqual(15);
-    expect(RADIOS.filter((radio) => radio.featured && radio.favicon).length).toBeGreaterThanOrEqual(12);
+    expect(RADIOS.filter((radio) => radio.featured && radio.favicon).length).toBeGreaterThanOrEqual(15);
+  });
+
+  it("entrega portada para cada emisora editorial destacada", () => {
+    const featured = RADIOS.filter((radio) => radio.featured);
+    expect(featured.length).toBeGreaterThan(0);
+    featured.forEach((radio) => expect(radio.favicon, radio.id).toMatch(/^https?:\/\//));
   });
 
   it("incluye emisoras adicionales verificadas de Santiago", () => {
