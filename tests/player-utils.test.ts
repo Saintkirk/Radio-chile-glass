@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, nearestCarouselSlot, playbackHandoff, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, spinLandingIndex, toggleFavoriteId, wrapCarouselIndex } from "../lib/player-utils";
+import { adjacentPlayableRadioIndex, adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isLockScreenAudioCandidate, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, nearestCarouselSlot, playbackHandoff, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, spinLandingIndex, toggleFavoriteId, wrapCarouselIndex } from "../lib/player-utils";
 
 const radio = {
   id: "fmlatina",
@@ -51,6 +51,17 @@ describe("player interaction utilities", () => {
     expect(adjacentRadioIndex(4, 0, -1)).toBe(3);
     expect(adjacentRadioIndex(4, 3, 1)).toBe(0);
     expect(adjacentRadioIndex(0, 0, 1)).toBe(-1);
+  });
+
+  it("skips known non-audio stations from lock-screen transport controls", () => {
+    const catalog = [{ id: "cooperativa" }, { id: "13c" }, { id: "la-clave" }, { id: "fmlatina" }];
+    expect(isLockScreenAudioCandidate("cooperativa")).toBe(true);
+    expect(isLockScreenAudioCandidate("13c")).toBe(false);
+    expect(isLockScreenAudioCandidate("la-clave")).toBe(false);
+    expect(isLockScreenAudioCandidate("remote-abc-12")).toBe(false);
+    expect(adjacentPlayableRadioIndex(catalog, 0, 1)).toBe(3);
+    expect(adjacentPlayableRadioIndex(catalog, 3, -1)).toBe(0);
+    expect(adjacentPlayableRadioIndex(catalog, 1, 1)).toBe(3);
   });
 
   it("uses one handoff decision for route, card, and mini-player starts", () => {

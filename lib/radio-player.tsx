@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
+import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
 
@@ -42,6 +42,7 @@ type PlayerContextValue = {
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 const LAST_RADIO_KEY = "radio-last-played-id";
 const AUDIO_CROSSFADE_MS = 260;
+const FAILED_RADIO_COOLDOWN_MS = 5 * 60 * 1000;
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
@@ -67,6 +68,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const autoplayStartedRef = useRef(false);
   const playbackIntentRef = useRef(false);
   const currentRadioRef = useRef<Radio | null>(null);
+  const failedRadioUntilRef = useRef(new Map<string, number>());
 
   const cleanupCrossfadeOutgoing = useCallback((except: RadioAudioPlayer | null = null) => {
     const outgoing = crossfadeOutgoingRef.current;
@@ -173,7 +175,6 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       crossfadeTimerRef.current = null;
     }
     cleanupCrossfadeOutgoing();
-    const outgoingRadio = currentRadioRef.current;
     const outgoingPlayer = detachCurrentPlayerForCrossfade();
     // Stop the old stream before opening the new one. A live radio must never
     // leave two audible players during the handoff; the paused instance remains
@@ -186,6 +187,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       setNativeMediaSession(lockScreenMetadata(radio), false);
     }
     resumeAfterFocusGainRef.current = false;
+    failedRadioUntilRef.current.delete(radio.id);
     currentRadioRef.current = radio;
     setCurrentRadio(radio);
     AsyncStorage.setItem(LAST_RADIO_KEY, radio.id).catch(() => undefined);
@@ -222,6 +224,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         }
         playerRef.current = candidate;
         syncLockScreenControls(candidate, radio, backgroundPlaybackEnabled, false);
+        let nativePlaybackConfirmed = false;
         playerStatusSubscriptionRef.current = candidate.addListener("playbackStatusUpdate", (status) => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
           const confirmed = isPlaybackConfirmed(status);
@@ -229,6 +232,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           // buffer. Solo ese estado confirmado termina la conexión y actualiza
           // la MediaSession como reproduciendo.
           if (confirmed) {
+            nativePlaybackConfirmed = true;
+            failedRadioUntilRef.current.delete(radio.id);
             setIsPlaying(true);
             updateNativeMediaState(true);
           } else if (!status.playing && !status.isBuffering && !playbackIntentRef.current) {
@@ -261,38 +266,33 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         if (replayTimeoutRef.current) clearTimeout(replayTimeoutRef.current);
         replayTimeoutRef.current = setTimeout(() => {
           replayTimeoutRef.current = null;
-          if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && !activeCandidate.playing) {
+          if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && playbackIntentRef.current && !nativePlaybackConfirmed) {
             try {
               activeCandidate.play();
             } catch { /* status listener reports the real failure */ }
           }
         }, 350);
         startupTimeoutRef.current = setTimeout(() => {
-          if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
+          if (!isCurrentPlaybackRequest(requestId, playRequestRef.current) || !playbackIntentRef.current || nativePlaybackConfirmed) return;
           startupTimeoutRef.current = null;
           playbackIntentRef.current = false;
           setIsPlaying(false);
           setIsLoading(false);
+          failedRadioUntilRef.current.set(radio.id, Date.now() + FAILED_RADIO_COOLDOWN_MS);
           setPlaybackError(`No se pudo iniciar el audio de ${radio.name}`);
           try { candidate?.pause(); } catch { /* no-op */ }
           try { candidate?.remove(); } catch { /* no-op */ }
-          if (outgoingPlayer && outgoingRadio) {
-            try { outgoingPlayer.volume = 1; outgoingPlayer.play(); } catch { /* no-op */ }
-            playerRef.current = outgoingPlayer;
-            currentRadioRef.current = outgoingRadio;
-            setCurrentRadio(outgoingRadio);
-            setIsPlaying(true);
-            updateNativeMediaState(true);
-            setNativeMediaSession(lockScreenMetadata(outgoingRadio), true);
-          } else {
-            playerRef.current = null;
-          }
+          // Do not silently restore the old stream: it was already detached and
+          // may have been reclaimed by Android. Leaving the session paused with an
+          // explicit error is safer than reporting a dead station as playing.
+          if (outgoingPlayer) pauseAndRemovePlayer(outgoingPlayer);
+          playerRef.current = null;
+          currentRadioRef.current = radio;
+          setCurrentRadio(radio);
           // Mantener la MediaSession visible en estado pausado permite que el usuario
           // intente otra emisora desde la notificación sin cerrar la actividad.
-          if (!outgoingPlayer || !outgoingRadio) {
-            setNativeMediaSession(lockScreenMetadata(radio), false);
-            abandonAudioFocus();
-          }
+          setNativeMediaSession(lockScreenMetadata(radio), false);
+          abandonAudioFocus();
         }, 8000);
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
@@ -317,20 +317,16 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
         if (attempt === MAX_PLAYBACK_RETRIES) {
           playbackIntentRef.current = false;
+          failedRadioUntilRef.current.set(radio.id, Date.now() + FAILED_RADIO_COOLDOWN_MS);
           setPlaybackError(`No se pudo conectar con ${radio.name}`);
           setIsLoading(false);
-          if (outgoingPlayer && outgoingRadio) {
-            try { outgoingPlayer.volume = 1; outgoingPlayer.play(); } catch { /* no-op */ }
-            playerRef.current = outgoingPlayer;
-            currentRadioRef.current = outgoingRadio;
-            setCurrentRadio(outgoingRadio);
-            setIsPlaying(true);
-            updateNativeMediaState(true);
-            setNativeMediaSession(lockScreenMetadata(outgoingRadio), true);
-          } else {
-            setIsPlaying(false);
-            setNativeMediaSession(lockScreenMetadata(radio), false);
-          }
+          if (outgoingPlayer) pauseAndRemovePlayer(outgoingPlayer);
+          playerRef.current = null;
+          currentRadioRef.current = radio;
+          setCurrentRadio(radio);
+          setIsPlaying(false);
+          setNativeMediaSession(lockScreenMetadata(radio), false);
+          abandonAudioFocus();
         }
       }
     }
@@ -340,7 +336,18 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     const sourceId = fromId ?? currentRadio?.id;
     const currentIndex = radios.findIndex((radio) => radio.id === sourceId);
     if (currentIndex < 0 || radios.length < 2) return;
-    const nextIndex = (currentIndex + direction + radios.length) % radios.length;
+    const now = Date.now();
+    const nextIndex = adjacentPlayableRadioIndex(radios, currentIndex, direction, (candidate) => {
+      if (!isLockScreenAudioCandidate(candidate.id)) return false;
+      const blockedUntil = failedRadioUntilRef.current.get(candidate.id);
+      if (!blockedUntil) return true;
+      if (blockedUntil <= now) {
+        failedRadioUntilRef.current.delete(candidate.id);
+        return true;
+      }
+      return false;
+    });
+    if (nextIndex < 0) return;
     await playRadio(radios[nextIndex], true);
   }, [currentRadio?.id, playRadio, radios]);
 
@@ -373,17 +380,35 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     setPlaybackError(null);
     setIsLoading(true);
     setIsPlaying(false);
-    player.play();
-    if (player.playing) {
+    try {
+      player.play();
+    } catch {
+      playbackIntentRef.current = false;
       setIsLoading(false);
-      setIsPlaying(true);
-      updateNativeMediaState(true);
-      if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), true);
-    } else {
       setIsPlaying(false);
+      setPlaybackError(`No se pudo reanudar el audio de ${currentRadio?.name ?? "la emisora"}`);
       updateNativeMediaState(false);
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
+      return;
     }
+    if (startupTimeoutRef.current) clearTimeout(startupTimeoutRef.current);
+    const resumeRequestId = requestId;
+    startupTimeoutRef.current = setTimeout(() => {
+      startupTimeoutRef.current = null;
+      if (resumeRequestId !== playRequestRef.current || playerRef.current !== player || !playbackIntentRef.current) return;
+      playbackIntentRef.current = false;
+      setIsLoading(false);
+      setIsPlaying(false);
+      setPlaybackError(`No se pudo reanudar el audio de ${currentRadio?.name ?? "la emisora"}`);
+      updateNativeMediaState(false);
+      if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
+    }, 8000);
+    // The playbackStatusUpdate listener is the only source of truth for an
+    // audible state. `player.playing` can flip before the stream is loaded.
+    setIsPlaying(false);
+    setIsLoading(true);
+    updateNativeMediaState(false);
+    if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
   }, [currentRadio, playRadio]);
 
   const togglePlay = useCallback(() => {
@@ -402,7 +427,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     // ICY/now-playing puede resolver después de que el usuario cambió de
     // emisora. Nunca permitas que esa respuesta tardía reviva el título,
     // logo o estado de la radio anterior en la pantalla bloqueada.
-    if (metadata.radioId && !isCurrentRadioId(currentRadioRef.current?.id, metadata.radioId)) return;
+    if (!metadata.radioId || !isCurrentRadioId(currentRadioRef.current?.id, metadata.radioId)) return;
     try { playerRef.current?.updateLockScreenMetadata(metadata); } catch { /* no-op */ }
     updateNativeMediaMetadata(metadata);
   }, [backgroundPlaybackEnabled]);

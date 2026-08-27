@@ -1,8 +1,8 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { memo, useEffect, useState } from "react";
-import { prefetchLogo } from "@/lib/logo-cache";
+import { memo, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { prefetchLogo } from "@/lib/logo-cache";
 import type { Radio } from "@/lib/radios";
 
 type StationLogoProps = { radio: Pick<Radio, "id" | "favicon" | "initials" | "accent">; size?: number; radius?: number };
@@ -34,17 +34,30 @@ const LOCAL_LOGOS: Record<string, number> = {
 
 export const StationLogo = memo(function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
   const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    setFailed(false);
-    if (radio.favicon) void prefetchLogo(radio.favicon);
-  }, [radio.favicon, radio.id]);
+  const sourceKey = `${radio.id}:${radio.favicon ?? ""}`;
+  const currentSourceKeyRef = useRef(sourceKey);
   const hasLocalLogo = Boolean(LOCAL_LOGOS[radio.id]);
+
+  useEffect(() => {
+    currentSourceKeyRef.current = sourceKey;
+    setFailed(false);
+    if (radio.favicon && !hasLocalLogo) void prefetchLogo(radio.favicon);
+  }, [hasLocalLogo, radio.favicon, radio.id, sourceKey]);
+
   const showLogo = Boolean((hasLocalLogo || radio.favicon) && !failed);
+  const fallback = (
+    <LinearGradient colors={[`${radio.accent}66`, "#181818"]} style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}>
+      <View style={[styles.glassOrb, { width: size * 0.7, height: size * 0.7, borderRadius: size }]} />
+      <Text style={[styles.initials, { fontSize: Math.max(13, size * 0.28) }]}>{radio.initials}</Text>
+    </LinearGradient>
+  );
+
   return (
-    <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}> 
-      {showLogo ? (
+    <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}>
+      {fallback}
+      {showLogo && (
         <Image
-          key={radio.id}
+          key={sourceKey}
           source={LOCAL_LOGOS[radio.id] ?? { uri: radio.favicon }}
           style={[styles.image, { width: size, height: size, borderRadius: radius }]}
           contentFit="contain"
@@ -52,22 +65,25 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
           cachePolicy="memory-disk"
           transition={hasLocalLogo ? 0 : 120}
           onLoad={(event) => {
+            if (currentSourceKeyRef.current !== sourceKey) return;
             const sourceWidth = event.source?.width ?? 0;
             const sourceHeight = event.source?.height ?? 0;
             const smallestSide = Math.min(sourceWidth, sourceHeight);
             if (!hasLocalLogo && size >= 120 && smallestSide > 0 && smallestSide < size * 1.35) setFailed(true);
           }}
-          onError={() => setFailed(true)}
+          onError={() => {
+            if (currentSourceKeyRef.current === sourceKey) setFailed(true);
+          }}
         />
-      ) : (
-        <LinearGradient colors={[`${radio.accent}66`, "#181818"]} style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}>
-          <View style={[styles.glassOrb, { width: size * 0.7, height: size * 0.7, borderRadius: size }]} />
-          <Text style={[styles.initials, { fontSize: Math.max(13, size * 0.28) }]}>{radio.initials}</Text>
-        </LinearGradient>
       )}
     </View>
   );
 });
 
-const styles = StyleSheet.create({ container: { overflow: "hidden", backgroundColor: "#181818", alignItems: "center", justifyContent: "center" }, image: { backgroundColor: "#F4F4F2" }, fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" }, glassOrb: { position: "absolute", right: -sizeOffset(), top: -sizeOffset(), backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" }, initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 }, });
-function sizeOffset() { return 8; }
+const styles = StyleSheet.create({
+  container: { overflow: "hidden", backgroundColor: "#181818", alignItems: "center", justifyContent: "center" },
+  image: { ...StyleSheet.absoluteFillObject, backgroundColor: "transparent" },
+  fallback: { alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  glassOrb: { position: "absolute", right: -8, top: -8, backgroundColor: "#FFFFFF12", borderWidth: 1, borderColor: "#FFFFFF18" },
+  initials: { color: "#F5F3EE", fontWeight: "800", letterSpacing: 0.5 },
+});

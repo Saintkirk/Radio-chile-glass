@@ -69,6 +69,26 @@ export function adjacentRadioIndex(length: number, currentIndex: number, directi
   return (currentIndex + direction + length) % length;
 }
 
+/** Known video/HLS entries are kept in the catalogue but skipped by transport controls. */
+export function isLockScreenAudioCandidate(radioId: string): boolean {
+  return !radioId.startsWith("remote-") && radioId !== "13c" && radioId !== "la-clave";
+}
+
+/** Finds the next transport-safe station without landing on a known non-audio entry. */
+export function adjacentPlayableRadioIndex(
+  radios: ReadonlyArray<{ id: string }>,
+  currentIndex: number,
+  direction: -1 | 1,
+  isCandidate: (radio: { id: string }) => boolean = (radio) => isLockScreenAudioCandidate(radio.id),
+): number {
+  if (radios.length < 2 || currentIndex < 0 || currentIndex >= radios.length) return -1;
+  for (let step = 1; step <= radios.length; step += 1) {
+    const index = (currentIndex + direction * step + radios.length * 2) % radios.length;
+    if (isCandidate(radios[index])) return index;
+  }
+  return -1;
+}
+
 /** Keeps a carousel index inside the available catalog, or returns -1 when empty/invalid. */
 export function safeRadioIndex(length: number, currentIndex: number): number {
   if (length < 1 || !Number.isFinite(currentIndex)) return -1;

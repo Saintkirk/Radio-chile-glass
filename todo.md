@@ -1605,4 +1605,11 @@
 - [x] Estabilizar restauración al cerrar y reabrir la app sin play manual
 - [x] Garantizar una sola MediaSession activa en notificación y pantalla de bloqueo
 - [x] Añadir pruebas de concurrencia, restauración y navegación compartida
-- [ ] Validar preview, prebuild y generar APK corregida
+- [x] Validar preview, prebuild y generar APK corregida
+
+## Regresión reportada: botón superior, carátulas y streams en pantalla bloqueada
+- [x] Corregir el botón superior de cierre/retroceso del reproductor
+- [x] Estabilizar carga, identidad y fallback de carátulas durante cambios rápidos
+- [x] Evitar que una emisora sin audio real quede publicada como reproduciendo desde pantalla bloqueada
+- [x] Añadir pruebas de regresión para navegación, artwork y cambio nativo de emisora
+- [ ] Validar build Android y entregar APK corregida
