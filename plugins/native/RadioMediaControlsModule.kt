@@ -67,6 +67,37 @@ class RadioMediaControlsModule(
 
   override fun getName(): String = NAME
 
+  override fun invalidate() {
+    executor.shutdownNow()
+    abandonAudioFocus()
+    active = false
+    lastArtwork = null
+    lastArtworkUrl = null
+    lastArtworkKey = ""
+    artworkGeneration += 1
+    if (mediaSessionDelegate.isInitialized()) {
+      val ownsSession = RadioMediaSessionRegistry.releaseIfOwner(mediaSession)
+      if (ownsSession) {
+        try {
+          mediaSession.isActive = false
+          mediaSession.setPlaybackState(
+            PlaybackStateCompat.Builder()
+              .setActions(0)
+              .setState(PlaybackStateCompat.STATE_NONE, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
+              .build(),
+          )
+          mediaSession.setMetadata(MediaMetadataCompat.Builder().build())
+          mediaSession.release()
+        } catch (_: Exception) {
+          // React Native may already be tearing down the host activity.
+        }
+      }
+    }
+    try { reactContext.stopService(android.content.Intent(reactContext, RadioKeepAliveService::class.java)) } catch (_: Exception) { /* no-op */ }
+    NotificationManagerCompat.from(reactContext).cancel(NOTIFICATION_ID)
+    super.invalidate()
+  }
+
   @ReactMethod
   fun requestAudioFocus(promise: Promise) {
     try {
@@ -263,27 +294,49 @@ class RadioMediaControlsModule(
     if (artworkUrl.isNullOrBlank()) return
     executor.execute {
       try {
-        val connection = (URL(artworkUrl).openConnection() as HttpURLConnection).apply {
-          connectTimeout = 5000
-          readTimeout = 5000
-          instanceFollowRedirects = true
-        }
-        connection.inputStream.use { input ->
-          val bitmap = BitmapFactory.decodeStream(input)
-          if (bitmap != null && active && artworkUrl == lastArtworkUrl && artworkKey == lastArtworkKey && generation == artworkGeneration) {
-            lastArtwork = bitmap
-            reactContext.runOnUiQueueThread {
-              if (active && artworkKey == lastArtworkKey && generation == artworkGeneration) {
-                updateMetadata(lastTitle, lastArtist, artworkUrl, lastRadioId)
-              }
+        val bitmap = decodeArtworkBounded(artworkUrl)
+        if (bitmap != null && active && artworkUrl == lastArtworkUrl && artworkKey == lastArtworkKey && generation == artworkGeneration) {
+          lastArtwork = bitmap
+          reactContext.runOnUiQueueThread {
+            if (active && artworkKey == lastArtworkKey && generation == artworkGeneration) {
+              updateMetadata(lastTitle, lastArtist, artworkUrl, lastRadioId)
             }
           }
         }
-        connection.disconnect()
       } catch (_: Exception) {
         // The notification remains usable with the application icon.
       }
     }
+  }
+
+  private fun decodeArtworkBounded(artworkUrl: String): Bitmap? {
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    openArtworkConnection(artworkUrl).use { connection ->
+      connection.inputStream.use { input -> BitmapFactory.decodeStream(input, null, bounds) }
+    }
+    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+
+    val options = BitmapFactory.Options().apply {
+      inSampleSize = calculateArtworkSample(bounds.outWidth, bounds.outHeight)
+      inPreferredConfig = Bitmap.Config.ARGB_8888
+    }
+    openArtworkConnection(artworkUrl).use { connection ->
+      connection.inputStream.use { input -> BitmapFactory.decodeStream(input, null, options) }
+    }
+  }
+
+  private fun openArtworkConnection(artworkUrl: String) =
+    (URL(artworkUrl).openConnection() as HttpURLConnection).apply {
+      connectTimeout = 5000
+      readTimeout = 5000
+      instanceFollowRedirects = true
+      useCaches = true
+    }
+
+  private fun calculateArtworkSample(width: Int, height: Int): Int {
+    var sample = 1
+    while (width / sample > MAX_ARTWORK_EDGE || height / sample > MAX_ARTWORK_EDGE) sample *= 2
+    return sample
   }
 
   private fun artworkKey(radioId: String?, artworkUrl: String?): String =
@@ -357,6 +410,7 @@ class RadioMediaControlsModule(
     private const val SESSION_TAG = "RadioChileGlass"
     private const val CHANNEL_ID = "radio_chile_glass_playback"
     private const val NOTIFICATION_ID = 9133
+    private const val MAX_ARTWORK_EDGE = 256
   }
 }
 

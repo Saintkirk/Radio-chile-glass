@@ -1630,4 +1630,22 @@
 - [x] Mantener la portada actual visible mientras carga la siguiente
 - [x] Precargar y superponer la próxima portada sin desmontar el artwork activo
 - [x] Evitar que el cambio de emisora reinicie todas las carátulas de la tarjeta
-- [ ] Añadir prueba de transición persistente y generar APK corregida
+- [x] Añadir prueba de transición persistente y generar APK corregida
+
+## Regresión observada en video: retorno visual del logo anterior
+- [x] Documentar la secuencia de movimiento y retorno del logo en el video
+- [x] Evitar que un callback o estado anterior vuelva a pintar el logo viejo
+- [x] Mantener una transición direccional y estable entre carátulas
+- [x] Añadir prueba de identidad monotónica sin generar APK
+
+## Revisión senior de optimización Android
+- [x] Auditar arquitectura, ciclo de vida y falencias eventuales
+- [x] Optimizar memoria de imágenes, listas y animaciones
+- [x] Reforzar audio focus, MediaSession y recuperación en segundo plano
+- [ ] Mejorar red, timeouts, fallbacks, observabilidad y accesibilidad
+- [x] Añadir regresiones y ejecutar TypeScript, Vitest y lint
+- [ ] Revisar cambios finales sin generar APK
+
+## Sincronización del checkpoint actual
+- [ ] Sincronizar la rama local con el repositorio remoto y resolver divergencias
+- [ ] Guardar y enviar el checkpoint actual sin generar APK

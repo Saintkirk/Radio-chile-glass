@@ -436,7 +436,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     loadFavoriteIds().then((stored) => { if (stored.length > 0) setFavorites(stored); }).catch(() => undefined);
     AsyncStorage.getItem("radio-background-playback").then((value) => { if (value !== null) setBackgroundPlaybackEnabled(value !== "false"); });
-    const audioModeReady = setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: "mixWithOthers" }).catch(() => undefined);
+    const audioModeReady = setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: "doNotMix" }).catch(() => undefined);
     void prefetchFrequentLogos(RADIOS);
 
     const startInitialPlayback = async () => {
@@ -457,7 +457,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, [disposeCurrentPlayer, playRadio, refreshCatalog]);
 
   useEffect(() => {
-    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled, interruptionMode: "mixWithOthers" }).catch(() => undefined);
+    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: backgroundPlaybackEnabled, interruptionMode: "doNotMix" }).catch(() => undefined);
   }, [backgroundPlaybackEnabled]);
 
   useEffect(() => {
@@ -475,20 +475,15 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       } else if (action === "restore") {
         player.volume = 1;
         if (resumeAfterFocusGainRef.current && !player.playing) {
-          try {
-            player.play();
-            setIsPlaying(true);
-            updateNativeMediaState(true);
-            if (currentRadioRef.current) setNativeMediaSession(lockScreenMetadata(currentRadioRef.current), true);
-          } catch {
-            // The native status listener will keep the UI paused if playback cannot resume.
-          }
+          // Reuse the serialized resume path. The native status listener, not the
+          // focus callback, is the only authority allowed to publish PLAYING.
+          void setPlayingState(true);
         }
         resumeAfterFocusGainRef.current = false;
       }
     });
     return () => subscription.remove();
-  }, [isPlaying]);
+  }, [isPlaying, setPlayingState]);
 
   useEffect(() => {
     const subscription = subscribeToNativeMediaActions((action) => {

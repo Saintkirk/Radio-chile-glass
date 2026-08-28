@@ -36,3 +36,13 @@ describe("ventana de precarga de portadas", () => {
     expect(getLogoPrefetchUris([{ id: "sin-logo" }], 0)).toEqual([]);
   });
 });
+
+
+describe("identidad monotónica del artwork", () => {
+  it("solo permite promover el callback de la emisora vigente", async () => {
+    const { canCommitLogo } = await import("../lib/logo-transition");
+
+    expect(canCommitLogo("radio-nueva: nueva.png", "radio-anterior: anterior.png")).toBe(false);
+    expect(canCommitLogo("radio-nueva: nueva.png", "radio-nueva: nueva.png")).toBe(true);
+  });
+});

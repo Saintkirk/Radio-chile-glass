@@ -324,7 +324,9 @@ export function CoverFlowCarousel({
             if (!radio) return null;
             return (
               <SlotCard
-                key={`${radio.id}-${slot}`}
+                // El slot representa una posición física del tambor; su key no debe
+                // depender de la emisora, o React desmonta todas las carátulas al cambiar índice.
+                key={`slot-${slot}`}
                 radio={radio}
                 slot={slot}
                 wheelOffset={wheelOffset}
@@ -332,7 +334,9 @@ export function CoverFlowCarousel({
                 reduceMotion={reduceMotion}
                 isCenter={slot === 0}
                 isPlaying={isPlaying}
-                isLoading={isLoading && currentRadioId === radio.id}
+                // Durante el handoff el centro ya representa la próxima emisora,
+                // aunque el provider aún conserve por un instante el id anterior.
+                isLoading={isLoading && (slot === 0 || currentRadioId === radio.id)}
                 currentRadioId={currentRadioId}
                 onPress={() => selectSlot(slot)}
                 onPlay={onPlay}

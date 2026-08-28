@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { memo, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { prefetchLogo } from "@/lib/logo-cache";
+import { canCommitLogo } from "@/lib/logo-transition";
 import type { Radio } from "@/lib/radios";
 
 type StationLogoProps = { radio: Pick<Radio, "id" | "favicon" | "initials" | "accent">; size?: number; radius?: number };
@@ -86,12 +87,12 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
           cachePolicy="memory-disk"
           transition={hasLocalLogo ? 0 : 90}
           onLoad={() => {
-            if (currentSourceKeyRef.current === sourceKey && source) {
+            if (canCommitLogo(currentSourceKeyRef.current, sourceKey) && source) {
               setDisplayedLogo({ key: sourceKey, source });
             }
           }}
           onError={() => {
-            if (currentSourceKeyRef.current === sourceKey) setFailed(true);
+            if (canCommitLogo(currentSourceKeyRef.current, sourceKey)) setFailed(true);
           }}
         />
       )}
