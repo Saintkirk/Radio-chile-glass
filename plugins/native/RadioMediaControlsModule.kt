@@ -320,7 +320,7 @@ class RadioMediaControlsModule(
       inSampleSize = calculateArtworkSample(bounds.outWidth, bounds.outHeight)
       inPreferredConfig = Bitmap.Config.ARGB_8888
     }
-    openArtworkConnection(artworkUrl).use { connection ->
+    return openArtworkConnection(artworkUrl).use { connection ->
       connection.inputStream.use { input -> BitmapFactory.decodeStream(input, null, options) }
     }
   }
