@@ -1647,5 +1647,5 @@
 - [ ] Revisar cambios finales sin generar APK
 
 ## Sincronización del checkpoint actual
-- [ ] Sincronizar la rama local con el repositorio remoto y resolver divergencias
-- [ ] Guardar y enviar el checkpoint actual sin generar APK
+- [x] Sincronizar la rama local con el repositorio remoto y resolver divergencias
+- [x] Preservar y enviar el estado actual a GitHub sin generar APK; checkpoint administrado pendiente por timeout
