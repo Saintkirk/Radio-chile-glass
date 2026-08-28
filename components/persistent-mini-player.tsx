@@ -61,7 +61,14 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
   return (
     <Animated.View ref={containerRef} collapsable={false} style={[styles.container, { backgroundColor: lightMode ? "#FFFFFFF5" : "#171D2BF7", borderColor: lightMode ? "#D9E0EC" : "#FFFFFF22", bottom, opacity: progress, transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}>
       <Pressable onPress={() => openDetail(displayRadio)} accessibilityRole="button" accessibilityLabel={`Abrir reproductor de ${displayRadio.name}`} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
-        <View ref={logoRef} collapsable={false}><StationLogo radio={displayRadio} size={48} radius={14} /></View>
+        <View ref={logoRef} collapsable={false}>
+          <StationLogo
+            key={`mini-logo-${displayRadio.id}:${displayRadio.favicon ?? ""}`}
+            radio={displayRadio}
+            size={48}
+            radius={14}
+          />
+        </View>
         <View style={styles.info}><Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{displayRadio.name}</Text>{isLoading ? <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text> : playbackError ? <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text> : <NowPlayingLabel streamUrl={displayRadio.streamUrl} compact />}</View>
         <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : displayRadio.accent} barCount={5} compact />
       </Pressable>

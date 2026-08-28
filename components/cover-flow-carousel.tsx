@@ -113,7 +113,12 @@ const SlotCard = memo(function SlotCard({
         style={styles.cardPressable}
       >
         <View style={[styles.cardFrame, isCenter && styles.centerCardFrame, { backgroundColor: `${radio.accent}32` }]}>
-          <StationLogo radio={radio} size={CARD_SIZE - 4} radius={26} />
+          <StationLogo
+            key={`slot-logo-${radio.id}:${radio.favicon ?? ""}`}
+            radio={radio}
+            size={CARD_SIZE - 4}
+            radius={26}
+          />
           <Animated.View style={[styles.cardShine, centerGlow, nonInteractiveStyle]} />
           {isCenter && <View style={[styles.centerBorder, { borderColor: `${radio.accent}A8` }]} pointerEvents="none" />}
           {isCenter && (
@@ -129,7 +134,12 @@ const SlotCard = memo(function SlotCard({
           )}
         </View>
         <View style={[styles.reflection, nonInteractiveStyle]}>
-          <StationLogo radio={radio} size={CARD_SIZE - 22} radius={22} />
+          <StationLogo
+            key={`slot-reflection-${radio.id}:${radio.favicon ?? ""}`}
+            radio={radio}
+            size={CARD_SIZE - 22}
+            radius={22}
+          />
           <View style={styles.reflectionFadeStrong} />
           <View style={styles.reflectionFadeSoft} />
         </View>

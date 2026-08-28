@@ -1665,4 +1665,15 @@
 
 ## Corrección de inferencia Kotlin
 - [x] Añadir tipos explícitos a las lambdas `use` de la conexión HTTP
-- [ ] Validar, crear commit, hacer push y lanzar nuevamente el workflow Android
+- [x] Validar, crear commit, hacer push y lanzar nuevamente el workflow Android
+
+## Estabilización de cambio de emisora
+- [x] Eliminar el salto visual al logo anterior durante el cambio de emisora
+- [x] Estabilizar la tarjeta, el carrusel y los estados de carga durante la transición
+- [x] Validar que la emisora seleccionada, el artwork y el estado de reproducción permanezcan alineados
+
+## Refactor StationLogo sin parpadeos
+- [x] Separar identidad de estación, fuente visual y estado de carga
+- [x] Mantener fallback de la nueva emisora sin mostrar el logo anterior
+- [x] Ignorar callbacks tardíos y estabilizar errores/carga de imágenes
+- [x] Añadir regresiones y validar TypeScript, Vitest y lint

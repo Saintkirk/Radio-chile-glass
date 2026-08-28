@@ -65,7 +65,12 @@ export function ItunesRadioCard({
       >
         <View style={[styles.coverStage, { backgroundColor: `${radio.accent}18` }]}>
           <View style={[styles.coverBack, { borderColor: `${radio.accent}55` }]} />
-          <StationLogo radio={radio} size={54} radius={16} />
+          <StationLogo
+            key={`list-logo-${radio.id}:${radio.favicon ?? ""}`}
+            radio={radio}
+            size={54}
+            radius={16}
+          />
         </View>
         <View style={styles.info}>
           <Text style={[styles.name, lightMode && styles.nameLight]} numberOfLines={1}>{radio.name}</Text>

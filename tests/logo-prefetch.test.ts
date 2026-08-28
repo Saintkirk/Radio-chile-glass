@@ -40,9 +40,14 @@ describe("ventana de precarga de portadas", () => {
 
 describe("identidad monotónica del artwork", () => {
   it("solo permite promover el callback de la emisora vigente", async () => {
-    const { canCommitLogo } = await import("../lib/logo-transition");
+    const { canCommitLogo, getLogoSourceKey } = await import("../lib/logo-transition");
+    const currentKey = getLogoSourceKey("radio-nueva", "nueva.png");
+    const previousKey = getLogoSourceKey("radio-anterior", "anterior.png");
 
-    expect(canCommitLogo("radio-nueva: nueva.png", "radio-anterior: anterior.png")).toBe(false);
-    expect(canCommitLogo("radio-nueva: nueva.png", "radio-nueva: nueva.png")).toBe(true);
+    expect(currentKey).toBe("radio-nueva:nueva.png");
+    expect(previousKey).toBe("radio-anterior:anterior.png");
+    expect(canCommitLogo(currentKey, previousKey)).toBe(false);
+    expect(canCommitLogo(currentKey, currentKey)).toBe(true);
+    expect(getLogoSourceKey("radio-nueva", "otra-nueva.png")).not.toBe(currentKey);
   });
 });
