@@ -1661,4 +1661,4 @@
 ## Corrección de compilación Kotlin nativa
 - [x] Localizar la causa exacta del error `:app:compileReleaseKotlin`
 - [x] Corregir el puente nativo y validar TypeScript, Vitest y lint
-- [ ] Crear commit y volver a disparar el workflow Android
+- [x] Crear commit y volver a disparar el workflow Android
