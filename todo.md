@@ -1649,3 +1649,11 @@
 ## Sincronización del checkpoint actual
 - [x] Sincronizar la rama local con el repositorio remoto y resolver divergencias
 - [x] Preservar y enviar el estado actual a GitHub sin generar APK; checkpoint administrado pendiente por timeout
+
+## Entrega APK solicitada
+- [ ] Preparar checkpoint de compilación para la APK solicitada
+- [ ] Verificar y entregar el artefacto APK actualizado
+
+## Corrección workflow Gradle
+- [x] Sustituir `cache-cleanup: true` por un valor válido para gradle/actions/setup-gradle@v4
+- [ ] Validar y enviar la corrección del workflow a GitHub
