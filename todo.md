@@ -1662,3 +1662,7 @@
 - [x] Localizar la causa exacta del error `:app:compileReleaseKotlin`
 - [x] Corregir el puente nativo y validar TypeScript, Vitest y lint
 - [x] Crear commit y volver a disparar el workflow Android
+
+## Corrección de inferencia Kotlin
+- [x] Añadir tipos explícitos a las lambdas `use` de la conexión HTTP
+- [ ] Validar, crear commit, hacer push y lanzar nuevamente el workflow Android

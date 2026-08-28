@@ -311,7 +311,7 @@ class RadioMediaControlsModule(
 
   private fun decodeArtworkBounded(artworkUrl: String): Bitmap? {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    openArtworkConnection(artworkUrl).use { connection ->
+    withArtworkConnection(artworkUrl) { connection: HttpURLConnection ->
       connection.inputStream.use { input -> BitmapFactory.decodeStream(input, null, bounds) }
     }
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
@@ -320,12 +320,24 @@ class RadioMediaControlsModule(
       inSampleSize = calculateArtworkSample(bounds.outWidth, bounds.outHeight)
       inPreferredConfig = Bitmap.Config.ARGB_8888
     }
-    return openArtworkConnection(artworkUrl).use { connection ->
+    return withArtworkConnection(artworkUrl) { connection: HttpURLConnection ->
       connection.inputStream.use { input -> BitmapFactory.decodeStream(input, null, options) }
     }
   }
 
-  private fun openArtworkConnection(artworkUrl: String) =
+  private fun <T> withArtworkConnection(
+    artworkUrl: String,
+    block: (HttpURLConnection) -> T,
+  ): T {
+    val connection = openArtworkConnection(artworkUrl)
+    return try {
+      block(connection)
+    } finally {
+      connection.disconnect()
+    }
+  }
+
+  private fun openArtworkConnection(artworkUrl: String): HttpURLConnection =
     (URL(artworkUrl).openConnection() as HttpURLConnection).apply {
       connectTimeout = 5000
       readTimeout = 5000
