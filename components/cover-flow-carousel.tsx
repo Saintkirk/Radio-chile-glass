@@ -257,13 +257,12 @@ export function CoverFlowCarousel({
       awaitingParentSyncRef.current = false;
       return;
     }
-    // Durante el buffering/loading, evitar forzar sincronización que pueda
-    // interrumpir la animación en curso o causar saltos indeseados.
+    // Durante el buffering/loading o selección manual, evitar forzar sincronización
     if (isSpinningRef.current || awaitingParentSyncRef.current || isLoading) return;
     selectedIndexRef.current = safeActiveIndex;
     setSelectedIndex(safeActiveIndex);
     wheelOffset.set(0);
-  }, [safeActiveIndex, wheelOffset, isLoading]);
+  }, [safeActiveIndex, wheelOffset]);
 
   useEffect(() => {
     isMounted.set(true);
@@ -374,24 +373,6 @@ export function CoverFlowCarousel({
           <Pressable onPress={() => selectSlot(1)} disabled={isSpinning} accessibilityRole="button" accessibilityLabel="Next station" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}>
             <IconSymbol name="chevron.right" size={20} color="#F5F3EE" />
           </Pressable>
-        </View>
-
-        <View style={styles.actionRow}>
-          <Pressable
-            onPress={spin}
-            disabled={isSpinning || radios.length < 2}
-            accessibilityRole="button"
-            accessibilityLabel={isSpinning ? "Girando emisoras" : "Girar ruleta"}
-            style={({ pressed }) => [styles.spinButton, isSpinning && styles.spinButtonBusy, pressed && styles.pressed]}
-          >
-            <IconSymbol name="sparkles" size={16} color="#160F14" />
-            <Text style={styles.spinButtonText}>{isSpinning ? "GIRANDO…" : "GIRAR RULETA"}</Text>
-          </Pressable>
-          <View style={styles.dots} accessibilityElementsHidden>
-            <View style={[styles.dot, styles.dotActive]} />
-            <View style={styles.dot} />
-            <View style={styles.dot} />
-          </View>
         </View>
       </View>
     </GestureDetector>
