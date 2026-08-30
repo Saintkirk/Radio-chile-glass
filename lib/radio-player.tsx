@@ -210,15 +210,18 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         // de lo contrario una respuesta nativa incompleta deja todas las radios
         // atrapadas en buffering sin llegar a crear el stream.
         await requestAudioFocus();
-        candidate = createAudioPlayer({
-          uri: radio.streamUrl,
-          headers: {
-            "Icy-MetaData": "1",
-            "User-Agent": "RadioChileGlass/1.0",
+        candidate = createAudioPlayer(
+          {
+            uri: radio.streamUrl,
+            headers: {
+              "Icy-MetaData": "1",
+              "User-Agent": "RadioChileGlass/1.0",
+            },
           },
-          shouldPlay: true,
-          androidImportantForAudioQuality: true,
-        });
+          {
+            downloadFirst: false,
+          }
+        );
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
           candidate.remove();
@@ -475,7 +478,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         player.pause();
         setIsPlaying(false);
         updateNativeMediaState(false);
-      } else if (action === \"duck") {
+      } else if (action === "duck") {
         player.volume = 0.35;
       } else if (action === "restore") {
         player.volume = 1;
