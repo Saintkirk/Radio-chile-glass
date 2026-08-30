@@ -1,47 +1,58 @@
-```ts
-// Example generated .gitignore for TypeScript/React project
+```
+# Expo cache
+.expo/cache/
+
+# Dependencies
 node_modules/
-dist/
-build/
-coverage/
-.nyc_output/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.yarn/
-.pnp/
-.pnp.js
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.next/
-out/
-.nuxt/
-public/
-*.local
-.DS_Store
-Thumbs.db
+.env.*
+
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
+
+# Python
 __pycache__/
 *.pyc
-.pytest_cache/
+*.pyo
+*.pyd
+
+# Build outputs
+dist/
+build/
+*.min.js
+*.min.css
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Testing
 .mypy_cache/
-*.tmp
+.pytest_cache/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Zip files
 *.zip
-*.tar.gz
-*.tar
 *.gz
-*.rar
-*.7z
+*.tar
+*.tgz
 *.bz2
 *.xz
+*.7z
+*.rar
 *.zst
 *.lz4
 *.lzh
@@ -52,6 +63,7 @@ __pycache__/
 *.Z
 *.lz
 *.lzo
+*.tar.gz
 *.tar.bz2
 *.tar.xz
 *.tar.zst

@@ -4,9 +4,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
-import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "@/lib/audio-focus";
-import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "@/lib/radio-media-controls";
+import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, type LockScreenMetadata } from "./player-utils";
+import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "./audio-focus";
+import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "./radio-media-controls";
 
 type RadioAudioPlayer = ReturnType<typeof createAudioPlayer>;
 
@@ -41,7 +41,6 @@ type PlayerContextValue = {
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 const LAST_RADIO_KEY = "radio-last-played-id";
-const AUDIO_CROSSFADE_MS = 260;
 const FAILED_RADIO_COOLDOWN_MS = 5 * 60 * 1000;
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
@@ -220,6 +219,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           },
           {
             downloadFirst: false,
+            updateInterval: 200,
           }
         );
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {

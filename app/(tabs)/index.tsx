@@ -45,7 +45,10 @@ export default function HomeScreen() {
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const filtered = useMemo(() => [...radios].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))), [radios]);
   const isSelectingRef = useRef(false);
-  useEffect(() => { setFeaturedIndex((index) => filtered.length ? index % filtered.length : 0); }, [filtered.length]);
+  useEffect(() => {
+    // Solo ajustar el índice si está fuera de rango después de un cambio en el catálogo
+    setFeaturedIndex((index) => filtered.length ? Math.min(index, filtered.length - 1) : 0);
+  }, [filtered.length]);
   useEffect(() => {
     if (!currentRadio || isSelectingRef.current) return;
     const activeIndex = filtered.findIndex((radio) => radio.id === currentRadio.id);

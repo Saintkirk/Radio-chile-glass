@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { prefetchLogo } from "@/lib/logo-cache";
 import { canCommitLogo, getLogoSourceKey } from "@/lib/logo-transition";
@@ -10,6 +10,7 @@ type StationLogoProps = {
   radio: Pick<Radio, "id" | "favicon" | "initials" | "accent">;
   size?: number;
   radius?: number;
+  priority?: "high" | "normal" | "low";
 };
 type LogoImageSource = number | { uri: string };
 
@@ -38,7 +39,12 @@ const LOCAL_LOGOS: Record<string, number> = {
   edelweiss: require("@/assets/images/radios/edelweiss.png"),
 };
 
-export const StationLogo = memo(function StationLogo({ radio, size = 54, radius = 16 }: StationLogoProps) {
+export const StationLogo = memo(function StationLogo({ 
+  radio, 
+  size = 54, 
+  radius = 16,
+  priority = "normal"
+}: StationLogoProps) {
   const sourceKey = getLogoSourceKey(radio.id, radio.favicon);
   const hasLocalLogo = Boolean(LOCAL_LOGOS[radio.id]);
   const source: LogoImageSource | null = hasLocalLogo
@@ -46,23 +52,44 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
     : radio.favicon
       ? { uri: radio.favicon }
       : null;
-  const [loadedSourceKey, setLoadedSourceKey] = useState<string | null>(() => (source ? sourceKey : null));
+  const [loadedSourceKey, setLoadedSourceKey] = useState<string | null>(() => (source && hasLocalLogo ? sourceKey : null));
   const [failedSourceKey, setFailedSourceKey] = useState<string | null>(null);
   const currentSourceKeyRef = useRef(sourceKey);
+  const loadAttemptedRef = useRef(false);
   // Actualizar durante el render cierra la ventana entre el cambio de props y el efecto.
   // Así, un callback tardío nunca puede promover artwork de la emisora anterior.
   currentSourceKeyRef.current = sourceKey;
 
+  const handleLoad = useCallback(() => {
+    if (canCommitLogo(currentSourceKeyRef.current, sourceKey)) {
+      setLoadedSourceKey(sourceKey);
+    }
+  }, [sourceKey]);
+
+  const handleError = useCallback(() => {
+    if (canCommitLogo(currentSourceKeyRef.current, sourceKey)) {
+      setFailedSourceKey(sourceKey);
+    }
+  }, [sourceKey]);
+
   useEffect(() => {
-    setLoadedSourceKey(null);
+    setLoadedSourceKey(hasLocalLogo ? sourceKey : null);
     setFailedSourceKey(null);
-    if (radio.favicon && !hasLocalLogo) void prefetchLogo(radio.favicon);
-  }, [hasLocalLogo, radio.favicon, radio.id, sourceKey]);
+    loadAttemptedRef.current = false;
+    
+    if (radio.favicon && !hasLocalLogo && !loadAttemptedRef.current) {
+      loadAttemptedRef.current = true;
+      const prefetchLevel = priority === "high" ? "hot" : priority === "low" ? "warm" : "warm" as const;
+      void prefetchLogo(radio.favicon, prefetchLevel);
+    }
+  }, [hasLocalLogo, radio.favicon, radio.id, sourceKey, priority]);
 
   const fallback = (
     <LinearGradient
       colors={[`${radio.accent}66`, "#181818"]}
       style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
     >
       <View style={[styles.glassOrb, { width: size * 0.7, height: size * 0.7, borderRadius: size }]} />
       <Text style={[styles.initials, { fontSize: Math.max(13, size * 0.28) }]}>{radio.initials}</Text>
@@ -72,9 +99,10 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
   const isLoaded = loadedSourceKey === sourceKey;
   const hasFailed = failedSourceKey === sourceKey;
   const canRenderImage = Boolean(source && !hasFailed);
+  const transitionDuration = hasLocalLogo ? 0 : isLoaded ? 0 : 180;
 
   return (
-    <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}>
+    <View style={[styles.container, { width: size, height: size, borderRadius: radius }]} accessible={false}>
       {fallback}
       {canRenderImage && source && (
         <Image
@@ -88,17 +116,11 @@ export const StationLogo = memo(function StationLogo({ radio, size = 54, radius 
           contentFit="contain"
           contentPosition="center"
           cachePolicy="memory-disk"
-          transition={isLoaded || hasLocalLogo ? 0 : 100}
-          onLoad={() => {
-            if (canCommitLogo(currentSourceKeyRef.current, sourceKey)) {
-              setLoadedSourceKey(sourceKey);
-            }
-          }}
-          onError={() => {
-            if (canCommitLogo(currentSourceKeyRef.current, sourceKey)) {
-              setFailedSourceKey(sourceKey);
-            }
-          }}
+          recyclingKey={sourceKey}
+          transition={transitionDuration}
+          onLoad={handleLoad}
+          onError={handleError}
+          accessibilityIgnoresInvertColors
         />
       )}
     </View>
