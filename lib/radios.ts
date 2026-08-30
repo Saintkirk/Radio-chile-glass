@@ -68,6 +68,42 @@ const accents = ["#64D8FF", "#8B7CFF", "#1ED760", "#F2B6FF", "#FFD36A", "#1ED760
 const initials = (name: string) => name.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "FM";
 const genreFromTags = (tags: string) => { const value = tags.toLowerCase(); if (/news|noticia|talk|actual/.test(value)) return "Noticias"; if (/rock/.test(value)) return "Rock"; if (/pop|hit/.test(value)) return "Pop"; if (/jazz/.test(value)) return "Jazz"; if (/classic|clásic/.test(value)) return "Clásica"; return "Música"; };
 const isKnownBrokenStream = (url: string) => /radio\.digitalfm\.cl:8000/i.test(url);
+
+/** Validates stream URLs to prevent loading invalid or insecure streams */
+export function validateStreamUrl(url: string): { valid: boolean; reason?: string } {
+  if (!url || typeof url !== 'string') {
+    return { valid: false, reason: 'URL vacía' };
+  }
+  
+  try {
+    const parsed = new URL(url);
+    
+    // Check protocol
+    if (!['https:', 'http:'].includes(parsed.protocol)) {
+      return { valid: false, reason: `Protocolo no soportado: ${parsed.protocol}` };
+    }
+    
+    // Warn about HTTP (non-secure) streams
+    if (parsed.protocol === 'http:') {
+      console.warn(`Stream HTTP detectado (potencial mixed-content): ${url}`);
+    }
+    
+    // Check for valid hostname
+    if (!parsed.hostname || parsed.hostname.length < 3) {
+      return { valid: false, reason: 'Hostname inválido' };
+    }
+    
+    // Known broken stream patterns
+    if (isKnownBrokenStream(url)) {
+      return { valid: false, reason: 'Stream conocido como roto' };
+    }
+    
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, reason: 'URL mal formada' };
+  }
+}
+
 const fallbackFavicon = (homepage?: string) => { if (!homepage) return undefined; try { return `${new URL(homepage).origin}/favicon.ico`; } catch { return undefined; } };
 
 export function regionFromCity(city: string): string {
@@ -96,6 +132,14 @@ export function normalizeRemoteStations(input: RemoteStation[]): Radio[] {
   const result: Radio[] = [];
   input.filter((station) => station.country === "Chile" && station.lastcheckok === 1 && !!(station.url_resolved || station.url) && !!station.name?.trim()).forEach((station, index) => {
     const streamUrl = (station.url_resolved || station.url || "").trim();
+    
+    // Validate stream URL before processing
+    const validation = validateStreamUrl(streamUrl);
+    if (!validation.valid) {
+      console.warn(`Stream inválido para ${station.name}: ${validation.reason}`);
+      return;
+    }
+    
     const key = streamUrl.toLowerCase().replace(/\/$/, "");
     if (seen.has(key)) return;
     seen.add(key);
