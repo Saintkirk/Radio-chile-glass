@@ -55,14 +55,15 @@ export default function RadioDetailScreen() {
   useEffect(() => {
     // The route id is authoritative on the first render (for example, when a
     // notification opens a requested station). After that initial handoff,
-    // follow external changes from the global player.
+    // follow external changes from the global player only when not loading.
     if (!routeInitialisedRef.current) {
       routeInitialisedRef.current = true;
       return;
     }
-    if (!currentRadio || currentRadio.id === selectedRadioId) return;
+    // Evitar sincronizar durante el buffering para no causar saltos en el carrusel.
+    if (isLoading || !currentRadio || currentRadio.id === selectedRadioId) return;
     setSelectedRadioId(currentRadio.id);
-  }, [currentRadio, selectedRadioId]);
+  }, [currentRadio, selectedRadioId, isLoading]);
   const hasMeasuredOrigin = [originX, originY, originWidth, originHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const hasMeasuredContainer = [containerX, containerY, containerWidth, containerHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const sourceViewportWidth = Number(viewportWidth) || windowWidth;

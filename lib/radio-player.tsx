@@ -216,6 +216,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
             "Icy-MetaData": "1",
             "User-Agent": "RadioChileGlass/1.0",
           },
+          shouldPlay: true,
+          androidImportantForAudioQuality: true,
         });
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) {
           try { candidate.pause(); } catch { /* no-op */ }
@@ -465,12 +467,15 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       const action = audioFocusAction(change);
       const player = playerRef.current;
       if (!player) return;
+      // Evita pausar manualmente durante buffering transitorio. Solo pausa
+      // por pérdida definitiva de foco, manteniendo la reproducción activa
+      // mientras el buffer se llena.
       if (action === "pause") {
         resumeAfterFocusGainRef.current = isPlaying && playbackIntentRef.current;
         player.pause();
         setIsPlaying(false);
         updateNativeMediaState(false);
-      } else if (action === "duck") {
+      } else if (action === \"duck") {
         player.volume = 0.35;
       } else if (action === "restore") {
         player.volume = 1;
