@@ -13,8 +13,8 @@ export function LockScreenNowPlayingSync() {
     { streamUrl },
     {
       enabled: Boolean(currentRadio && backgroundPlaybackEnabled),
-      refetchInterval: 20_000,
-      staleTime: 15_000,
+      refetchInterval: 10_000,
+      staleTime: 8_000,
       retry: 1,
     },
   );

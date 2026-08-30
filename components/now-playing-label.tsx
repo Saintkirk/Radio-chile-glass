@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 export function NowPlayingLabel({ streamUrl, compact = false }: { streamUrl: string; compact?: boolean }) {
   const { data, isFetching } = trpc.metadata.nowPlaying.useQuery(
     { streamUrl },
-    { enabled: Boolean(streamUrl), refetchInterval: 20_000, staleTime: 15_000, retry: 1 },
+    { enabled: Boolean(streamUrl), refetchInterval: 10_000, staleTime: 8_000, retry: 1 },
   );
 
   const hasMetadata = Boolean(data?.available && (data.title || data.artist));
