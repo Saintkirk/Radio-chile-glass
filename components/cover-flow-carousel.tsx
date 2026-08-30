@@ -251,15 +251,19 @@ export function CoverFlowCarousel({
 
   useEffect(() => {
     if (safeActiveIndex < 0) return;
+    // Solo sincronizar si el índice externo difiere y no estamos en medio de
+    // una animación interna o esperando confirmación del padre.
     if (safeActiveIndex === selectedIndexRef.current) {
       awaitingParentSyncRef.current = false;
       return;
     }
-    if (isSpinningRef.current || awaitingParentSyncRef.current) return;
+    // Durante el buffering/loading, evitar forzar sincronización que pueda
+    // interrumpir la animación en curso o causar saltos indeseados.
+    if (isSpinningRef.current || awaitingParentSyncRef.current || isLoading) return;
     selectedIndexRef.current = safeActiveIndex;
     setSelectedIndex(safeActiveIndex);
     wheelOffset.set(0);
-  }, [safeActiveIndex, wheelOffset]);
+  }, [safeActiveIndex, wheelOffset, isLoading]);
 
   useEffect(() => {
     isMounted.set(true);
