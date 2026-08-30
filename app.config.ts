@@ -93,7 +93,7 @@ const config: ExpoConfig = {
     [
       "expo-audio",
       {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
+        // No microphone permission needed - this is a playback-only app
       },
     ],
     [

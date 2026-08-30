@@ -37,6 +37,21 @@ export function isCurrentRadioId(activeRadioId: string | null | undefined, candi
   return Boolean(activeRadioId && candidateRadioId && activeRadioId === candidateRadioId);
 }
 
+/** Adaptive retry delay with exponential backoff and jitter for different error types */
+export function adaptiveRetryDelayMs(attempt: number, errorType?: 'network' | 'timeout' | 'stream'): number {
+  // Base delays increase exponentially: 0, 1000, 2000, 4000, 8000
+  const baseDelay = attempt === 0 ? 0 : Math.pow(2, attempt - 1) * 1000;
+  
+  // Add jitter (+-20%) to prevent thundering herd
+  const jitter = baseDelay * 0.2 * (Math.random() - 0.5) * 2;
+  
+  // Network errors may need more time, stream errors less
+  const typeMultiplier = errorType === 'network' ? 1.5 : errorType === 'stream' ? 0.8 : 1.0;
+  
+  return Math.round((baseDelay + jitter) * typeMultiplier);
+}
+
+
 /** A crossfade is valid only while both its request and cancellation token are current. */
 export function shouldContinueCrossfade(requestId: number, currentRequestId: number, token: number, currentToken: number): boolean {
   return requestId === currentRequestId && token === currentToken;
@@ -173,4 +188,36 @@ export function lockScreenMetadata(radio: Radio, nowPlaying?: LockScreenNowPlayi
     radioId: radio.id,
     ...(radio.favicon ? { artworkUrl: radio.favicon } : {}),
   };
+}
+
+/**
+ * Parses ICY stream metadata to extract artist and title.
+ * Common format: "Artist - Title" or just "Title"
+ */
+export function parseICYMetadata(streamTitle: string): { artist?: string; title?: string } {
+  if (!streamTitle || typeof streamTitle !== 'string') {
+    return { title: undefined, artist: undefined };
+  }
+  
+  const trimmed = streamTitle.trim();
+  if (!trimmed) {
+    return { title: undefined, artist: undefined };
+  }
+  
+  // Try to split by " - " (common ICY format)
+  const parts = trimmed.split(' - ');
+  
+  if (parts.length >= 2) {
+    // First part is artist, rest is title (in case title contains " - ")
+    const artist = parts[0].trim();
+    const title = parts.slice(1).join(' - ').trim();
+    
+    // Validate that artist looks like an artist name (not empty or too short)
+    if (artist.length > 1 && title.length > 0) {
+      return { artist, title };
+    }
+  }
+  
+  // If no valid split, treat entire string as title
+  return { title: trimmed, artist: undefined };
 }
