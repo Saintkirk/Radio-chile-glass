@@ -8,6 +8,50 @@ import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetad
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "./audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "./radio-media-controls";
 
+// Performance logging utilities for production debugging
+const PERF_LOGS_ENABLED = __DEV__ || process.env.NODE_ENV === "development";
+
+interface PerformanceMetric {
+  event: string;
+  timestamp: number;
+  duration?: number;
+  radioId?: string;
+  success?: boolean;
+  error?: string;
+}
+
+const logPerformance = (metric: PerformanceMetric) => {
+  if (!PERF_LOGS_ENABLED) return;
+  console.log(`[PERF] ${metric.event}`, {
+    time: new Date(metric.timestamp).toISOString(),
+    duration: metric.duration ? `${metric.duration}ms` : undefined,
+    radioId: metric.radioId,
+    success: metric.success,
+    error: metric.error,
+  });
+};
+
+const measureDuration = <T,>(event: string, radioId: string | undefined, fn: () => T): T => {
+  const start = performance.now();
+  try {
+    const result = fn();
+    const duration = performance.now() - start;
+    logPerformance({ event, timestamp: Date.now(), duration, radioId, success: true });
+    return result;
+  } catch (error) {
+    const duration = performance.now() - start;
+    logPerformance({ 
+      event, 
+      timestamp: Date.now(), 
+      duration, 
+      radioId, 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    });
+    throw error;
+  }
+};
+
 type RadioAudioPlayer = ReturnType<typeof createAudioPlayer>;
 
 function pauseAndRemovePlayer(player: RadioAudioPlayer | null) {
@@ -195,6 +239,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     // creating a second native player for the same stream.
     if (currentRadioRef.current?.id === radio.id && (playbackIntentRef.current || playerRef.current?.playing)) return;
 
+    const startTime = Date.now();
+    logPerformance({ event: 'playRadio_start', timestamp: startTime, radioId: radio.id });
+    
     const requestId = ++playRequestRef.current;
     crossfadeTokenRef.current += 1;
     if (crossfadeTimerRef.current) {
@@ -228,6 +275,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     // Validate stream URL before attempting playback
     const urlValidation = validateStreamUrl(radio.streamUrl);
     if (!urlValidation.valid) {
+      const errorTime = Date.now();
+      logPerformance({ 
+        event: 'playRadio_error', 
+        timestamp: errorTime, 
+        radioId: radio.id, 
+        success: false, 
+        error: `URL inválida: ${urlValidation.reason}` 
+      });
       setPlaybackError(`URL inválida: ${urlValidation.reason}`);
       setIsLoading(false);
       failedRadioUntilRef.current.set(radio.id, Date.now() + FAILED_RADIO_COOLDOWN_MS);
@@ -288,6 +343,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
             updateNativeMediaState(false);
           }
           if (confirmed) {
+            const successTime = Date.now();
+            logPerformance({ 
+              event: 'playRadio_success', 
+              timestamp: successTime, 
+              radioId: radio.id, 
+              success: true,
+              duration: successTime - startTime 
+            });
             if (crossfadeStartedRequestRef.current !== requestId) {
               crossfadeStartedRequestRef.current = requestId;
               startCrossfade(outgoingPlayer, candidate as ReturnType<typeof createAudioPlayer>, requestId);
@@ -363,6 +426,15 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         }
         if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
         if (attempt === MAX_PLAYBACK_RETRIES) {
+          const errorTime = Date.now();
+          logPerformance({ 
+            event: 'playRadio_error', 
+            timestamp: errorTime, 
+            radioId: radio.id, 
+            success: false, 
+            error: `No se pudo conectar con ${radio.name}`,
+            duration: errorTime - startTime 
+          });
           playbackIntentRef.current = false;
           failedRadioUntilRef.current.set(radio.id, Date.now() + FAILED_RADIO_COOLDOWN_MS);
           setPlaybackError(`No se pudo conectar con ${radio.name}`);

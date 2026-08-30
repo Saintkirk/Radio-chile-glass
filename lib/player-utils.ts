@@ -190,10 +190,7 @@ export function lockScreenMetadata(radio: Radio, nowPlaying?: LockScreenNowPlayi
   };
 }
 
-/**
- * Parses ICY stream metadata to extract artist and title.
- * Common format: "Artist - Title" or just "Title"
- */
+/** Parses ICY stream metadata to extract artist and title with logging */
 export function parseICYMetadata(streamTitle: string): { artist?: string; title?: string } {
   if (!streamTitle || typeof streamTitle !== 'string') {
     return { title: undefined, artist: undefined };
@@ -220,4 +217,16 @@ export function parseICYMetadata(streamTitle: string): { artist?: string; title?
   
   // If no valid split, treat entire string as title
   return { title: trimmed, artist: undefined };
+}
+
+/** Logging utility for metadata updates */
+export function logMetadataUpdate(radioId: string, metadata: { artist?: string; title?: string }, source: 'icy' | 'fallback') {
+  const PERF_LOGS_ENABLED = __DEV__ || process.env.NODE_ENV === "development";
+  if (!PERF_LOGS_ENABLED) return;
+  
+  console.log(`[METADATA] ${source.toUpperCase()} update for ${radioId}`, {
+    timestamp: new Date().toISOString(),
+    artist: metadata.artist || '(none)',
+    title: metadata.title || '(none)',
+  });
 }

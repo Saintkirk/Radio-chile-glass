@@ -60,8 +60,14 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
 
   return (
     <Animated.View ref={containerRef} collapsable={false} style={[styles.container, { backgroundColor: lightMode ? "#FFFFFFF5" : "#171D2BF7", borderColor: lightMode ? "#D9E0EC" : "#FFFFFF22", bottom, opacity: progress, transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }] }]}>
-      <Pressable onPress={() => openDetail(displayRadio)} accessibilityRole="button" accessibilityLabel={`Abrir reproductor de ${displayRadio.name}`} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
-        <View ref={logoRef} collapsable={false}>
+      <Pressable 
+        onPress={() => openDetail(displayRadio)} 
+        accessibilityRole="button" 
+        accessibilityLabel={`Abrir reproductor de ${displayRadio.name}`}
+        accessibilityHint="Abre la vista detallada del reproductor"
+        style={({ pressed }) => [styles.main, pressed && styles.pressed]}
+      >
+        <View ref={logoRef} collapsable={false} accessible={false}>
           <StationLogo
             key={`mini-logo-${displayRadio.id}:${displayRadio.favicon ?? ""}`}
             radio={displayRadio}
@@ -69,14 +75,49 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
             radius={14}
           />
         </View>
-        <View style={styles.info}><Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{displayRadio.name}</Text>{isLoading ? <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text> : playbackError ? <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text> : <NowPlayingLabel streamUrl={displayRadio.streamUrl} compact />}</View>
-        <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : displayRadio.accent} barCount={5} compact />
+        <View style={styles.info} accessible={false}>
+          <Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{displayRadio.name}</Text>
+          {isLoading ? (
+            <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text>
+          ) : playbackError ? (
+            <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text>
+          ) : (
+            <NowPlayingLabel streamUrl={displayRadio.streamUrl} compact />
+          )}
+        </View>
+        <AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : displayRadio.accent} barCount={5} compact accessible={false} />
       </Pressable>
-      <Pressable onPress={() => void playAdjacent(-1, displayRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora anterior" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.left" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
-      <Pressable onPress={() => playbackError ? playRadio(displayRadio) : togglePlay()} accessibilityRole="button" accessibilityLabel={playbackError ? `Reintentar ${displayRadio.name}` : isPlaying ? `Pausar ${displayRadio.name}` : `Reproducir ${displayRadio.name}`} style={({ pressed }) => [styles.control, pressed && styles.pressed]}>
-        {isLoading ? <ActivityIndicator size="small" color={lightMode ? "#172033" : "#F5F3EE"} /> : <IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color={lightMode ? "#172033" : "#F5F3EE"} />}
+      <Pressable 
+        onPress={() => void playAdjacent(-1, displayRadio.id)} 
+        accessibilityRole="button" 
+        accessibilityLabel="Emisora anterior"
+        accessibilityHint="Cambia a la emisora anterior en la lista"
+        style={({ pressed }) => [styles.skip, pressed && styles.pressed]}
+      >
+        <IconSymbol name="chevron.left" size={17} color={lightMode ? "#172033" : "#F5F3EE"} />
       </Pressable>
-      <Pressable onPress={() => void playAdjacent(1, displayRadio.id)} accessibilityRole="button" accessibilityLabel="Emisora siguiente" style={({ pressed }) => [styles.skip, pressed && styles.pressed]}><IconSymbol name="chevron.right" size={17} color={lightMode ? "#172033" : "#F5F3EE"} /></Pressable>
+      <Pressable 
+        onPress={() => playbackError ? playRadio(displayRadio) : togglePlay()} 
+        accessibilityRole="button" 
+        accessibilityLabel={playbackError ? `Reintentar ${displayRadio.name}` : isPlaying ? `Pausar ${displayRadio.name}` : `Reproducir ${displayRadio.name}`}
+        accessibilityHint={playbackError ? "Intenta reproducir la emisora nuevamente" : isPlaying ? "Pausa la reproducción actual" : "Inicia la reproducción de la emisora"}
+        style={({ pressed }) => [styles.control, pressed && styles.pressed]}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="small" color={lightMode ? "#172033" : "#F5F3EE"} />
+        ) : (
+          <IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color={lightMode ? "#172033" : "#F5F3EE"} />
+        )}
+      </Pressable>
+      <Pressable 
+        onPress={() => void playAdjacent(1, displayRadio.id)} 
+        accessibilityRole="button" 
+        accessibilityLabel="Emisora siguiente"
+        accessibilityHint="Cambia a la emisora siguiente en la lista"
+        style={({ pressed }) => [styles.skip, pressed && styles.pressed]}
+      >
+        <IconSymbol name="chevron.right" size={17} color={lightMode ? "#172033" : "#F5F3EE"} />
+      </Pressable>
     </Animated.View>
   );
 }

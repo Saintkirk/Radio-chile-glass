@@ -3,7 +3,13 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import { parseICYMetadata } from "../lib/player-utils.js";
 
+/**
+ * Lee metadatos ICY de un stream de radio en vivo.
+ * Extrae título y artista del StreamTitle usando parseICYMetadata para consistencia.
+ * Timeout: 7s para no bloquear la UI.
+ */
 async function readNowPlaying(streamUrl: string) {
   const parsed = new URL(streamUrl);
   if (parsed.protocol !== "https:") throw new Error("Only HTTPS streams are supported");
@@ -47,10 +53,15 @@ async function readNowPlaying(streamUrl: string) {
     const match = raw.match(/StreamTitle='([^']*)'/i);
     const titleLine = match?.[1]?.trim() || "";
     if (!titleLine) return { artist: null, title: null, available: false, fetchedAt: Date.now() };
-    const separator = titleLine.indexOf(" - ");
-    const artist = separator > 0 ? titleLine.slice(0, separator).trim() : null;
-    const title = separator > 0 ? titleLine.slice(separator + 3).trim() : titleLine;
-    return { artist, title, available: true, fetchedAt: Date.now() };
+    
+    // Usar parseICYMetadata para consistencia con el cliente
+    const parsedMetadata = parseICYMetadata(titleLine);
+    return { 
+      artist: parsedMetadata.artist ?? null, 
+      title: parsedMetadata.title ?? null, 
+      available: true, 
+      fetchedAt: Date.now() 
+    };
   } finally { clearTimeout(timeout); }
 }
 
