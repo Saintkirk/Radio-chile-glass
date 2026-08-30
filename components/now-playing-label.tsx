@@ -13,16 +13,28 @@ export function NowPlayingLabel({ streamUrl, compact = false }: { streamUrl: str
   const artist = data?.artist || (hasMetadata ? "Emisión en vivo" : "La emisora no publica artista y pista");
 
   return (
-    <View style={[styles.wrap, compact && styles.compactWrap]} accessibilityLiveRegion="polite">
-      <View style={[styles.dot, data?.available && styles.dotActive]} />
+    <View 
+      style={[styles.wrap, compact && styles.compactWrap]} 
+      accessibilityLiveRegion="polite"
+      accessible={true}
+      accessibilityLabel={
+        isFetching && !data 
+          ? "Buscando información de la pista..." 
+          : hasMetadata 
+            ? `Ahora suena: ${title} por ${artist}` 
+            : "Información de la pista no disponible"
+      }
+      accessibilityHint="Esta información se actualiza automáticamente cada 20 segundos"
+    >
+      <View style={[styles.dot, data?.available && styles.dotActive]} accessible={false} />
       <View style={styles.copy}>
         {compact ? (
-          <Text style={styles.compactLine} numberOfLines={1}>{isFetching && !data ? "Buscando pista…" : hasMetadata ? `${artist} · ${title}` : "Metadatos no disponibles"}</Text>
+          <Text style={styles.compactLine} numberOfLines={1} accessible={false}>{isFetching && !data ? "Buscando pista…" : hasMetadata ? `${artist} · ${title}` : "Metadatos no disponibles"}</Text>
         ) : (
           <>
-            <Text style={styles.kicker} numberOfLines={1}>{isFetching && !data ? "BUSCANDO AHORA" : hasMetadata ? "AHORA SUENA" : "EN VIVO"}</Text>
-            <Text style={styles.title} numberOfLines={1}>{title}</Text>
-            <Text style={styles.artist} numberOfLines={1}>{artist}</Text>
+            <Text style={styles.kicker} numberOfLines={1} accessible={false}>{isFetching && !data ? "BUSCANDO AHORA" : hasMetadata ? "AHORA SUENA" : "EN VIVO"}</Text>
+            <Text style={styles.title} numberOfLines={1} accessible={false}>{title}</Text>
+            <Text style={styles.artist} numberOfLines={1} accessible={false}>{artist}</Text>
           </>
         )}
       </View>

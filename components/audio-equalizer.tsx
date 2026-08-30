@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 
-type AudioEqualizerProps = { playing: boolean; color?: string; barCount?: number; compact?: boolean };
+type AudioEqualizerProps = { playing: boolean; color?: string; barCount?: number; compact?: boolean; accessible?: boolean };
 
 const LEVELS = [0.35, 0.72, 0.48, 0.9, 0.58, 0.8, 0.4];
 
