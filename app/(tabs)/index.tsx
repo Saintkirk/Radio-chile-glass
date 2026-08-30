@@ -44,16 +44,19 @@ export default function HomeScreen() {
   }, [radios]);
   const handleFavorite = (id: string, name: string) => { const saved = !isFavorite(id); toggleFavorite(id); if (saved) favoriteAddedHaptic(); else favoriteRemovedHaptic(); setFavoriteNotice(saved ? `${name} guardada en favoritos` : `${name} quitada de favoritos`); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setFavoriteNotice(null), 1700); };
   const filtered = useMemo(() => [...radios].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))), [radios]);
+  const isSelectingRef = useRef(false);
   useEffect(() => { setFeaturedIndex((index) => filtered.length ? index % filtered.length : 0); }, [filtered.length]);
   useEffect(() => {
-    if (!currentRadio) return;
+    if (!currentRadio || isSelectingRef.current) return;
     const activeIndex = filtered.findIndex((radio) => radio.id === currentRadio.id);
-    if (activeIndex >= 0) setFeaturedIndex(activeIndex);
-  }, [currentRadio, filtered]);
+    if (activeIndex >= 0 && activeIndex !== featuredIndex) setFeaturedIndex(activeIndex);
+  }, [currentRadio, filtered, featuredIndex]);
   const selectAndPlayRadio = useCallback((radio: Radio) => {
+    isSelectingRef.current = true;
     const nextIndex = filtered.findIndex((item) => item.id === radio.id);
     if (nextIndex >= 0) setFeaturedIndex(nextIndex);
     void playRadio(radio, Boolean(currentRadio && currentRadio.id !== radio.id));
+    setTimeout(() => { isSelectingRef.current = false; }, 500);
   }, [currentRadio, filtered, playRadio]);
   const featured = filtered[featuredIndex] ?? currentRadio ?? radios[0];
 
