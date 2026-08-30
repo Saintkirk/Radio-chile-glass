@@ -12,6 +12,7 @@ const WARM_DISK_LIMIT = 64;
 const HOT_WINDOW_RADIUS = 2;
 const PREFETCH_WORKERS = 2;
 const FREQUENT_LOGO_LIMIT = 8;
+const LOGO_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 días TTL para logos
 const FREQUENT_RADIO_IDS = [
   "fmlatina", "carolina", "futuro", "cooperativa", "biobio", "corazon", "oasis", "13c",
   "rock-pop", "concierto", "duna", "adn",
@@ -30,6 +31,24 @@ async function readCache(): Promise<LogoCache> {
         try {
           const parsed = value ? JSON.parse(value) as LogoCache : {};
           memoryCache = parsed && typeof parsed === "object" ? parsed : {};
+          
+          // Invalidate expired logos (TTL cleanup)
+          const now = Date.now();
+          const validEntries: LogoCache = {};
+          let hasExpired = false;
+          
+          for (const [uri, entry] of Object.entries(memoryCache)) {
+            if (now - entry.updatedAt < LOGO_CACHE_TTL_MS) {
+              validEntries[uri] = entry;
+            } else {
+              hasExpired = true;
+            }
+          }
+          
+          if (hasExpired) {
+            memoryCache = validEntries;
+            AsyncStorage.setItem(CACHE_KEY, JSON.stringify(memoryCache)).catch(() => undefined);
+          }
         } catch {
           memoryCache = {};
         }

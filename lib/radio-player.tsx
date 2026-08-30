@@ -1,10 +1,10 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { loadCatalog, RADIOS, selectStartupRadio, type Radio } from "./radios";
+import { loadCatalog, RADIOS, selectStartupRadio, type Radio, validateStreamUrl } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, type LockScreenMetadata } from "./player-utils";
+import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, adaptiveRetryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "./audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "./radio-media-controls";
 
@@ -123,16 +123,44 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     return outgoing;
   }, []);
 
-  const startCrossfade = useCallback((outgoing: ReturnType<typeof createAudioPlayer> | null, incoming: ReturnType<typeof createAudioPlayer>, _requestId: number) => {
-    // The previous player is already paused before the new stream is created.
-    // Keep this boundary synchronous so playback cannot overlap even when the
-    // native status callback arrives later than the play() call.
+  const startCrossfade = useCallback((outgoing: ReturnType<typeof createAudioPlayer> | null, incoming: ReturnType<typeof createAudioPlayer>, requestId: number) => {
+    // Implement real crossfade with 400ms fade duration
     if (outgoing && outgoing !== incoming) {
-      crossfadeOutgoingRef.current = null;
-      pauseAndRemovePlayer(outgoing);
+      crossfadeOutgoingRef.current = outgoing;
+      crossfadeStartedRequestRef.current = requestId;
+
+      let volume = 1;
+      const fadeDuration = 400; // ms
+      const fadeInterval = 50; // ms
+      const fadeSteps = fadeDuration / fadeInterval;
+      const volumeStep = 1 / fadeSteps;
+
+      // Fade out outgoing player
+      const fadeTimer = setInterval(() => {
+        if (!shouldContinueCrossfade(requestId, playRequestRef.current, crossfadeTokenRef.current, crossfadeTokenRef.current)) {
+          clearInterval(fadeTimer);
+          pauseAndRemovePlayer(outgoing);
+          crossfadeOutgoingRef.current = null;
+          return;
+        }
+
+        volume -= volumeStep;
+        if (volume <= 0) {
+          clearInterval(fadeTimer);
+          try { outgoing.volume = 0; } catch { /* no-op */ }
+          try { outgoing.pause(); } catch { /* no-op */ }
+          crossfadeOutgoingRef.current = null;
+        } else {
+          try { outgoing.volume = Math.max(0, volume); } catch { /* no-op */ }
+        }
+      }, fadeInterval);
+
+      crossfadeTimerRef.current = fadeTimer;
     }
+
+    // Ensure incoming player starts at full volume
     try { incoming.volume = 1; } catch { /* no-op */ }
-  }, []);
+  }, [shouldContinueCrossfade]);
 
   const refreshCatalog = useCallback(async (): Promise<Radio[]> => {
     setIsRefreshingCatalog(true);
@@ -197,9 +225,23 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setPlaybackError(null);
 
+    // Validate stream URL before attempting playback
+    const urlValidation = validateStreamUrl(radio.streamUrl);
+    if (!urlValidation.valid) {
+      setPlaybackError(`URL inválida: ${urlValidation.reason}`);
+      setIsLoading(false);
+      failedRadioUntilRef.current.set(radio.id, Date.now() + FAILED_RADIO_COOLDOWN_MS);
+      return;
+    }
+    
     for (let attempt = 0; attempt <= MAX_PLAYBACK_RETRIES; attempt += 1) {
       if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
-      const delay = retryDelayMs(attempt);
+      
+      // Use adaptive retry delay with error type detection
+      const isNetworkError = attempt > 0 && playbackError?.includes('red') || playbackError?.includes('conexión');
+      const errorType = isNetworkError ? 'network' : attempt > 0 ? 'stream' : undefined;
+      const delay = adaptiveRetryDelayMs(attempt, errorType);
+      
       if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
       if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
       let candidate: ReturnType<typeof createAudioPlayer> | null = null;
