@@ -1,3 +1,26 @@
-```ts
+```
+# Dependencies
+node_modules/
 
+# Build artifacts
+dist/
+build/
+target/
+
+# Cache and temporary files
+.expo/
+.vite/
+*.cache*
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+.nyc_output/
 ```
