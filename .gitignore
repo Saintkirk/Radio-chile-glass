@@ -1,4 +1,31 @@
-```
+# Android build artifacts
+*.apk
+*.aar
+*.jar
+*.dex
+*.so
+
+# Android dependency directories
+app/build/
 .gradle/
 local.properties
-```
+
+# IDE files
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# Log files
+*.log
+
+# Temp files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+*.env.*
