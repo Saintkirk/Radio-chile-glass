@@ -61,9 +61,11 @@ export default function RadioDetailScreen() {
       return;
     }
     // Evitar sincronizar durante el buffering para no causar saltos en el carrusel.
+    // Solo actualizar si realmente cambió la emisora, evitando actualizaciones espurias
+    // que provocan pérdida de portadas y saltos visuales.
     if (isLoading || !currentRadio || currentRadio.id === selectedRadioId) return;
     setSelectedRadioId(currentRadio.id);
-  }, [currentRadio, selectedRadioId, isLoading]);
+  }, [currentRadio?.id, isLoading, selectedRadioId]);
   const hasMeasuredOrigin = [originX, originY, originWidth, originHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const hasMeasuredContainer = [containerX, containerY, containerWidth, containerHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const sourceViewportWidth = Number(viewportWidth) || windowWidth;
