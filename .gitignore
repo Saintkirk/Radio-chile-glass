@@ -1,240 +1,57 @@
 ```
-# Dependencies
-node_modules/
-
-# Build artifacts
-.expo/
+# Gradle
+.gradle/
 build/
-dist/
-*.apk
-*.aab
+!FIX_GRADLE_WRAPPER.md
 
-# Android specific
-android/app/build/
-android/.gradle/
-android/build/
-android/gradle/wrapper/dists/
-*.keystore
-debug.keystore
-
-# Expo assets cache
-.expo/web/cache/
-
-# Temporary files
-*.tmp
-*.temp
-*.log
-
-# Environment variables
+# Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# IDE specific
-.vscode/
-.idea/
-*.swp
-*.swo
+# Logs
+*.log
+
+# Dependencies
+node_modules/
+vendor/
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# System files
-*.dll
-*.so
-*.dylib
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Compression files
-*.zip
-*.tar
-*.gz
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# Coverage reports
-coverage/
-htmlcov/
-
-# Python specific
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-*.so
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
-# Node specific
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# React Native specific
-*.jks
-*.keystore
-*.db
-*.db-shm
-*.db-wal
-
-# Metro bundler
-.metro/
-
-# TypeScript
-*.tsbuildinfo
-
-# Next.js
-.next/
-out/
-
-# Webpack
-webpack-stats.json
-
-# Compiled CSS
-*.css.map
-
-# Lock files
-.yarn/
-pnp.*
-
-# Browserslist
-.browserslistcache
-
-# Sentry
-.sentry/
-
-# Prisma
-prisma/migrations/
-
-# Supabase
-supabase/.temp/
-supabase/migrations/
-
-# Bun
-bun.lockb
-
-# Go
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-
-# Rust
+# Build outputs
+dist/
 target/
+out/
+bin/
+obj/
 
-# Ruby
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-
-# PHP
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-
-# C#
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-
-# Elixir
-.erlang.cookie
-elixir_ls/
-
-# Dart
-.dart_tool/
-.pub/
-build/
-
-# Flutter
-flutter/
-.dart_tool/
-.build/
-*.nib
-*.o
-*.lo
-*.la
-*.a
-*.obj
-*.objlist
-*.plist
-*.manifest
-*.res
-*.rsrc
-*.rdata
-*.ldata
-*.pdata
-*.edata
-*.idb
-*.iobj
-*.ipdb
-*.pdb
-*.pgc
-*.pgd
-*.bsc
-*.sbr
-*.res
-*.map
-*.err
-*.wrn
-*.log
-*.ilk
-*.meta
-*.pidb
-*.svclog
-*.opensdf
-*.sdf
-*.opendb
-*.db
-*.db-shm
-*.db-wal
-*.cache
-*.lock
-*.tmp
-*.temp
-*.log
-*.swp
-*.swo
+# Compressed files
 *.zip
-*.tar
 *.gz
+*.tar
 *.tgz
 *.bz2
 *.xz
@@ -254,229 +71,4 @@ flutter/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.jks
-*.keystore
-*.db
-*.db-shm
-*.db-wal
-*.class
-*.jar
-*.war
-*.ear
-*.exe
-*.dll
-*.so
-*.dylib
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.jar
-*.war
-*.ear
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.jar
-*.war
-*.ear
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.jar
-*.war
-*.ear
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.jar
-*.war
-*.ear
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.jar
-*.war
-*.ear
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.cache
-*.vcxproj.filters
-*.gem
-*.rbc
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-*.phar
-.php_cs.cache
-.phpunit.result.cache
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.jar
-*.war
-*.ear
-*.pdb
-*.ilk
-*.iobj
-*.ipdb
-*.aps
-*.ncb
-*.obj
-*.o
-*.suo
-*.user
-*.userosscache
-*.sln.doc......
 ```
