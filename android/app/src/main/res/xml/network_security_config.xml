@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Configuración base segura -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Dominios específicos que permiten tráfico HTTP (streaming) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Dominios comunes de streaming de radio -->
+        <domain includeSubdomains="true">stream-url.com</domain>
+        <domain includeSubdomains="true">radio-stream.com</domain>
+        <domain includeSubdomains="true">live-radio.net</domain>
+        <domain includeSubdomains="true">icecast.org</domain>
+        <domain includeSubdomains="true">shoutcast.com</domain>
+        <domain includeSubdomains="true">streamguys.com</domain>
+        <domain includeSubdomains="true">radionet.de</domain>
+        
+        <!-- Permitir localhost para desarrollo -->
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        
+        <!-- Configuración de pinning para dominios críticos -->
+        <pin-set expiration="2025-12-31">
+            <!-- Los pins se pueden agregar aquí para mayor seguridad -->
+        </pin-set>
+    </domain-config>
+    
+    <!-- Configuración específica para debugging (solo debug builds) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
