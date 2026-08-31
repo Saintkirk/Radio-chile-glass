@@ -12,106 +12,35 @@ target/
 .venv/
 venv/
 node_modules/
-.pnpm-store/
-.yarn/
-.yarn-cache/
-.npm/
-.bower/
-.dart_tool/
-.pub/
+.mypy_cache/
+.pytest_cache/
+.gradle/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 *.swo
-*.bak
-*.~
-*~
 
 # Environment
 .env
 .env.local
 .env.*
-!.env.example
-!.env.sample
 
 # Editors
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
-*.code-workspace
-.project
-.classpath
-.settings/
 
-# OS
+# System files
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
-*.DS_Store
-.Spotlight-V100
-.Trashes
 
-# Python
-*.pyc
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-.coverage
-htmlcov/
+# Coverage
 coverage/
+htmlcov/
+.coverage
 
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-target/
-.gradle/
-build/
-
-# C/C++
-*.o
-*.obj
-*.a
-*.lib
-*.so
-*.dll
-*.dylib
-*.exe
-*.out
-
-# Go
-*.exe
-*.test
-*.prof
-go.mod
-go.sum
-
-# Rust
-Cargo.lock
-target/
-
-# Ruby
-*.gem
-*.rbc
-.bundle/
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-
-# Compression
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -134,19 +63,4 @@ vendor/ruby/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
-# Coverage
-coverage/
-htmlcov/
-.coverage*
-
-# Testing
-*.pytest_cache/
-.jest/
-.nyc_output/
-
-# Distribution
-dist/
-build/
-*.egg-info/
 ```

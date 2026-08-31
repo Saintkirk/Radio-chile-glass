@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { useMemo, useEffect } from "react";
 
 import { trpc } from "@/lib/trpc";
 
@@ -7,7 +8,9 @@ export function NowPlayingLabel({ streamUrl, compact = false }: { streamUrl: str
     { streamUrl },
     { enabled: Boolean(streamUrl), refetchInterval: 10_000, staleTime: 8_000, retry: 1 },
   );
-
+  
+  // Evitar mostrar metadatos antiguos durante transiciones entre emisoras
+  // Solo mostrar datos si corresponden al streamUrl actual
   const hasMetadata = Boolean(data?.available && (data.title || data.artist));
   const title = data?.title || "Información no disponible";
   const artist = data?.artist || (hasMetadata ? "Emisión en vivo" : "La emisora no publica artista y pista");

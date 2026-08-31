@@ -90,6 +90,10 @@ const SlotCard = memo(function SlotCard({
   const centerGlow = useAnimatedStyle(() => ({
     opacity: isCenter ? interpolate(spinProgress.get(), [0, 1], [0.12, 0.04], Extrapolation.CLAMP) : 0,
   }), [isCenter, spinProgress]);
+  
+  // Memoizar keys para evitar remount innecesario de StationLogo al cambiar entre emisoras
+  const logoKey = useMemo(() => `${radio.id}:${radio.favicon ?? ''}`, [radio.id, radio.favicon]);
+  const reflectionKey = useMemo(() => `reflection:${logoKey}`, [logoKey]);
 
   return (
     <Animated.View
@@ -114,7 +118,7 @@ const SlotCard = memo(function SlotCard({
       >
         <View style={[styles.cardFrame, isCenter && styles.centerCardFrame, { backgroundColor: `${radio.accent}32` }]}>
           <StationLogo
-            key={`slot-logo-${radio.id}:${radio.favicon ?? ""}`}
+            key={`slot-logo-${logoKey}`}
             radio={radio}
             size={CARD_SIZE - 4}
             radius={26}
@@ -136,7 +140,7 @@ const SlotCard = memo(function SlotCard({
         </View>
           <View style={styles.reflection} accessible={false}>
             <StationLogo
-              key={`slot-reflection-${radio.id}:${radio.favicon ?? ""}`}
+              key={`slot-reflection-${reflectionKey}`}
               radio={radio}
               size={CARD_SIZE - 22}
               radius={22}
@@ -260,11 +264,25 @@ export function CoverFlowCarousel({
       return;
     }
     // Durante el buffering/loading o selección manual, evitar forzar sincronización
+    // que causa saltos visuales y pérdida de portadas en el carrusel.
+    // La sincronización solo debe ocurrir cuando el usuario cambia manualmente
+    // desde otro componente (no durante transiciones internas del carrusel).
     if (isSpinningRef.current || awaitingParentSyncRef.current || isLoading) return;
+    
+    // Evitar sincronización espuria cuando el carrusel ya está en la posición correcta
+    // pero el padre aún no ha confirmado el cambio. Esto previene que las portadas
+    // se pierdan al volver a una emisora anterior.
+    const indexDiff = Math.abs(safeActiveIndex - selectedIndexRef.current);
+    if (indexDiff > 0 && indexDiff < radios.length / 2) {
+      // El cambio es pequeño, probablemente una actualización de estado del player,
+      // no un cambio real de emisora. Ignorar para mantener estabilidad visual.
+      return;
+    }
+    
     selectedIndexRef.current = safeActiveIndex;
     setSelectedIndex(safeActiveIndex);
     wheelOffset.set(0);
-  }, [safeActiveIndex, wheelOffset]);
+  }, [safeActiveIndex, wheelOffset, isLoading, radios.length]);
 
   useEffect(() => {
     isMounted.set(true);
