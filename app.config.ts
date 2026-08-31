@@ -90,6 +90,7 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-web-browser",
     "./plugins/with-radio-media-controls",
+    "./plugins/with-network-security-config",
     [
       "expo-audio",
       {
@@ -116,7 +117,13 @@ const config: ExpoConfig = {
           minSdkVersion: 24,
           enableMinifyInReleaseBuilds: true,
           enableShrinkResourcesInReleaseBuilds: true,
+          packagingOptions: {
+            exclude: ["**/*.dko"]
+          }
         },
+        ios: {
+          useFrameworks: "static"
+        }
       },
     ],
   ],

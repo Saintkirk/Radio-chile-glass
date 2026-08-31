@@ -1,117 +1,50 @@
 ```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-dist/
-build/
-target/
-
 # Dependencies
-.venv/
-venv/
 node_modules/
-.pnpm-store/
-.yarn/
-.yarn-cache/
-.npm/
-.bower/
-.dart_tool/
-.pub/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-*.bak
-*.~
-*~
 
 # Environment
 .env
 .env.local
-.env.*
-!.env.example
-!.env.sample
+*.env.*
 
-# Editors
+# Build outputs
+dist/
+build/
+target/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-selfcheck.json
+
+# Logs
+*.log
+
+# Coverage
+.coverage
+coverage/
+htmlcov/
+.nyc_output
+
+# IDE
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
-*.code-workspace
-.project
-.classpath
-.settings/
+*.swp
+*.swo
+*.tmp
 
 # OS
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
-*.DS_Store
-.Spotlight-V100
-.Trashes
 
-# Python
-*.pyc
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-.coverage
-htmlcov/
-coverage/
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-target/
-.gradle/
-build/
-
-# C/C++
-*.o
-*.obj
-*.a
-*.lib
-*.so
-*.dll
-*.dylib
-*.exe
-*.out
-
-# Go
-*.exe
-*.test
-*.prof
-go.mod
-go.sum
-
-# Rust
-Cargo.lock
-target/
-
-# Ruby
-*.gem
-*.rbc
-.bundle/
-vendor/bundle/
-vendor/cache/
-vendor/gems/
-vendor/ruby/
-
-# Compression
+# Compressed
 *.zip
 *.gz
 *.tar
@@ -134,19 +67,4 @@ vendor/ruby/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
-# Coverage
-coverage/
-htmlcov/
-.coverage*
-
-# Testing
-*.pytest_cache/
-.jest/
-.nyc_output/
-
-# Distribution
-dist/
-build/
-*.egg-info/
 ```
