@@ -79,7 +79,7 @@ export const StationLogo = memo(function StationLogo({
     
     if (radio.favicon && !hasLocalLogo && !loadAttemptedRef.current) {
       loadAttemptedRef.current = true;
-      const prefetchLevel = priority === "high" ? "hot" : priority === "low" ? "warm" : "warm" as const;
+      const prefetchLevel = priority === "high" ? "hot" : priority === "normal" ? "warm" : "cold" as const;
       void prefetchLogo(radio.favicon, prefetchLevel);
     }
   }, [hasLocalLogo, radio.favicon, radio.id, sourceKey, priority]);
