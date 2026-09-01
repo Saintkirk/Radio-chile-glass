@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { devLogger } from "./dev-logger";
 
 export type Radio = {
   id: string;
@@ -85,7 +86,7 @@ export function validateStreamUrl(url: string): { valid: boolean; reason?: strin
     
     // Warn about HTTP (non-secure) streams
     if (parsed.protocol === 'http:') {
-      console.warn(`Stream HTTP detectado (potencial mixed-content): ${url}`);
+      devLogger.warn(`Stream HTTP detectado (potencial mixed-content): ${url}`);
     }
     
     // Check for valid hostname
@@ -136,7 +137,7 @@ export function normalizeRemoteStations(input: RemoteStation[]): Radio[] {
     // Validate stream URL before processing
     const validation = validateStreamUrl(streamUrl);
     if (!validation.valid) {
-      console.warn(`Stream inválido para ${station.name}: ${validation.reason}`);
+      devLogger.warn(`Stream inválido para ${station.name}: ${validation.reason}`);
       return;
     }
     
@@ -160,12 +161,29 @@ export function mergeCatalog(remote: Radio[]): Radio[] {
 }
 
 export async function fetchRemoteCatalog(): Promise<Radio[]> {
-  const response = await fetch(CATALOG_URL, { headers: { Accept: "application/json" } });
-  if (!response.ok) throw new Error(`Radio Browser respondió ${response.status}`);
-  const payload = await response.json() as RemoteStation[];
-  const normalized = normalizeRemoteStations(payload);
-  if (!normalized.length) throw new Error("La fuente remota no devolvió radios válidas");
-  return mergeCatalog(normalized);
+  // Timeout explícito de 8s para evitar bloqueos prolongados en redes lentas
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8_000);
+  
+  try {
+    const response = await fetch(CATALOG_URL, { 
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) throw new Error(`Radio Browser respondió ${response.status}`);
+    const payload = await response.json() as RemoteStation[];
+    const normalized = normalizeRemoteStations(payload);
+    if (!normalized.length) throw new Error("La fuente remota no devolvió radios válidas");
+    return mergeCatalog(normalized);
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Timeout al cargar catálogo remoto (8s)');
+    }
+    throw error;
+  }
 }
 
 export async function loadCatalog(): Promise<{ radios: Radio[]; updatedAt: string | null; source: "remote" | "cache" | "local" }> {

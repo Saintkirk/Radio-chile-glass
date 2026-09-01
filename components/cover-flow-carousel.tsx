@@ -183,6 +183,7 @@ export function CoverFlowCarousel({
   const selectedIndexRef = useRef(selectedIndex);
   const isSpinningRef = useRef(false);
   const awaitingParentSyncRef = useRef(false);
+  const prefetchAbortRef = useRef<AbortController | null>(null);
 
   const safeActiveIndex = safeRadioIndex(radios.length, activeIndex);
   const renderIndex = safeRadioIndex(radios.length, selectedIndex);
@@ -297,10 +298,25 @@ export function CoverFlowCarousel({
 
   useEffect(() => {
     if (renderIndex < 0 || radios.length < 1) return;
+    
+    // Cancelar prefetch anterior si el índice cambió significativamente
+    if (prefetchAbortRef.current) {
+      prefetchAbortRef.current.abort();
+    }
+    
+    const controller = new AbortController();
+    prefetchAbortRef.current = controller;
+    
     const handle = setTimeout(() => {
-      void prefetchLogoWindow(radios, renderIndex, 5);
+      if (!controller.signal.aborted) {
+        void prefetchLogoWindow(radios, renderIndex, 5);
+      }
     }, 80);
-    return () => clearTimeout(handle);
+    
+    return () => {
+      clearTimeout(handle);
+      controller.abort();
+    };
   }, [radios, renderIndex]);
 
   useEffect(() => {

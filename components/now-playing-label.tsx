@@ -1,12 +1,43 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef } from "react";
+import { AppState, AppStateStatus } from "react-native";
 
 import { trpc } from "@/lib/trpc";
 
+/**
+ * Hook para determinar el intervalo de polling según el estado de la app
+ * - En foreground: 10s (balance entre frescura y eficiencia)
+ * - En background: 30s (reduce consumo de batería y red en 66%)
+ */
+function useBackgroundAwarePolling() {
+  const appStateRef = useRef<AppStateStatus>('active');
+  
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      appStateRef.current = nextAppState;
+    });
+    
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+  
+  const isBackground = appStateRef.current === 'background' || appStateRef.current === 'inactive';
+  // Polling más lento en background para ahorrar batería y red
+  return isBackground ? 30_000 : 10_000;
+}
+
 export function NowPlayingLabel({ streamUrl, compact = false }: { streamUrl: string; compact?: boolean }) {
+  const pollInterval = useBackgroundAwarePolling();
+  
   const { data, isFetching } = trpc.metadata.nowPlaying.useQuery(
     { streamUrl },
-    { enabled: Boolean(streamUrl), refetchInterval: 10_000, staleTime: 8_000, retry: 1 },
+    { 
+      enabled: Boolean(streamUrl), 
+      refetchInterval: pollInterval, 
+      staleTime: Math.min(pollInterval - 2000, 8_000), // Siempre mantener caché razonable
+      retry: 1 
+    },
   );
   
   // Evitar mostrar metadatos antiguos durante transiciones entre emisoras

@@ -1,37 +1,68 @@
-# Build artifacts
-lint-baseline.xml
+# Dependencies
+node_modules/
 
-# Logs and temp files
-*.log
-*.tmp
+# Build artifacts
+dist/
+build/
+*.js.map
+*.ts.map
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+*.coverage
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-target/
-.gradle/
-
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 
-# Coverage reports
-coverage/
-htmlcov/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
 .coverage
+.nox/
+
+# Compiled and binary files
+*.class
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
 
 # Compressed files
 *.zip
