@@ -1,7 +1,33 @@
-# Android build artifacts
-lint-baseline.xml
+```
+# Build artifacts
+build/
+.gradle/
 
-# Compiled and binary files
+# Dependencies
+node_modules/
+venv/
+.venv/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Compiled files
 *.class
 *.o
 *.obj
@@ -11,63 +37,19 @@ lint-baseline.xml
 *.a
 *.out
 
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-target/
-.gradle/
-
-# Build directories
-build/
-dist/
-out/
-
-# Editor/IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# System files
-.DS_Store
-Thumbs.db
-.env
-.env.local
-*.env.*
-
-# Logs
-*.log
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Compressed files
+# Archives
 *.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
 *.tar.gz
 *.tar.bz2
 *.tar.xz
-*.tar.zst
+*.gz
+*.tgz
+*.rar
+*.7z
+*.xz
+*.bz2
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
