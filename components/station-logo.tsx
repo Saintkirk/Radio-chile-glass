@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { prefetchLogo } from "@/lib/logo-cache";
+import { prefetchLogo, type PrefetchLevel } from "@/lib/logo-cache";
 import { canCommitLogo, getLogoSourceKey } from "@/lib/logo-transition";
 import type { Radio } from "@/lib/radios";
 
@@ -79,7 +79,7 @@ export const StationLogo = memo(function StationLogo({
     
     if (radio.favicon && !hasLocalLogo && !loadAttemptedRef.current) {
       loadAttemptedRef.current = true;
-      const prefetchLevel = priority === "high" ? "hot" : priority === "normal" ? "warm" : "cold" as const;
+      const prefetchLevel: PrefetchLevel = priority === "high" ? "hot" : "warm";
       void prefetchLogo(radio.favicon, prefetchLevel);
     }
   }, [hasLocalLogo, radio.favicon, radio.id, sourceKey, priority]);
