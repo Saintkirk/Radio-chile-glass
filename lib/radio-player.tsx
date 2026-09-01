@@ -369,6 +369,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         activeCandidate.play();
         // La intención se refleja con el indicador de conexión; el estado de
         // reproducción y la MediaSession esperan la confirmación nativa.
+        // Mantener isLoading=true hasta que el listener confirme playing o error.
         setIsPlaying(false);
         setIsLoading(true);
         updateNativeMediaState(false);
@@ -605,7 +606,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       }
     });
     return () => subscription.remove();
-  }, [isPlaying, setPlayingState]);
+    // Suscribirse solo una vez al montar, usando refs para acceder a estado actualizado
+  }, []);
 
   useEffect(() => {
     const subscription = subscribeToNativeMediaActions((action) => {

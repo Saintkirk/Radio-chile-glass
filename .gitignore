@@ -1,31 +1,31 @@
-# Android build artifacts
-*.apk
-*.aar
-*.jar
-*.dex
-*.so
+```
+# Dependencies
+node_modules/
 
-# Android dependency directories
-app/build/
-.gradle/
-local.properties
+# Vite/Vitest cache
+node_modules/.vite/
 
-# IDE files
-.idea/
-*.iml
-*.iws
-.vscode/
-
-# Log files
+# Logs and temp files
 *.log
-
-# Temp files
 *.tmp
-*.temp
-.DS_Store
-Thumbs.db
+*.swp
 
-# Environment files
+# Environment
 .env
 .env.local
-*.env.*
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+.env
+```
