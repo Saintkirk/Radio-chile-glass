@@ -4,7 +4,7 @@ import { getLogoPrefetchUris } from "@/lib/logo-prefetch";
 
 type LogoSource = { id: string; favicon?: string | null };
 type LogoCache = Record<string, { uri: string; updatedAt: number }>;
-type PrefetchLevel = "hot" | "warm";
+export type PrefetchLevel = "hot" | "warm";
 
 const CACHE_KEY = "radio-logo-cache-v3";
 const HOT_MEMORY_LIMIT = 5;
