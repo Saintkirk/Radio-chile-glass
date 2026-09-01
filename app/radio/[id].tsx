@@ -65,7 +65,7 @@ export default function RadioDetailScreen() {
     // que provocan pérdida de portadas y saltos visuales.
     if (isLoading || !currentRadio || currentRadio.id === selectedRadioId) return;
     setSelectedRadioId(currentRadio.id);
-  }, [currentRadio?.id, isLoading, selectedRadioId]);
+  }, [currentRadio?.id, isLoading, selectedRadioId]); // eslint-disable-line react-hooks/exhaustive-deps
   const hasMeasuredOrigin = [originX, originY, originWidth, originHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const hasMeasuredContainer = [containerX, containerY, containerWidth, containerHeight].every((value) => value !== undefined && Number.isFinite(Number(value)));
   const sourceViewportWidth = Number(viewportWidth) || windowWidth;
@@ -125,6 +125,20 @@ export default function RadioDetailScreen() {
     const nextRadio = radios[nextIndex];
     selectRadio(nextRadio);
   }, [currentIndex, radios, selectRadio]);
+  
+  // Optimizar navegación con teclado y gestos
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') changeRadio(-1);
+      else if (event.key === 'ArrowRight') changeRadio(1);
+      else if (event.key === ' ' || event.key === 'Enter') togglePlay();
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [changeRadio, togglePlay]);
   const dismissDetail = useCallback(() => {
     if (router.canGoBack()) router.back();
     else router.replace("/");
@@ -132,7 +146,13 @@ export default function RadioDetailScreen() {
 
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 10 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
-    onPanResponderGrant: () => dismissY.stopAnimation(),
+    onPanResponderGrant: () => {
+      dismissY.stopAnimation();
+      // Feedback háptico al iniciar el gesto de dismiss
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(8);
+      }
+    },
     onPanResponderMove: (_, gesture) => dismissY.setValue(Math.max(0, gesture.dy)),
     onPanResponderRelease: (_, gesture) => {
       if (gesture.dy > 100 || gesture.vy > 0.8) {

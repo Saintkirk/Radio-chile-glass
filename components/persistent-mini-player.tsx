@@ -21,16 +21,24 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
   const progress = useRef(new Animated.Value(currentRadio ? 1 : 0)).current;
   const containerRef = useRef<View>(null);
   const logoRef = useRef<View>(null);
+  const lastRadioIdRef = useRef<string | null>(currentRadio?.id ?? null);
 
   useEffect(() => {
     let active = true;
     if (currentRadio) {
-      setMiniRadio(currentRadio);
+      // Solo actualizar si realmente cambió la emisora para evitar re-renders innecesarios
+      if (currentRadio.id !== lastRadioIdRef.current) {
+        lastRadioIdRef.current = currentRadio.id;
+        setMiniRadio(currentRadio);
+      }
       Animated.timing(progress, { toValue: 1, duration: 240, useNativeDriver: true }).start();
       return () => { active = false; };
     }
     Animated.timing(progress, { toValue: 0, duration: 200, useNativeDriver: true }).start(({ finished }) => {
-      if (finished && active) setMiniRadio(null);
+      if (finished && active) {
+        lastRadioIdRef.current = null;
+        setMiniRadio(null);
+      }
     });
     return () => { active = false; };
   }, [currentRadio, progress]);

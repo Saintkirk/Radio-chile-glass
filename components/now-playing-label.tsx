@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useMemo, useEffect } from "react";
 
 import { trpc } from "@/lib/trpc";
 

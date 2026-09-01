@@ -257,25 +257,26 @@ export function CoverFlowCarousel({
 
   useEffect(() => {
     if (safeActiveIndex < 0) return;
-    // Solo sincronizar si el índice externo difiere y no estamos en medio de
-    // una animación interna o esperando confirmación del padre.
+    // Solo sincronizar si el índice externo difiere significativamente y no estamos
+    // en medio de una animación interna o esperando confirmación del padre.
     if (safeActiveIndex === selectedIndexRef.current) {
       awaitingParentSyncRef.current = false;
       return;
     }
-    // Durante el buffering/loading o selección manual, evitar forzar sincronización
-    // que causa saltos visuales y pérdida de portadas en el carrusel.
-    // La sincronización solo debe ocurrir cuando el usuario cambia manualmente
-    // desde otro componente (no durante transiciones internas del carrusel).
+    // Durante el buffering/loading, evitar forzar sincronización que causa saltos
+    // visuales y pérdida de portadas en el carrusel. La sincronización solo debe
+    // ocurrir cuando hay un cambio real de emisora desde el player global.
     if (isSpinningRef.current || awaitingParentSyncRef.current || isLoading) return;
     
     // Evitar sincronización espuria cuando el carrusel ya está en la posición correcta
     // pero el padre aún no ha confirmado el cambio. Esto previene que las portadas
-    // se pierdan al volver a una emisora anterior.
+    // se pierdan al volver a una emisora anterior o durante actualizaciones de estado.
     const indexDiff = Math.abs(safeActiveIndex - selectedIndexRef.current);
-    if (indexDiff > 0 && indexDiff < radios.length / 2) {
-      // El cambio es pequeño, probablemente una actualización de estado del player,
-      // no un cambio real de emisora. Ignorar para mantener estabilidad visual.
+    const normalizedDiff = Math.min(indexDiff, radios.length - indexDiff);
+    
+    // Solo sincronizar si la diferencia es significativa (más de 1 posición)
+    // o si estamos en los extremos del catálogo circular
+    if (normalizedDiff > 1 && normalizedDiff < radios.length - 1) {
       return;
     }
     
