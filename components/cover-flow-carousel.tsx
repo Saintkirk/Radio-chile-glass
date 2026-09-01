@@ -258,30 +258,43 @@ export function CoverFlowCarousel({
 
   useEffect(() => {
     if (safeActiveIndex < 0) return;
-    // Solo sincronizar si el índice externo difiere y no estamos en medio de
-    // una animación interna o esperando confirmación del padre.
+    
+    // Si el índice externo coincide con el interno, marcar como sincronizado y salir
     if (safeActiveIndex === selectedIndexRef.current) {
       awaitingParentSyncRef.current = false;
       return;
     }
-    // Durante el buffering/loading o selección manual, evitar forzar sincronización
-    // que causa saltos visuales y pérdida de portadas en el carrusel.
-    // La sincronización solo debe ocurrir cuando el usuario cambia manualmente
-    // desde otro componente (no durante transiciones internas del carrusel).
-    if (isSpinningRef.current || awaitingParentSyncRef.current || isLoading) return;
     
-    // Evitar sincronización espuria cuando el carrusel ya está en la posición correcta
-    // pero el padre aún no ha confirmado el cambio. Esto previene que las portadas
-    // se pierdan al volver a una emisora anterior.
-    const indexDiff = Math.abs(safeActiveIndex - selectedIndexRef.current);
-    if (indexDiff > 0 && indexDiff < radios.length / 2) {
-      // El cambio es pequeño, probablemente una actualización de estado del player,
-      // no un cambio real de emisora. Ignorar para mantener estabilidad visual.
+    // Durante animaciones internas (spin o drag), evitar sincronización espuria
+    if (isSpinningRef.current || awaitingParentSyncRef.current) {
       return;
     }
     
-    selectedIndexRef.current = safeActiveIndex;
-    setSelectedIndex(safeActiveIndex);
+    // Durante buffering/loading, NO sincronizar para evitar saltos visuales
+    // El estado isLoading indica que el player está cargando una emisora,
+    // pero el carrusel debe mantener su posición hasta que la carga complete
+    if (isLoading) {
+      return;
+    }
+    
+    // Solo sincronizar si hay un cambio significativo de emisora
+    // (no por actualizaciones menores de estado del player)
+    const wrappedSafeIndex = wrapCarouselIndex(safeActiveIndex, radios.length);
+    const wrappedSelectedIndex = wrapCarouselIndex(selectedIndexRef.current, radios.length);
+    const indexDiff = Math.abs(wrappedSafeIndex - wrappedSelectedIndex);
+    
+    // Calcular distancia circular mínima en el carrusel
+    const circularDiff = Math.min(indexDiff, radios.length - indexDiff);
+    
+    // Ignorar cambios pequeños (< 2 posiciones) que probablemente son
+    // actualizaciones de estado del player, no cambios reales de emisora
+    if (circularDiff > 0 && circularDiff < 2) {
+      return;
+    }
+    
+    // Sincronizar solo para cambios deliberados desde otro componente
+    selectedIndexRef.current = wrappedSafeIndex;
+    setSelectedIndex(wrappedSafeIndex);
     wheelOffset.set(0);
   }, [safeActiveIndex, wheelOffset, isLoading, radios.length]);
 
