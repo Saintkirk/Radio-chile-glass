@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Native Gradle)
 
 on:
   push:
@@ -29,21 +29,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Configure EAS
+      - name: Build Release APK
         run: |
-          echo "${{ secrets.EXPO_TOKEN }}" | eas login --token
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build Android APK
-        run: eas build --platform android --profile preview --non-interactive --output app-release.apk
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30

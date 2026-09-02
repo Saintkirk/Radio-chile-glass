@@ -80,30 +80,35 @@ jobs:
         working-directory: android
         run: |
           set -euo pipefail
+          if [ ! -f "gradlew" ] || [ ! -x "gradlew" ]; then
+            echo "Gradle wrapper script missing or not executable"
+            exit 1
+          fi
           if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ] || [ ! -s "gradle/wrapper/gradle-wrapper.jar" ]; then
             echo "Gradle wrapper JAR missing or empty, regenerating..."
             rm -rf gradle/wrapper
             mkdir -p gradle/wrapper
-            # Download gradle-wrapper.jar from official Gradle distribution
-            GRADLE_VERSION=$(grep distributionUrl gradle/wrapper/gradle-wrapper.properties | sed 's/.*gradle-\([0-9.]*\).*/\1/')
+            GRADLE_VERSION=$(grep distributionUrl gradle/wrapper/gradle-wrapper.properties 2>/dev/null | sed 's/.*gradle-\([0-9.]*\)-.*/\1/' || echo "8.10.2")
             echo "Downloading Gradle wrapper for version $GRADLE_VERSION"
             curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
               "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" || \
             curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
-              "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+              "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" && unzip -p gradle-${GRADLE_VERSION}-bin.zip "gradle-${GRADLE_VERSION}/lib/gradle-launcher-*.jar" > gradle/wrapper/gradle-wrapper.jar || \
+            echo "Using default wrapper"
+            rm -rf gradle-${GRADLE_VERSION}*
           fi
           chmod +x gradlew
           ls -lh gradle/wrapper/
+          cat gradle/wrapper/gradle-wrapper.properties
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-cleanup: on-success
+          gradle-version: wrapper
 
       - name: Build signed release APK with Gradle
         working-directory: android
-        env:
-          GRADLE_OPTS: "-Xmx1024m -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
         run: |
           set -euo pipefail
           ./gradlew --no-daemon --stacktrace --console=plain assembleRelease

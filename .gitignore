@@ -1,3 +1,4 @@
-```
-node_modules/
+```yaml
+# Configuration file for GitHub Actions workflow
+!.github/workflows/build-android.yml
 ```
