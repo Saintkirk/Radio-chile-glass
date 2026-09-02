@@ -23,6 +23,11 @@
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
+        
+        <!-- Configuración de pinning para dominios críticos -->
+        <pin-set expiration="2025-12-31">
+            <!-- Los pins se pueden agregar aquí para mayor seguridad -->
+        </pin-set>
     </domain-config>
     
     <!-- Configuración específica para debugging (solo debug builds) -->
