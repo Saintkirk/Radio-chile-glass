@@ -2,16 +2,113 @@
 # Dependencies
 node_modules/
 
-# Environment
-.env
-.env.local
-*.env.*
+# Build artifacts
+build/
+dist/
+target/
+
+# Compiled files
+*.pyc
+__pycache__/
 
 # Logs
 *.log
 
-# Build artifacts
-dist/
-build/
-*.js.map
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Gradle
+.gradle/
+!node_modules/@react-native/gradle-plugin/.gradle/
+!node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/
+!node_modules/expo-modules-core/expo-module-gradle-plugin/.gradle/
+
+# Expo cache
+.expo/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# Java/Android
+*.class
+*.jar
+*.war
+*.ear
+*.apk
+*.aar
+
+# C/C++
+*.o
+*.a
+*.obj
+*.out
+*.dll
+*.so
+
+# Rust
+Cargo.lock
+
+# Go
+*.exe
+*.test
+*.prof
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+# Testing
+*.pytest_cache/
+.mypy_cache/
+
 ```
