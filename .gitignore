@@ -1,8 +1,17 @@
 ```
+# Dependencies
 node_modules/
-*.log
+
+# Environment
 .env
 .env.local
-.env.*
-package-lock.json
+*.env.*
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+*.js.map
 ```
