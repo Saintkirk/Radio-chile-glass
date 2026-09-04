@@ -13,12 +13,15 @@ config.transformer.minifierConfig = {
   },
 };
 
-// Exclude DOM polyfills from the bundle that cause Hermes compilation errors
+// Fix for React Native 0.81.5 DOM polyfills - allow React Native's internal webapis
+// but block external DOM polyfills that cause conflicts
 config.resolver.blockList = [
-  /node_modules\/.*\/dom\/.*/,
   /node_modules\/react-native-dom\/.*/,
   /node_modules\/jsdom\/.*/,
 ];
+
+// Ensure React Native's internal webapis are properly resolved
+config.resolver.unstable_enablePackageExports = true;
 
 module.exports = withNativeWind(config, {
   input: "./global.css",
