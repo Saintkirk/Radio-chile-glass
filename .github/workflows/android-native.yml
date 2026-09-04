@@ -100,9 +100,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Clear Metro cache
-        run: rm -rf node_modules/.cache
-
       - name: Ensure Gradle wrapper exists
         working-directory: android
         run: |
