@@ -38,7 +38,7 @@ jobs:
         run: pnpm install --prefer-offline
 
       - name: Prebuild native Android project
-        run: npx expo prebuild --platform android --clean
+        run: npx expo prebuild --platform android --clean --no-install
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -47,7 +47,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace --info
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
