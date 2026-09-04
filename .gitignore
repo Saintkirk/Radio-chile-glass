@@ -1,44 +1,46 @@
 ```
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Build artifacts
-dist/
-build/
-target/
-
-# Temporary files
-*.tmp
-*.temp
-
-# Logs
-*.log
-
-# Environment files
+# Environment
 .env
 .env.local
 .env.*
 
-# Editors
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+target/
+.gradle/
+
+# Compiled and build artifacts
+*.pyc
+*.class
+*.o
+*.exe
+*.dll
+*.so
+*.a
+*.obj
+*.out
+dist/
+build/
+coverage/
+htmlcov/
+.coverage
+
+# Editor/IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Package manager
-package-lock.json
-.yarn/
-node_modules/
+# Logs
+*.log
 
-# OS generated files
+# System files
 .DS_Store
 Thumbs.db
-
-# Testing
-coverage/
-.nyc_output/
-.vite/
-
-# Compiled/native modules
-*.node
 ```

@@ -82,11 +82,26 @@ jobs:
       - name: Fix React Native DOM setup
         run: node scripts/fix-react-native-dom-setup.js
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Clear Metro cache
-        run: |
-          rm -rf node_modules/.cache
-          rm -rf android/app/build
-          pnpm exec expo start --reset-cache 2>/dev/null || true
+        run: rm -rf node_modules/.cache
 
       - name: Ensure Gradle wrapper exists
         working-directory: android
@@ -115,10 +130,14 @@ jobs:
       - name: Build signed release APK with Gradle
         working-directory: android
         env:
-          GRADLE_OPTS: "-Xmx1024m -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
+          GRADLE_OPTS: "-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+UseParallelGC -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2"
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon --stacktrace --console=plain clean assembleRelease
+          ./gradlew --stacktrace --console=plain assembleRelease \
+            --max-workers=2 \
+            -Dorg.gradle.parallel=true \
+            -Dorg.gradle.caching=true \
+            -Dorg.gradle.jvmargs="-Xmx2048m -XX:+UseParallelGC"
 
       - name: Verify APK and write provenance
         run: |
