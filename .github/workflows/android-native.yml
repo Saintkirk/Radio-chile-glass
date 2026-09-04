@@ -76,6 +76,9 @@ jobs:
       - name: Generate native Android project
         run: pnpm exec expo prebuild --platform android --no-install
 
+      - name: Fix React Native DOM setup
+        run: node scripts/fix-react-native-dom-setup.js
+
       - name: Ensure Gradle wrapper exists
         working-directory: android
         run: |
