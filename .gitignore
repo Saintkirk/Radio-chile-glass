@@ -1,90 +1,89 @@
-```yaml
-# Configuration file for ignoring files in Git
-
-# GitHub workflow artifacts (if any)
+# CI/CD
 .github/
-
-# Logs
-*.log
 
 # Environment variables
 .env
 .env.local
-*.env.*
+.env.*
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# Logs
+*.log
 
-# Virtual environments
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# IDEs
-.vscode/
-.idea/
+# Temporary files
+*.tmp
 *.swp
 *.swo
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Icon?
-*/
-
-# Coverage
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.python-version
+.mypy_cache/
+.pytest_cache/
 .coverage
 coverage/
 htmlcov/
 
-# Testing
-.pytest_cache/
-.mypy_cache/
-.tox/
-.nox/
+# Build artifacts
+dist/
+build/
+*.egg
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Node.js
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+nyc_output/
+coverage/
+.nyc_output/
 
-# Build outputs
-target/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+*.apk
+*.aar
+*.so
+*.dex
+*.jar
 build/
-dist/
-out/
-bundle/
-*.min.js
-*.min.css
+.gradle/
+local.properties
+captures/
+.externalNativeBuild
+.gradle-wrapper.properties
 
-# Compression
+# Gradle
+.gradle/
+.gradle-wrapper/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.tar.gz
+hs_err_pid*
+
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -103,22 +102,7 @@ bundle/
 *.Z
 *.lz
 *.lzo
-
-# Temporary files
-*.tmp
-*~
-```
-
-Wait, I need to reconsider this. Looking at the input again:
-
-### Added files: []
-### Deleted files: []
-### Modified files: ['.github/workflows/build-android.yml']
-
-The only change is modifying a GitHub Actions workflow file. This doesn't indicate any build artifacts, dependencies, or temporary files being created. The current .gitignore appears to be empty, so there's no existing content to preserve.
-
-Since there are only source/config files being modified (the YAML workflow file), and no build artifacts or dependency-related files in the changes, the result should be empty.
-
-```yaml
-
-```
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
