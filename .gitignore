@@ -3,70 +3,23 @@
 node_modules/
 
 # Build outputs
-build/
 dist/
+build/
 *.js.map
 
-# Environment variables
+# Environment
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editor files
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
 
 # Logs
 *.log
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/modules/
-.DS_Store
-Thumbs.db
-
-# Mobile specific
-*.apk
-*.aab
-*.ipa
-*.aar
-
-# Metro bundler
-metro-cache/
-*.bundle
-
-# Android
-*.keystore
-local.properties
-
-# iOS
-Pods/
-*.xcworkspace
-build/
-
 # Temporary files
-.DS_Store
-Thumbs.db
 *.tmp
-*.temp
+*.swp
 ```

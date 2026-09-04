@@ -19,6 +19,7 @@ config.resolver.blockList = [
   /node_modules\/react-native-dom\/.*/,
   /node_modules\/jsdom\/.*/,
   /node_modules\/react-native\/src\/private\/setup\/setUpDOM\.js/,
+  /node_modules\/react-native\/src\/private\/setup\/setUpDefaultReactNativeEnvironment\.js/,
   /node_modules\/react-native\/src\/webapis\/dom\/.*/,
 ];
 
