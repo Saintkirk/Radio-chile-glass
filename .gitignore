@@ -1,4 +1,87 @@
 ```yaml
-# Configuration file for GitHub Actions workflow
-!.github/workflows/build-android.yml
+# GitHub workflow artifacts
+.github/workflows/_temp/
+.github/workflows/_actions/
+.github/workflows/_tool/
+
+# Android build artifacts
+*.apk
+*.aab
+*.aar
+*.so
+*.dex
+*.jar
+*.class
+
+# Build directories
+build/
+dist/
+out/
+target/
+
+# Dependencies
+node_modules/
+vendor/
+libs/
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python artifacts (if applicable)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Compiled binaries
+*.exe
+*.dll
+*.dylib
+*.o
+*.obj
+*.a
+*.lib
+*.out
+
+# Archives
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
