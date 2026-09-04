@@ -2,27 +2,49 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
+# Build outputs
 build/
 dist/
-*.jar
+*.js.map
 
-# Gradle
-.gradle/
-*/build/
+# Environment
+.env
+.env.local
+.env.*
 
-# React Native
-node_modules/react-native-css-interop/.cache/
-
-# Expo
-node_modules/expo-modules-autolinking/android/expo-gradle-plugin/*/build/
-node_modules/expo-modules-core/expo-module-gradle-plugin/build/
+# Editors
+.vscode/
+.idea/
 
 # Logs
 *.log
-hs_err_pid*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.python-version
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
 
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# MyPy cache
+.mypy_cache/
 ```
