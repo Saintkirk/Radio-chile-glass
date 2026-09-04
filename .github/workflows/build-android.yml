@@ -37,9 +37,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --prefer-offline
 
-      - name: Prebuild native Android project
-        run: npx expo prebuild --platform android --clean --no-install
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
