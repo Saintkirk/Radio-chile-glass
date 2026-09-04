@@ -1,4 +1,4 @@
-```
-.gradle/
-local.properties
+```yaml
+# Configuration file for GitHub Actions workflow
+!.github/workflows/build-android.yml
 ```
