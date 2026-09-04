@@ -35,12 +35,6 @@ jobs:
       - name: Fix React Native DOM setup
         run: node scripts/fix-react-native-dom-setup.js
 
-      - name: Clear Metro cache
-        run: |
-          rm -rf node_modules/.cache
-          rm -rf android/app/build
-          npx expo start --reset-cache 2>/dev/null || true
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
@@ -48,7 +42,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew clean assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace --max-workers=2
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

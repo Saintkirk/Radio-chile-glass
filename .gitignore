@@ -1,8 +1,19 @@
 ```
+# CI/CD
+.github/
+
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
 
 # Dependencies
 node_modules/
@@ -11,40 +22,21 @@ venv/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
-.julia/
-zig*/
-julia-*/
+.coverage
 
 # Build artifacts
 dist/
 build/
 target/
+*.pyc
+*.class
 *.o
-*.obj
-*.out
 *.exe
 *.dll
 *.so
 *.a
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-
-# Editors
-.vscode/
-.idea/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
+*.obj
+*.out
 
 # Compressed files
 *.zip
@@ -69,4 +61,16 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Coverage
+coverage/
+htmlcov/
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
 ```
