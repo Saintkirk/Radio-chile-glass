@@ -37,7 +37,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Install dependencies
-        run: pnpm install --prefer-offline
+        run: pnpm install --no-frozen-lockfile --prefer-offline
 
       - name: Generate native Android project
         run: npx expo prebuild --platform android --clean --no-install
