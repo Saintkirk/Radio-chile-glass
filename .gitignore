@@ -1,4 +1,28 @@
 ```
+# Dependencies
+node_modules/
+
+# Build artifacts
+build/
+dist/
+*.jar
+
+# Gradle
 .gradle/
-local.properties
+*/build/
+
+# React Native
+node_modules/react-native-css-interop/.cache/
+
+# Expo
+node_modules/expo-modules-autolinking/android/expo-gradle-plugin/*/build/
+node_modules/expo-modules-core/expo-module-gradle-plugin/build/
+
+# Logs
+*.log
+hs_err_pid*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
