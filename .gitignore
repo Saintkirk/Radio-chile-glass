@@ -1,4 +1,16 @@
 ```
-.gradle/
-local.properties
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
 ```

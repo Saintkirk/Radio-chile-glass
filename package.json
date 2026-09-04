@@ -22,7 +22,8 @@
     "build:android:release": "eas build --profile production-apk --platform android",
     "build:android:split": "eas build --profile release-split-per-abi --platform android",
     "build:android:bundle": "eas build --profile production-bundle --platform android",
-    "prebuild:clean": "pnpm clean:deep && pnpm install && npx expo prebuild --clean"
+    "prebuild:clean": "pnpm clean:deep && pnpm install && npx expo prebuild --clean",
+    "postinstall": "node scripts/fix-react-native-dom-setup.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
