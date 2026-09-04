@@ -12,7 +12,7 @@ module.exports = function (api) {
     presets: [
       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
       "nativewind/babel",
-      ["@babel/preset-env", { targets: { hermes: "0.73.0" } }]
+      ["@babel/preset-env", { targets: { android: "current" } }]
     ],
     plugins,
   };
