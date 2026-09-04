@@ -79,6 +79,12 @@ jobs:
       - name: Fix React Native DOM setup
         run: node scripts/fix-react-native-dom-setup.js
 
+      - name: Clear Metro cache
+        run: |
+          rm -rf node_modules/.cache
+          rm -rf android/app/build
+          pnpm exec expo start --reset-cache 2>/dev/null || true
+
       - name: Ensure Gradle wrapper exists
         working-directory: android
         run: |
@@ -109,7 +115,7 @@ jobs:
           GRADLE_OPTS: "-Xmx1024m -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon --stacktrace --console=plain assembleRelease
+          ./gradlew --no-daemon --stacktrace --console=plain clean assembleRelease
 
       - name: Verify APK and write provenance
         run: |
