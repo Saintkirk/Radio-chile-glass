@@ -1,41 +1,74 @@
-```yaml
-name: Build Android
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+#Editor
+.vscode/
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-      with:
-        packages: |
-          platforms;android-30
-          build-tools;30.0.3
-          platform-tools
-          cmdline-tools
-    
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
-    
-    - name: Build debug APK
-      run: ./gradlew assembleDebug
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
-```
+#Dependencies
+node_modules/
+
+#Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+#Build outputs
+dist/
+build/
+*.egg-info/
+
+#Environment
+.env
+.env.local
+*.env.*
+
+#Temp files
+*.tmp
+*.swp
+*.swo
+
+#OS
+.DS_Store
+Thumbs.db
+
+#Logs
+*.log
+
+#Testing
+.coverage
+htmlcov/
+coverage/
+
+#IDE
+.idea/
+.vscode/
+
+#Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+#Bundler
+vendor/bundle/
+
+#Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
