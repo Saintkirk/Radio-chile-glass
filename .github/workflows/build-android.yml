@@ -18,19 +18,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: |
+          pnpm store prune
+          rm -rf node_modules .expo pnpm-lock.yaml
+          pnpm install
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Install dependencies
-        run: |
-          npm cache clean --force
-          rm -rf node_modules package-lock.json
-          npm install --legacy-peer-deps
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
