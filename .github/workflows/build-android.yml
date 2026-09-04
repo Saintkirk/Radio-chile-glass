@@ -27,16 +27,23 @@ jobs:
           java-version: '17'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm cache clean --force
+          npm ci --legacy-peer-deps
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Clean Gradle Build
+        run: |
+          cd android
+          ./gradlew clean
 
       - name: Build Release APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace --refresh-dependencies
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
