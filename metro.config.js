@@ -19,6 +19,7 @@ config.resolver.blockList = [
   /node_modules\/.*\/dom\/.*/,
   /node_modules\/react-native-dom\/.*/,
   /node_modules\/jsdom\/.*/,
+  /node_modules\/react-native\/src\/private\/setup\/setUpDOM\.js/, // Block React Native's DOM setup
 ];
 
 // Ensure React Native's internal src directory is resolvable
