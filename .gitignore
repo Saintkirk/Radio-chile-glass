@@ -1,1 +1,4 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a GitHub Actions workflow configuration file (`.github/workflows/build-android.yml`), which is a source/config file and should not be added to `.gitignore`.
+```yaml
+# Configuration file for GitHub Actions workflow
+!.github/workflows/build-android.yml
+```
