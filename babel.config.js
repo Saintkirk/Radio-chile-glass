@@ -6,9 +6,14 @@ module.exports = function (api) {
   // Add plugins to transpile private fields for Hermes compatibility
   plugins.push("@babel/plugin-transform-private-methods");
   plugins.push("@babel/plugin-transform-class-properties");
+  plugins.push("@babel/plugin-proposal-decorators", { legacy: true });
 
   return {
-    presets: [["babel-preset-expo", { jsxImportSource: "nativewind" }], "nativewind/babel"],
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+      ["@babel/preset-env", { targets: { hermes: "0.73.0" } }]
+    ],
     plugins,
   };
 };

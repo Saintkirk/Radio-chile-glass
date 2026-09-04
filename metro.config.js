@@ -13,6 +13,9 @@ config.transformer.minifierConfig = {
   },
 };
 
+// Set target for Hermes compiler to ensure proper transpilation
+config.transformer.babelTransformerPath = require.resolve('metro-react-native-babel-transformer');
+
 // Exclude DOM polyfills from the bundle that cause Hermes compilation errors
 config.resolver.blockList = [
   /node_modules\/.*\/dom\/.*/,
