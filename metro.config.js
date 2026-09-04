@@ -13,10 +13,8 @@ config.transformer.minifierConfig = {
   },
 };
 
-// Exclude DOM polyfills from the bundle that cause Hermes compilation errors
+// Only block jsdom - don't block React Native's internal DOM polyfills
 config.resolver.blockList = [
-  /node_modules\/.*\/dom\/.*/,
-  /node_modules\/react-native-dom\/.*/,
   /node_modules\/jsdom\/.*/,
 ];
 

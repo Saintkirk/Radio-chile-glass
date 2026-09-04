@@ -32,3 +32,32 @@ try {
   // Don't fail the build on this error, just warn
   console.warn('Continuing build despite DOM setup fix failure...');
 }
+
+// Also fix metro.config.js to not block React Native's internal DOM polyfills
+const metroConfigPath = path.join(__dirname, '../metro.config.js');
+
+try {
+  if (fs.existsSync(metroConfigPath)) {
+    let metroContent = fs.readFileSync(metroConfigPath, 'utf8');
+    
+    // Check if the overly broad blockList pattern exists that blocks React Native's internal DOM modules
+    if (metroContent.includes('/node_modules/') && metroContent.includes('/dom/')) {
+      // Replace with a more specific pattern that only blocks jsdom
+      const newBlockList = `config.resolver.blockList = [
+  /node_modules\\/jsdom\\/.*/,
+];`;
+      
+      metroContent = metroContent.replace(
+        /config\.resolver\.blockList\s*=\s*\[[\s\S]*?\];/,
+        newBlockList
+      );
+      fs.writeFileSync(metroConfigPath, metroContent, 'utf8');
+      console.log('✓ Fixed Metro config - removed overly broad DOM blocklist');
+    } else {
+      console.log('ℹ Metro config blockList already modified or not found, skipping...');
+    }
+  }
+} catch (error) {
+  console.error('Error fixing Metro config:', error.message);
+  console.warn('Continuing despite Metro config fix failure...');
+}
