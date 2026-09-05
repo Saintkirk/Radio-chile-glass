@@ -1,4 +1,42 @@
 ```
+# Dependencies
+node_modules/
+
+# Build artifacts
+android/build/
+node_modules/*/*/android/build/
+node_modules/*/*/android/.cxx/
+
+# Gradle
 .gradle/
-local.properties
+*/build/
+
+# React Native Codegen
+node_modules/*/*/build/generated/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Environment variables
+.env*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compressed files
+*.zip
+*.tar.gz
+*.tar
+*.gz
+*.rar
+*.7z
 ```
