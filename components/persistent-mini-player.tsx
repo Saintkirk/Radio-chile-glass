@@ -1,5 +1,5 @@
 import { usePathname, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { StationLogo } from "@/components/station-logo";
 import { AudioEqualizer } from "@/components/audio-equalizer";
@@ -10,7 +10,7 @@ import { useThemeContext } from "@/lib/theme-provider";
 import { useColors } from "@/hooks/use-colors";
 import { platformShadow } from "@/lib/platform-styles";
 
-export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number }) {
+export const PersistentMiniPlayer = memo(function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number }) {
   const router = useRouter();
   const pathname = usePathname();
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
@@ -26,10 +26,10 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
     let active = true;
     if (currentRadio) {
       setMiniRadio(currentRadio);
-      Animated.timing(progress, { toValue: 1, duration: 240, useNativeDriver: true }).start();
+      Animated.timing(progress, { toValue: 1, duration: 180, useNativeDriver: true }).start();
       return () => { active = false; };
     }
-    Animated.timing(progress, { toValue: 0, duration: 200, useNativeDriver: true }).start(({ finished }) => {
+    Animated.timing(progress, { toValue: 0, duration: 150, useNativeDriver: true }).start(({ finished }) => {
       if (finished && active) setMiniRadio(null);
     });
     return () => { active = false; };
@@ -51,11 +51,8 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
   };
 
   const displayRadio = currentRadio ?? miniRadio;
-  // Inicio ya muestra el control completo dentro de cada tarjeta; el mini reproductor
-  // permanece visible en las otras pestañas y rutas para no cubrir el Cover Flow.
   if (!displayRadio || pathname === "/" || pathname === "/(tabs)" || pathname.startsWith("/radio/")) return null;
   const lightMode = colorScheme === "light";
-  // bottomOffset ya incluye la altura de la barra y el inset inferior; no duplicarlo.
   const bottom = bottomOffset;
 
   return (
@@ -120,7 +117,7 @@ export function PersistentMiniPlayer({ bottomOffset }: { bottomOffset: number })
       </Pressable>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: { position: "absolute", left: 16, right: 16, minHeight: 68, borderRadius: 20, backgroundColor: "#171D2BF7", borderWidth: 1, borderColor: "#FFFFFF22", padding: 9, flexDirection: "row", alignItems: "center", gap: 12, ...platformShadow({ color: "#000", opacity: 0.24, radius: 18, offsetY: 8, elevation: 8 }) },
