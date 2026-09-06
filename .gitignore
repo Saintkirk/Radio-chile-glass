@@ -1,11 +1,17 @@
-```
-# Dependencies
-node_modules/
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
 
-# Build outputs
-dist/
-build/
-target/
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
 
 # Python
 __pycache__/
@@ -13,43 +19,45 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-env/
 venv/
 .venv/
-.ENV
-.ENV.*
-.venv.bak/
-env.bak/
-
-# Logs
-*.log
-
-# Environment variables
 .env
-.env.local
-.env.*
+pyproject.toml
+poetry.lock
+*.egg-info/
 
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+.nuxt/
 
-# OS generated
+# Build outputs
+dist/
+build/
+target/
+out/
+_output/
+
+# OS generated files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Icon?
+.directory
+*.nfs*
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
 
-# MyPy
-.mypy_cache/
-
-# PyTest
+# Testing
 .pytest_cache/
+.mypy_cache/
+.tox/
 
 # Compressed files
 *.zip
@@ -70,4 +78,7 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-```
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst

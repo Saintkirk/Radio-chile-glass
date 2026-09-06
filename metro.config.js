@@ -16,10 +16,14 @@ config.transformer.minifierConfig = {
 // Exclude DOM polyfills from the bundle that cause Hermes compilation errors
 config.resolver.blockList = [
   /node_modules\/react-native\/src\/private\/setup\/setUpDOM\.js$/,
+  /node_modules\/react-native\/src\/private\/setup\/setUpDefaultReactNativeEnvironment\.js$/,
   /node_modules\/.*\/dom\/.*/,
   /node_modules\/react-native-dom\/.*/,
   /node_modules\/jsdom\/.*/,
 ];
+
+// Prevent React Native from auto-importing DOM setup
+config.resolver.unstable_enablePackageExports = false;
 
 module.exports = withNativeWind(config, {
   input: "./global.css",
