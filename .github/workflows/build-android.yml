@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Run expo prebuild
+        run: npx expo prebuild --clean --yes
+
       - name: Clear Metro and Gradle caches
         run: |
           rm -rf node_modules/.cache
