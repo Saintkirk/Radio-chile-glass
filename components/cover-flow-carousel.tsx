@@ -20,6 +20,7 @@ import type { Radio } from "@/lib/radio-player";
 import { safeRadioIndex, spinLandingIndex, wrapCarouselIndex } from "@/lib/player-utils";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
 import { prefetchLogoWindow } from "@/lib/logo-cache";
+import { useThemeContext } from "@/lib/theme-provider";
 
 const CARD_SIZE = 214;
 const CARD_STEP = 118;
@@ -176,6 +177,8 @@ export function CoverFlowCarousel({
   currentRadioId?: string;
   lightMode?: boolean;
 }) {
+  const { visualTheme } = useThemeContext();
+  const studioAccent = visualTheme.accent;
   const wheelOffset = useSharedValue(0);
   const spinProgress = useSharedValue(0);
   const spinning = useSharedValue(0);
@@ -381,8 +384,8 @@ export function CoverFlowCarousel({
               />
             );
           })}
-          <View style={[styles.selectionMarker, { borderColor: `${active.accent}B8` }, nonInteractiveStyle]}>
-            <View style={[styles.markerPointer, { backgroundColor: active.accent }]} />
+          <View style={[styles.selectionMarker, { borderColor: `${studioAccent}B8` }, nonInteractiveStyle]}>
+            <View style={[styles.markerPointer, { backgroundColor: studioAccent }]} />
           </View>
         </View>
 
@@ -393,7 +396,7 @@ export function CoverFlowCarousel({
           <View style={styles.caption}>
             <Text style={[styles.stationName, lightMode && styles.stationNameLight]} numberOfLines={1}>{active.name}</Text>
             <Text style={[styles.stationMeta, lightMode && styles.stationMetaLight]}>{active.frequency}  ·  {active.genre}</Text>
-            <Text style={styles.counter}>{renderIndex + 1} / {radios.length}</Text>
+            <Text style={[styles.counter, { color: studioAccent }]}>{renderIndex + 1} / {radios.length}</Text>
           </View>
           <Pressable onPress={() => selectSlot(1)} disabled={isSpinning} accessibilityRole="button" accessibilityLabel="Next station" style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}>
             <IconSymbol name="chevron.right" size={20} color="#F5F3EE" />
