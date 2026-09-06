@@ -14,15 +14,21 @@ config.transformer.minifierConfig = {
 };
 
 // Exclude DOM polyfills from the bundle that cause Hermes compilation errors
+// Block React Native internal DOM setup files that reference non-existent modules
 config.resolver.blockList = [
-  /node_modules\/react-native\/src\/private\/setup\/setUpDOM\.js$/,
-  /node_modules\/react-native\/src\/private\/setup\/setUpDefaultReactNativeEnvironment\.js$/,
-  /node_modules\/.*\/dom\/.*/,
-  /node_modules\/react-native-dom\/.*/,
-  /node_modules\/jsdom\/.*/,
+  // Block React Native's internal DOM setup which references HTMLCollection and other DOM modules
+  /node_modules[\\/]react-native[\\/]src[\\/]private[\\/]setup[\\/]setUpDOM\.js$/,
+  /node_modules[\\/]react-native[\\/]src[\\/]private[\\/]setup[\\/]setUpDefaultReactNativeEnvironment\.js$/,
+  // Block any DOM-related modules that shouldn't be in mobile bundles
+  /node_modules[\\/].*?[\\/]dom[\\/].*?/,
+  /node_modules[\\/]react-native-dom[\\/].*?/,
+  /node_modules[\\/]jsdom[\\/].*?/,
+  // Block oldstylecollections specifically mentioned in the error
+  /node_modules[\\/]react-native[\\/]src[\\/]webapis[\\/]dom[\\/]oldstylecollections[\\/].*?/,
 ];
 
-// Prevent React Native from auto-importing DOM setup
+// Prevent React Native from auto-importing DOM setup via package exports
+// This is critical for RN 0.81+ which has conditional exports for DOM modules
 config.resolver.unstable_enablePackageExports = false;
 
 module.exports = withNativeWind(config, {
