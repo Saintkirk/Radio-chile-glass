@@ -1,4 +1,52 @@
 ```
+# Dependencies
+node_modules/
+
+# Build artifacts
+build/
+dist/
+*.apk
+*.aab
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Gradle
 .gradle/
+build/
+
+# Android
+*.apk
+*.aar
+*.aab
 local.properties
 ```
