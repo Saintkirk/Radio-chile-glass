@@ -33,6 +33,7 @@ jobs:
       CI: "1"
       NODE_VERSION: "22"
       PNPM_VERSION: "9.12.0"
+      GRADLE_VERSION: "8.14.3"
     steps:
       - name: Checkout exact revision
         uses: actions/checkout@v4
@@ -71,29 +72,74 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           pnpm exec expo config --type public --json > .expo-config.json
-          node -e 'const fs=require("fs"); const c=JSON.parse(fs.readFileSync(".expo-config.json","utf8")); if(c.version !== "1.0.2") throw new Error(`Unexpected app version: ${c.version}`); if(c.android?.package !== "com.app.radiochileglass") throw new Error("Unexpected Android package"); console.log(`Expo config OK: ${c.name} ${c.version} ${c.android.package}`);'
+          node -e '
+            const fs = require("fs");
+            const c = JSON.parse(fs.readFileSync(".expo-config.json", "utf8"));
+            if (c.version !== "1.0.2") throw new Error(`Unexpected app version: ${c.version}`);
+            if (c.android?.package !== "com.app.radiochileglass") throw new Error("Unexpected Android package");
+            console.log(`Expo config OK: ${c.name} ${c.version} ${c.android.package}`);
+          '
 
       - name: Generate native Android project
         run: pnpm exec expo prebuild --platform android --no-install
 
-      - name: Ensure Gradle wrapper exists
+      - name: Ensure complete Gradle wrapper
         working-directory: android
         run: |
           set -euo pipefail
-          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ] || [ ! -s "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Gradle wrapper JAR missing or empty, regenerating..."
-            rm -rf gradle/wrapper
-            mkdir -p gradle/wrapper
-            # Download gradle-wrapper.jar from official Gradle distribution
-            GRADLE_VERSION=$(grep distributionUrl gradle/wrapper/gradle-wrapper.properties | sed 's/.*gradle-\([0-9.]*\).*/\1/')
-            echo "Downloading Gradle wrapper for version $GRADLE_VERSION"
-            curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
-              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" || \
-            curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
-              "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+
+          # Always ensure the directory exists
+          mkdir -p gradle/wrapper
+
+          # Restore or create gradle-wrapper.properties if missing
+          if [ ! -f "gradle/wrapper/gradle-wrapper.properties" ]; then
+            echo "Creating gradle-wrapper.properties for Gradle ${GRADLE_VERSION}"
+            cat > gradle/wrapper/gradle-wrapper.properties <<EOF
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
           fi
+
+          # Read version from properties (never delete the file)
+          GRADLE_VER=$(grep -oP 'gradle-\K[0-9.]+' gradle/wrapper/gradle-wrapper.properties || echo "${GRADLE_VERSION}")
+          echo "Using Gradle wrapper version: ${GRADLE_VER}"
+
+          # Download official wrapper JAR only if missing or empty
+          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ] || [ ! -s "gradle/wrapper/gradle-wrapper.jar" ]; then
+            echo "Downloading official gradle-wrapper.jar for ${GRADLE_VER}..."
+            # Primary source: official Gradle GitHub tag
+            curl -fsSL --retry 3 --retry-delay 2 \
+              -o gradle/wrapper/gradle-wrapper.jar \
+              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VER}/gradle/wrapper/gradle-wrapper.jar" \
+            || {
+              echo "Primary download failed, trying services.gradle.org..."
+              # Fallback: extract from the distribution zip (more reliable long-term)
+              TMP_ZIP=$(mktemp)
+              curl -fsSL --retry 3 --retry-delay 2 \
+                -o "${TMP_ZIP}" \
+                "https://services.gradle.org/distributions/gradle-${GRADLE_VER}-bin.zip"
+              unzip -p "${TMP_ZIP}" "gradle-${GRADLE_VER}/lib/plugins/gradle-wrapper-*.jar" > gradle/wrapper/gradle-wrapper.jar 2>/dev/null \
+                || unzip -p "${TMP_ZIP}" "**/gradle-wrapper-*.jar" > gradle/wrapper/gradle-wrapper.jar
+              rm -f "${TMP_ZIP}"
+            }
+          fi
+
+          # Validate the JAR is a real zip/jar (not empty or HTML error page)
+          if ! unzip -t gradle/wrapper/gradle-wrapper.jar >/dev/null 2>&1; then
+            echo "ERROR: gradle-wrapper.jar is invalid or corrupted"
+            ls -la gradle/wrapper/
+            file gradle/wrapper/gradle-wrapper.jar || true
+            exit 1
+          fi
+
           chmod +x gradlew
           ls -lh gradle/wrapper/
+          echo "Gradle wrapper is ready."
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -103,7 +149,7 @@ jobs:
       - name: Build signed release APK with Gradle
         working-directory: android
         env:
-          GRADLE_OPTS: "-Xmx1024m -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
+          GRADLE_OPTS: "-Xmx1536m -XX:MaxMetaspaceSize=384m -XX:+UseSerialGC -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false"
         run: |
           set -euo pipefail
           ./gradlew --no-daemon --stacktrace --console=plain assembleRelease
