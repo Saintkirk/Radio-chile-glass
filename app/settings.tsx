@@ -10,6 +10,7 @@ import { useColors } from "@/hooks/use-colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_HAPTICS, loadHapticsPreferences, setHapticsPreference, type HapticPreferences } from "@/lib/haptics";
 import { FavoriteToast } from "@/components/favorite-toast";
+import { VISUAL_THEME_LIST, type VisualThemeId } from "@/lib/visual-themes";
 
 type PushPreferences = { programming: boolean; favorites: boolean };
 const DEFAULT_PUSH: PushPreferences = { programming: false, favorites: false };
@@ -17,28 +18,71 @@ const DEFAULT_PUSH: PushPreferences = { programming: false, favorites: false };
 export default function SettingsScreen() {
   const router = useRouter();
   const { backgroundPlaybackEnabled, setBackgroundPlaybackEnabled } = useRadioPlayer();
-  const { preference, colorScheme, setThemePreference } = useThemeContext();
+  const {
+    preference,
+    colorScheme,
+    setThemePreference,
+    visualThemeId,
+    visualTheme,
+    setVisualTheme,
+  } = useThemeContext();
   const colors = useColors(colorScheme);
   const [push, setPush] = useState<PushPreferences>(DEFAULT_PUSH);
   const [haptics, setHaptics] = useState<HapticPreferences>(DEFAULT_HAPTICS);
   const [permission, setPermission] = useState<Notifications.PermissionStatus | null>(null);
   const [hapticsNotice, setHapticsNotice] = useState<string | null>(null);
+  const [themeNotice, setThemeNotice] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, [toastTimer]);
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+
   useEffect(() => {
-    AsyncStorage.getItem("radio-push-preferences").then((value) => { if (value) setPush({ ...DEFAULT_PUSH, ...JSON.parse(value) }); }).catch(() => undefined);
+    AsyncStorage.getItem("radio-push-preferences").then((value) => {
+      if (value) setPush({ ...DEFAULT_PUSH, ...JSON.parse(value) });
+    }).catch(() => undefined);
     Notifications.getPermissionsAsync().then(({ status }) => setPermission(status)).catch(() => setPermission(null));
     loadHapticsPreferences().then(setHaptics).catch(() => undefined);
   }, []);
 
-  const savePush = (next: PushPreferences) => { setPush(next); AsyncStorage.setItem("radio-push-preferences", JSON.stringify(next)).catch(() => undefined); };
-  const toggleHaptics = async (kind: keyof HapticPreferences, enabled: boolean) => { setHaptics((current) => ({ ...current, [kind]: enabled })); const saved = await setHapticsPreference(kind, enabled); if (toastTimer.current) clearTimeout(toastTimer.current); setHapticsNotice(saved ? "Preferencia háptica guardada" : "No se pudo guardar la preferencia"); toastTimer.current = setTimeout(() => { setHapticsNotice(null); toastTimer.current = null; }, 1700); };
+  const showToast = (message: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setThemeNotice(message);
+    setHapticsNotice(null);
+    toastTimer.current = setTimeout(() => {
+      setThemeNotice(null);
+      toastTimer.current = null;
+    }, 1700);
+  };
+
+  const applyVisualTheme = (id: VisualThemeId) => {
+    setVisualTheme(id);
+    const theme = VISUAL_THEME_LIST.find((t) => t.id === id);
+    showToast(theme ? `Estilo «${theme.nameEs}» aplicado` : "Estilo aplicado");
+  };
+
+  const savePush = (next: PushPreferences) => {
+    setPush(next);
+    AsyncStorage.setItem("radio-push-preferences", JSON.stringify(next)).catch(() => undefined);
+  };
+
+  const toggleHaptics = async (kind: keyof HapticPreferences, enabled: boolean) => {
+    setHaptics((current) => ({ ...current, [kind]: enabled }));
+    const saved = await setHapticsPreference(kind, enabled);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setHapticsNotice(saved ? "Preferencia háptica guardada" : "No se pudo guardar la preferencia");
+    setThemeNotice(null);
+    toastTimer.current = setTimeout(() => {
+      setHapticsNotice(null);
+      toastTimer.current = null;
+    }, 1700);
+  };
+
   const requestPushPermission = async () => {
     const result = await Notifications.requestPermissionsAsync();
     setPermission(result.status);
     return result.status === "granted";
   };
+
   const togglePush = async (key: keyof PushPreferences, enabled: boolean) => {
     if (enabled && permission !== "granted") {
       const granted = await requestPushPermission();
@@ -46,13 +90,296 @@ export default function SettingsScreen() {
     }
     savePush({ ...push, [key]: enabled });
   };
-  const openNotificationSettings = () => { if (Platform.OS !== "web") Linking.openSettings().catch(() => undefined); };
-  const openBatterySettings = () => { if (Platform.OS === "android") NativeModules.RadioMediaControls?.openBatteryOptimizationSettings?.(); else if (Platform.OS !== "web") Linking.openSettings().catch(() => undefined); };
-  const permissionLabel = permission === "granted" ? "Permiso concedido" : permission === "denied" ? "Permiso bloqueado en el sistema" : "Aún no configurado";
 
-  return <ScreenContainer containerClassName="bg-background" className="px-5 pt-3"><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}><View style={styles.header}><Pressable onPress={() => router.back()} style={styles.back}><IconSymbol name="chevron.left" size={22} color="#F5F3EE" /></Pressable><Text style={[styles.title, { color: colors.foreground }]}>Ajustes</Text><View style={{ width: 38 }} /></View><Text style={[styles.eyebrow, { color: colors.muted } ]}>REPRODUCCIÓN</Text><View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border } ]}><SettingRow icon="moon.fill" title="Reproducción y controles de bloqueo" subtitle="Mantén la radio activa y controlable al salir" value={backgroundPlaybackEnabled} onChange={setBackgroundPlaybackEnabled} /><View style={styles.divider} /><View style={styles.explanation}><Text style={styles.explanationText}>En Android, esta opción activa la reproducción en segundo plano y los controles de la pantalla de bloqueo. Requiere un build nativo.</Text><Pressable onPress={openBatterySettings} style={styles.systemAction}><Text style={styles.systemActionText}>Configurar batería sin restricciones</Text></Pressable></View></View><Text style={[styles.eyebrow, { color: colors.muted } ]}>INTERACCIÓN</Text><View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border } ]}><SettingRow icon="waveform" title="Hápticos de navegación" subtitle="Al abrir detalles y cambiar de sección" value={haptics.navigation} onChange={(value) => toggleHaptics("navigation", value)} /><View style={styles.divider} /><SettingRow icon="waveform" title="Hápticos de acciones" subtitle="Al guardar favoritos y confirmar acciones" value={haptics.actions} onChange={(value) => toggleHaptics("actions", value)} /></View><Text style={[styles.eyebrow, { color: colors.muted } ]}>NOTIFICACIONES</Text><View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border } ]}><SettingRow icon="bell.fill" title="Avisos de programación" subtitle="Novedades y programas especiales" value={push.programming} onChange={(value) => togglePush("programming", value)} /><View style={styles.divider} /><SettingRow icon="heart.fill" title="Avisos de radios favoritas" subtitle="Actualizaciones de tus emisoras guardadas" value={push.favorites} onChange={(value) => togglePush("favorites", value)} /><View style={styles.permissionRow}><View style={[styles.statusDot, { backgroundColor: permission === "granted" ? "#1ED760" : "#FFB86B" }]} /><Text style={styles.permissionText}>{permissionLabel}</Text>{permission === "denied" && <Pressable onPress={openNotificationSettings}><Text style={styles.settingsLink}>Abrir ajustes</Text></Pressable>}</View></View><Text style={[styles.note, { color: colors.muted }]}>Las notificaciones editoriales son opcionales y no controlan la reproducción. Los controles multimedia pertenecen a la sesión de audio local.</Text><Text style={[styles.eyebrow, { color: colors.muted } ]}>APARIENCIA</Text><View style={[styles.themeGroup, { backgroundColor: colors.surface, borderColor: colors.border } ]}><Text style={[styles.themeTitle, { color: colors.foreground }]}>Tema visual</Text><Text style={[styles.themeSubtitle, { color: colors.muted }]}>Elige cómo quieres ver Radio Chile Glass.</Text><View style={styles.themeOptions}>{(["system", "light", "dark"] as ThemePreference[]).map((option) => <Pressable key={option} onPress={() => setThemePreference(option)} style={[styles.themeOption, { backgroundColor: colorScheme === "light" ? "#FFFFFF" : "#FFFFFF08", borderColor: colors.border }, preference === option && styles.themeOptionActive]}><Text style={[styles.themeOptionText, { color: colors.muted }, preference === option && styles.themeOptionTextActive]}>{option === "system" ? "Sistema" : option === "light" ? "Claro" : "Oscuro"}</Text></Pressable>)}</View></View><Text style={[styles.eyebrow, { color: colors.muted } ]}>ACERCA DE</Text><View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border } ]}><View style={styles.about}><View style={styles.aboutIcon}><IconSymbol name="radio" size={23} color="#1ED760" /></View><View style={{ flex: 1 }}><Text style={styles.aboutTitle}>Radio Chile Glass</Text><Text style={styles.aboutText}>Radios chilenas, en una experiencia simple.</Text></View><Text style={styles.version}>1.0</Text></View></View></ScrollView><FavoriteToast message={hapticsNotice} /></ScreenContainer>;
+  const openNotificationSettings = () => {
+    if (Platform.OS !== "web") Linking.openSettings().catch(() => undefined);
+  };
+
+  const openBatterySettings = () => {
+    if (Platform.OS === "android") NativeModules.RadioMediaControls?.openBatteryOptimizationSettings?.();
+    else if (Platform.OS !== "web") Linking.openSettings().catch(() => undefined);
+  };
+
+  const permissionLabel =
+    permission === "granted"
+      ? "Permiso concedido"
+      : permission === "denied"
+        ? "Permiso bloqueado en el sistema"
+        : "Aún no configurado";
+
+  const lightMode = colorScheme === "light";
+
+  return (
+    <ScreenContainer containerClassName="bg-background" className="px-5 pt-3">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.back}>
+            <IconSymbol name="chevron.left" size={22} color="#F5F3EE" />
+          </Pressable>
+          <Text style={[styles.title, { color: colors.foreground }]}>Ajustes</Text>
+          <View style={{ width: 38 }} />
+        </View>
+
+        <Text style={[styles.eyebrow, { color: colors.muted }]}>REPRODUCCIÓN</Text>
+        <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <SettingRow
+            icon="moon.fill"
+            title="Reproducción y controles de bloqueo"
+            subtitle="Mantén la radio activa y controlable al salir"
+            value={backgroundPlaybackEnabled}
+            onChange={setBackgroundPlaybackEnabled}
+          />
+          <View style={styles.divider} />
+          <View style={styles.explanation}>
+            <Text style={styles.explanationText}>
+              En Android, esta opción activa la reproducción en segundo plano y los controles de la pantalla de bloqueo. Requiere un build nativo.
+            </Text>
+            <Pressable onPress={openBatterySettings} style={styles.systemAction}>
+              <Text style={styles.systemActionText}>Configurar batería sin restricciones</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <Text style={[styles.eyebrow, { color: colors.muted }]}>INTERACCIÓN</Text>
+        <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <SettingRow
+            icon="waveform"
+            title="Hápticos de navegación"
+            subtitle="Al abrir detalles y cambiar de sección"
+            value={haptics.navigation}
+            onChange={(value) => toggleHaptics("navigation", value)}
+          />
+          <View style={styles.divider} />
+          <SettingRow
+            icon="waveform"
+            title="Hápticos de acciones"
+            subtitle="Al guardar favoritos y confirmar acciones"
+            value={haptics.actions}
+            onChange={(value) => toggleHaptics("actions", value)}
+          />
+        </View>
+
+        <Text style={[styles.eyebrow, { color: colors.muted }]}>NOTIFICACIONES</Text>
+        <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <SettingRow
+            icon="bell.fill"
+            title="Avisos de programación"
+            subtitle="Novedades y programas especiales"
+            value={push.programming}
+            onChange={(value) => togglePush("programming", value)}
+          />
+          <View style={styles.divider} />
+          <SettingRow
+            icon="heart.fill"
+            title="Avisos de radios favoritas"
+            subtitle="Actualizaciones de tus emisoras guardadas"
+            value={push.favorites}
+            onChange={(value) => togglePush("favorites", value)}
+          />
+          <View style={styles.permissionRow}>
+            <View style={[styles.statusDot, { backgroundColor: permission === "granted" ? "#1ED760" : "#FFB86B" }]} />
+            <Text style={styles.permissionText}>{permissionLabel}</Text>
+            {permission === "denied" && (
+              <Pressable onPress={openNotificationSettings}>
+                <Text style={styles.settingsLink}>Abrir ajustes</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+
+        <Text style={[styles.note, { color: colors.muted }]}>
+          Las notificaciones editoriales son opcionales y no controlan la reproducción. Los controles multimedia pertenecen a la sesión de audio local.
+        </Text>
+
+        <Text style={[styles.eyebrow, { color: colors.muted }]}>APARIENCIA</Text>
+        <View style={[styles.themeGroup, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.themeTitle, { color: colors.foreground }]}>Modo claro / oscuro</Text>
+          <Text style={[styles.themeSubtitle, { color: colors.muted }]}>
+            Elige el esquema de color del sistema.
+          </Text>
+          <View style={styles.themeOptions}>
+            {(["system", "light", "dark"] as ThemePreference[]).map((option) => (
+              <Pressable
+                key={option}
+                onPress={() => setThemePreference(option)}
+                style={[
+                  styles.themeOption,
+                  { backgroundColor: lightMode ? "#FFFFFF" : "#FFFFFF08", borderColor: colors.border },
+                  preference === option && styles.themeOptionActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.themeOptionText,
+                    { color: colors.muted },
+                    preference === option && styles.themeOptionTextActive,
+                  ]}
+                >
+                  {option === "system" ? "Sistema" : option === "light" ? "Claro" : "Oscuro"}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <View style={[styles.themeGroup, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.themeTitle, { color: colors.foreground }]}>Estilo de estudio</Text>
+          <Text style={[styles.themeSubtitle, { color: colors.muted }]}>
+            Aplica un look de radio profesional. Actual: {visualTheme.nameEs}
+          </Text>
+          <View style={styles.studioGrid}>
+            {VISUAL_THEME_LIST.map((theme) => {
+              const selected = visualThemeId === theme.id;
+              return (
+                <Pressable
+                  key={theme.id}
+                  onPress={() => applyVisualTheme(theme.id)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={`Estilo ${theme.nameEs}`}
+                  style={[
+                    styles.studioCard,
+                    {
+                      borderColor: selected ? theme.accent : colors.border,
+                      backgroundColor: lightMode ? "#FFFFFF" : "#FFFFFF08",
+                    },
+                    selected && { borderWidth: 2 },
+                  ]}
+                >
+                  <View style={styles.studioSwatches}>
+                    <View style={[styles.swatch, { backgroundColor: theme.stageBackground }]} />
+                    <View style={[styles.swatch, { backgroundColor: theme.accent }]} />
+                    <View style={[styles.swatch, { backgroundColor: theme.ambient }]} />
+                  </View>
+                  <Text style={[styles.studioName, { color: colors.foreground }]} numberOfLines={1}>
+                    {theme.nameEs}
+                  </Text>
+                  <Text style={[styles.studioDesc, { color: colors.muted }]} numberOfLines={2}>
+                    {theme.descriptionEs}
+                  </Text>
+                  {selected && (
+                    <View style={[styles.studioBadge, { backgroundColor: theme.accent }]}>
+                      <Text style={styles.studioBadgeText}>ACTIVO</Text>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <Text style={[styles.eyebrow, { color: colors.muted }]}>ACERCA DE</Text>
+        <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.about}>
+            <View style={styles.aboutIcon}>
+              <IconSymbol name="radio" size={23} color="#1ED760" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.aboutTitle}>Radio Chile Glass</Text>
+              <Text style={styles.aboutText}>Radios chilenas, en una experiencia simple.</Text>
+            </View>
+            <Text style={styles.version}>1.0</Text>
+          </View>
+        </View>
+      </ScrollView>
+      <FavoriteToast message={themeNotice ?? hapticsNotice} />
+    </ScreenContainer>
+  );
 }
 
-function SettingRow({ icon, title, subtitle, value, onChange }: { icon: string; title: string; subtitle: string; value: boolean; onChange: (value: boolean) => void }) { const { colorScheme } = useThemeContext(); const colors = useColors(colorScheme); const lightMode = colorScheme === "light"; return <View style={styles.row}><View style={[styles.rowIcon, { backgroundColor: lightMode ? `${colors.primary}14` : "#FFFFFF0D" }]}><IconSymbol name={icon as never} size={20} color={colors.muted} /></View><View style={{ flex: 1 }}><Text style={[styles.rowTitle, { color: colors.foreground }]} numberOfLines={2}>{title}</Text><Text style={[styles.rowSubtitle, { color: colors.muted }]} numberOfLines={2}>{subtitle}</Text></View><Switch value={value} onValueChange={onChange} trackColor={{ false: lightMode ? colors.border : "#33394A", true: colors.primary }} thumbColor={lightMode ? colors.background : "#F5F3EE"} /></View>; }
+function SettingRow({
+  icon,
+  title,
+  subtitle,
+  value,
+  onChange,
+}: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  const { colorScheme } = useThemeContext();
+  const colors = useColors(colorScheme);
+  const lightMode = colorScheme === "light";
+  return (
+    <View style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: lightMode ? `${colors.primary}14` : "#FFFFFF0D" }]}>
+        <IconSymbol name={icon as never} size={20} color={colors.muted} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.rowTitle, { color: colors.foreground }]} numberOfLines={2}>
+          {title}
+        </Text>
+        <Text style={[styles.rowSubtitle, { color: colors.muted }]} numberOfLines={2}>
+          {subtitle}
+        </Text>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: lightMode ? colors.border : "#33394A", true: colors.primary }}
+        thumbColor={lightMode ? colors.background : "#F5F3EE"}
+      />
+    </View>
+  );
+}
 
-const styles = StyleSheet.create({ content: { paddingBottom: 30 }, header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 36 }, back: { width: 38, height: 38, borderRadius: 14, backgroundColor: "#FFFFFF0D", alignItems: "center", justifyContent: "center" }, title: { color: "#F5F3EE", fontSize: 20, fontWeight: "700" }, eyebrow: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 }, group: { borderRadius: 20, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF10", paddingHorizontal: 16, marginBottom: 30 }, row: { minHeight: 76, flexDirection: "row", alignItems: "center", gap: 13 }, rowIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: "#FFFFFF0D", alignItems: "center", justifyContent: "center" }, rowTitle: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" }, rowSubtitle: { color: "#8D95A7", fontSize: 12, marginTop: 4 }, divider: { height: 1, backgroundColor: "#FFFFFF0C" }, explanation: { paddingVertical: 14 }, explanationText: { color: "#71798C", fontSize: 12, lineHeight: 18 }, systemAction: { marginTop: 12, paddingVertical: 10, borderRadius: 10, backgroundColor: "#1ED76018", alignItems: "center" }, systemActionText: { color: "#1ED760", fontSize: 12, fontWeight: "700" }, permissionRow: { minHeight: 42, flexDirection: "row", alignItems: "center", gap: 8 }, statusDot: { width: 7, height: 7, borderRadius: 4 }, permissionText: { flex: 1, color: "#8D95A7", fontSize: 11 }, settingsLink: { color: "#1ED760", fontSize: 11, fontWeight: "700" }, note: { color: "#71798C", fontSize: 12, lineHeight: 18, paddingHorizontal: 4, marginBottom: 30 }, themeGroup: { borderRadius: 20, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF10", padding: 16, marginBottom: 30 }, themeTitle: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" }, themeSubtitle: { color: "#8D95A7", fontSize: 12, marginTop: 4, marginBottom: 14 }, themeOptions: { flexDirection: "row", gap: 8 }, themeOption: { flex: 1, minHeight: 40, borderRadius: 12, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF10", alignItems: "center", justifyContent: "center" }, themeOptionActive: { backgroundColor: "#1ED760", borderColor: "#B9F6C5" }, themeOptionText: { color: "#9AA2B3", fontSize: 12, fontWeight: "600" }, themeOptionTextActive: { color: "#07140B", fontWeight: "800" }, about: { minHeight: 82, flexDirection: "row", alignItems: "center", gap: 13 }, aboutIcon: { width: 44, height: 44, borderRadius: 15, backgroundColor: "#1DB95420", alignItems: "center", justifyContent: "center" }, aboutTitle: { color: "#F5F3EE", fontSize: 15, fontWeight: "700" }, aboutText: { color: "#8D95A7", fontSize: 12, marginTop: 5 }, version: { color: "#8D95A7", fontSize: 12 } });
+const styles = StyleSheet.create({
+  content: { paddingBottom: 30 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 36 },
+  back: { width: 38, height: 38, borderRadius: 14, backgroundColor: "#FFFFFF0D", alignItems: "center", justifyContent: "center" },
+  title: { color: "#F5F3EE", fontSize: 20, fontWeight: "700" },
+  eyebrow: { color: "#A8B0C2", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 12 },
+  group: { borderRadius: 20, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF10", paddingHorizontal: 16, marginBottom: 30 },
+  row: { minHeight: 76, flexDirection: "row", alignItems: "center", gap: 13 },
+  rowIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: "#FFFFFF0D", alignItems: "center", justifyContent: "center" },
+  rowTitle: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
+  rowSubtitle: { color: "#8D95A7", fontSize: 12, marginTop: 4 },
+  divider: { height: 1, backgroundColor: "#FFFFFF0C" },
+  explanation: { paddingVertical: 14 },
+  explanationText: { color: "#71798C", fontSize: 12, lineHeight: 18 },
+  systemAction: { marginTop: 12, paddingVertical: 10, borderRadius: 10, backgroundColor: "#1ED76018", alignItems: "center" },
+  systemActionText: { color: "#1ED760", fontSize: 12, fontWeight: "700" },
+  permissionRow: { minHeight: 42, flexDirection: "row", alignItems: "center", gap: 8 },
+  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  permissionText: { flex: 1, color: "#8D95A7", fontSize: 11 },
+  settingsLink: { color: "#1ED760", fontSize: 11, fontWeight: "700" },
+  note: { color: "#71798C", fontSize: 12, lineHeight: 18, paddingHorizontal: 4, marginBottom: 30 },
+  themeGroup: { borderRadius: 20, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF10", padding: 16, marginBottom: 30 },
+  themeTitle: { color: "#F5F3EE", fontSize: 15, fontWeight: "600" },
+  themeSubtitle: { color: "#8D95A7", fontSize: 12, marginTop: 4, marginBottom: 14 },
+  themeOptions: { flexDirection: "row", gap: 8 },
+  themeOption: { flex: 1, minHeight: 40, borderRadius: 12, backgroundColor: "#FFFFFF08", borderWidth: 1, borderColor: "#FFFFFF10", alignItems: "center", justifyContent: "center" },
+  themeOptionActive: { backgroundColor: "#1ED760", borderColor: "#B9F6C5" },
+  themeOptionText: { color: "#9AA2B3", fontSize: 12, fontWeight: "600" },
+  themeOptionTextActive: { color: "#07140B", fontWeight: "800" },
+  studioGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  studioCard: {
+    width: "47%",
+    flexGrow: 1,
+    minWidth: 140,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 12,
+    gap: 6,
+  },
+  studioSwatches: { flexDirection: "row", gap: 6, marginBottom: 4 },
+  swatch: { width: 22, height: 22, borderRadius: 8, borderWidth: 1, borderColor: "#FFFFFF22" },
+  studioName: { fontSize: 13, fontWeight: "700" },
+  studioDesc: { fontSize: 11, lineHeight: 15 },
+  studioBadge: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  studioBadgeText: { color: "#0B0B0B", fontSize: 9, fontWeight: "900", letterSpacing: 0.8 },
+  about: { minHeight: 82, flexDirection: "row", alignItems: "center", gap: 13 },
+  aboutIcon: { width: 44, height: 44, borderRadius: 15, backgroundColor: "#1DB95420", alignItems: "center", justifyContent: "center" },
+  aboutTitle: { color: "#F5F3EE", fontSize: 15, fontWeight: "700" },
+  aboutText: { color: "#8D95A7", fontSize: 12, marginTop: 5 },
+  version: { color: "#8D95A7", fontSize: 12 },
+});
