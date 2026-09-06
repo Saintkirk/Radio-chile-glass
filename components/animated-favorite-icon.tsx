@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, StyleSheet, View } from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 
-export function AnimatedFavoriteIcon({ active, color }: { active: boolean; color: string }) {
+export const AnimatedFavoriteIcon = memo(function AnimatedFavoriteIcon({ active, color }: { active: boolean; color: string }) {
   const scale = useRef(new Animated.Value(1)).current;
   const previousActive = useRef(active);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -31,6 +31,6 @@ export function AnimatedFavoriteIcon({ active, color }: { active: boolean; color
   }, [active, reduceMotion, scale]);
 
   return <View style={styles.container}><Animated.View style={{ transform: [{ scale }] }}><IconSymbol name={active ? "heart.fill" : "heart"} size={20} color={color} /></Animated.View></View>;
-}
+});
 
 const styles = StyleSheet.create({ container: { width: 20, height: 20, alignItems: "center", justifyContent: "center" } });
