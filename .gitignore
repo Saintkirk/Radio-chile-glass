@@ -7,7 +7,7 @@
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
@@ -20,30 +20,32 @@ venv/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
-dist/
-build/
+.julia/
+zig*/
 target/
 .gradle/
 
-# Compiled files
+# Build artifacts
+dist/
+build/
 *.pyc
 *.class
 *.o
+*.obj
 *.exe
 *.dll
 *.so
 *.a
-*.obj
 *.out
-
-# System files
-.DS_Store
-Thumbs.db
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
+
+# System files
+.DS_Store
+Thumbs.db
 
 # Compressed files
 *.zip
