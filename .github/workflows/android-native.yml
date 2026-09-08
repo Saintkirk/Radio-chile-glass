@@ -14,6 +14,7 @@ on:
       - "app.config.ts"
       - "package.json"
       - "babel.config.js"
+      - "metro.config.js"
       - "pnpm-lock.yaml"
       - "android/**"
       - ".github/workflows/android-native.yml"
