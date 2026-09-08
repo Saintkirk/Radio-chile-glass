@@ -13,6 +13,7 @@ on:
       - "assets/**"
       - "app.config.ts"
       - "package.json"
+      - "babel.config.js"
       - "pnpm-lock.yaml"
       - "android/**"
       - ".github/workflows/android-native.yml"
@@ -135,6 +136,30 @@ jobs:
           fs.writeFileSync(".expo-build-meta.env", `APP_VERSION=${version}\nAPP_PACKAGE=${pkg}\n`);
           NODE
           cat .expo-build-meta.env >> "$GITHUB_ENV"
+
+      - name: Preflight Babel config (loose mode)
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const configFactory = require("./babel.config.js");
+          const config = typeof configFactory === "function"
+            ? configFactory({ cache: () => undefined })
+            : configFactory;
+          const plugins = config.plugins || [];
+          const names = plugins.map((p) => (Array.isArray(p) ? p[0] : p));
+          console.log("Babel plugins:", names.join(", "));
+          const classPlugins = plugins.filter((p) =>
+            Array.isArray(p) && /transform-(class-properties|private-methods|private-property)/.test(String(p[0]))
+          );
+          const looses = classPlugins.map((p) => p[1] && p[1].loose);
+          if (classPlugins.length && new Set(looses.map(String)).size > 1) {
+            throw new Error("Inconsistent loose mode among class-feature plugins: " + JSON.stringify(looses));
+          }
+          if (classPlugins.some((p) => !p[1] || p[1].loose !== true)) {
+            throw new Error("class-feature plugins must set { loose: true } for Hermes");
+          }
+          console.log("Babel loose-mode preflight OK");
+          NODE
 
       - name: Generate native Android project
         run: |
@@ -272,6 +297,8 @@ jobs:
 
       - name: Build release APK (assembleRelease)
         working-directory: android
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
           set -euo pipefail
           set +e
