@@ -1,6 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View , AppState, AppStateStatus } from "react-native";
 import { useMemo, useEffect, useRef } from "react";
-import { AppState, AppStateStatus } from "react-native";
 
 import { trpc } from "@/lib/trpc";
 

@@ -17,8 +17,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -27,7 +31,12 @@ jobs:
           java-version: '17'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Run expo prebuild
+        run: npx expo prebuild --clean
+        env:
+          CI: true
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -36,7 +45,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace --no-configuration-cache -x lint
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
