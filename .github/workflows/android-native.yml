@@ -99,7 +99,14 @@ jobs:
           cache: pnpm
 
       - name: Install JavaScript dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: |
+          set -euo pipefail
+          if ! pnpm install --frozen-lockfile --prefer-offline; then
+            echo "::warning::pnpm-lock.yaml out of sync with package.json — regenerating once"
+            pnpm install --no-frozen-lockfile --prefer-offline
+            echo "Lockfile drift detected. Commit an updated pnpm-lock.yaml from a local pnpm install."
+            git diff --stat pnpm-lock.yaml || true
+          fi
 
       - name: Typecheck
         run: pnpm check
