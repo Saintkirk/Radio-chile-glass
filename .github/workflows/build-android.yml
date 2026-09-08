@@ -1,46 +1,22 @@
-name: Build Android APK (Native Gradle)
+# DEPRECATED: do not use npm ci here.
+# This repo is packageManager: pnpm@9.12.0.
+# Native APK builds live in android-native.yml (Gradle + pnpm).
+# EAS APK builds live in android-apk.yml.
+#
+# Kept as a no-op so old branch rules / badges do not break silently.
+name: Build Android APK (Native Gradle) [deprecated]
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
 jobs:
-  build:
+  deprecated:
+    name: Redirect to android-native.yml
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Build Release APK
+      - name: Explain deprecation
         run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-          retention-days: 30
+          echo "This workflow is deprecated."
+          echo "Use: Actions → Android APK (Native Gradle) → android-native.yml"
+          echo "Or: Actions → Android APK → android-apk.yml (EAS)"
+          exit 0
