@@ -137,7 +137,7 @@ jobs:
           NODE
           cat .expo-build-meta.env >> "$GITHUB_ENV"
 
-      - name: Preflight Babel config (loose mode)
+      - name: Preflight Babel config (no duplicate class-feature plugins)
         run: |
           set -euo pipefail
           node <<'NODE'
@@ -146,19 +146,23 @@ jobs:
             ? configFactory({ cache: () => undefined })
             : configFactory;
           const plugins = config.plugins || [];
-          const names = plugins.map((p) => (Array.isArray(p) ? p[0] : p));
-          console.log("Babel plugins:", names.join(", "));
-          const classPlugins = plugins.filter((p) =>
-            Array.isArray(p) && /transform-(class-properties|private-methods|private-property)/.test(String(p[0]))
+          const names = plugins.map((p) => (Array.isArray(p) ? String(p[0]) : String(p)));
+          console.log("Babel plugins:", names.join(", ") || "(none)");
+          const banned = names.filter((n) =>
+            /transform-(class-properties|private-methods|private-property-in-object)/.test(n)
           );
-          const looses = classPlugins.map((p) => p[1] && p[1].loose);
-          if (classPlugins.length && new Set(looses.map(String)).size > 1) {
-            throw new Error("Inconsistent loose mode among class-feature plugins: " + JSON.stringify(looses));
+          if (banned.length) {
+            throw new Error(
+              "Do not register class-feature Babel plugins in babel.config.js; " +
+              "babel-preset-expo already enables them. Duplicates cause Hermes loose-mode failures. Found: " +
+              banned.join(", ")
+            );
           }
-          if (classPlugins.some((p) => !p[1] || p[1].loose !== true)) {
-            throw new Error("class-feature plugins must set { loose: true } for Hermes");
+          const last = names[names.length - 1] || "";
+          if (!/worklets\/plugin|reanimated\/plugin/.test(last)) {
+            console.warn("Warning: expected react-native-worklets/plugin (or reanimated) last; got:", last);
           }
-          console.log("Babel loose-mode preflight OK");
+          console.log("Babel preflight OK (no duplicate class-feature plugins)");
           NODE
 
       - name: Generate native Android project
