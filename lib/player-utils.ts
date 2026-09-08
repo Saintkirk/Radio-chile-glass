@@ -43,18 +43,11 @@ export function isCurrentRadioId(activeRadioId: string | null | undefined, candi
 
 /** Adaptive retry delay with exponential backoff and jitter for different error types */
 export function adaptiveRetryDelayMs(attempt: number, errorType?: 'network' | 'timeout' | 'stream'): number {
-  // Base delays increase exponentially: 0, 1000, 2000, 4000, 8000
   const baseDelay = attempt === 0 ? 0 : Math.pow(2, attempt - 1) * 1000;
-  
-  // Add jitter (+-20%) to prevent thundering herd
   const jitter = baseDelay * 0.2 * (Math.random() - 0.5) * 2;
-  
-  // Network errors may need more time, stream errors less
   const typeMultiplier = errorType === 'network' ? 1.5 : errorType === 'stream' ? 0.8 : 1.0;
-  
   return Math.round((baseDelay + jitter) * typeMultiplier);
 }
-
 
 /** A crossfade is valid only while both its request and cancellation token are current. */
 export function shouldContinueCrossfade(requestId: number, currentRequestId: number, token: number, currentToken: number): boolean {
