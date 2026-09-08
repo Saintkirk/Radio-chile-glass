@@ -1,9 +1,12 @@
 module.exports = function (api) {
   api.cache(true);
 
-  // All class-feature plugins MUST share the same `loose` value or Metro/Hermes
-  // fails with: "'loose' mode configuration must be the same for ..."
-  const classFeatures = { loose: true };
+  // Do NOT re-register @babel/plugin-transform-class-properties,
+  // private-methods, or private-property-in-object here.
+  // babel-preset-expo already enables them with a consistent loose mode.
+  // Registering them again with different options causes:
+  //   "'loose' mode configuration must be the same for ..."
+  // and breaks :app:createBundleReleaseJsAndAssets (Hermes).
 
   return {
     presets: [
@@ -11,10 +14,7 @@ module.exports = function (api) {
       "nativewind/babel",
     ],
     plugins: [
-      ["@babel/plugin-transform-class-properties", classFeatures],
-      ["@babel/plugin-transform-private-methods", classFeatures],
-      ["@babel/plugin-transform-private-property-in-object", classFeatures],
-      // worklets/reanimated must be listed last
+      // Must be listed last (reanimated / worklets requirement)
       "react-native-worklets/plugin",
     ],
   };
