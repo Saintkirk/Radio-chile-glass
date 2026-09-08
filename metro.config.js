@@ -13,11 +13,12 @@ config.transformer.minifierConfig = {
   },
 };
 
-// Exclude DOM polyfills from the bundle that cause Hermes compilation errors
+// Block only true DOM polyfills that break Hermes.
+// Do NOT use /node_modules\/.*/dom\/.*/ — that also matches expo/dom,
+// which expo-router needs (useDomComponentNavigation → expo/dom/global).
 config.resolver.blockList = [
-  /node_modules\/.*\/dom\/.*/,
-  /node_modules\/react-native-dom\/.*/,
-  /node_modules\/jsdom\/.*/,
+  /node_modules\/jsdom\/,
+  /node_modules\/react-native-dom\/,
 ];
 
 module.exports = withNativeWind(config, {
