@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { memo, useEffect, useRef, useState, useCallback } from "react";
+import { memo, useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { modernImageSources } from "@/lib/image-format";
 import { prefetchLogo, type PrefetchLevel } from "@/lib/logo-cache";
 import { canCommitLogo, getLogoSourceKey } from "@/lib/logo-transition";
 import type { Radio } from "@/lib/radios";
@@ -12,7 +13,8 @@ type StationLogoProps = {
   radius?: number;
   priority?: "high" | "normal" | "low";
 };
-type LogoImageSource = number | { uri: string };
+
+type LogoImageSource = number | { uri: string } | { uri: string }[];
 
 const LOCAL_LOGOS: Record<string, number> = {
   fmlatina: require("@/assets/images/radios/fmlatina.png"),
@@ -39,25 +41,29 @@ const LOCAL_LOGOS: Record<string, number> = {
   edelweiss: require("@/assets/images/radios/edelweiss.png"),
 };
 
-export const StationLogo = memo(function StationLogo({ 
-  radio, 
-  size = 54, 
+export const StationLogo = memo(function StationLogo({
+  radio,
+  size = 54,
   radius = 16,
-  priority = "normal"
+  priority = "normal",
 }: StationLogoProps) {
   const sourceKey = getLogoSourceKey(radio.id, radio.favicon);
   const hasLocalLogo = Boolean(LOCAL_LOGOS[radio.id]);
-  const source: LogoImageSource | null = hasLocalLogo
-    ? LOCAL_LOGOS[radio.id]
-    : radio.favicon
-      ? { uri: radio.favicon }
-      : null;
-  const [loadedSourceKey, setLoadedSourceKey] = useState<string | null>(() => (source && hasLocalLogo ? sourceKey : null));
+
+  const source: LogoImageSource | null = useMemo(() => {
+    if (hasLocalLogo) return LOCAL_LOGOS[radio.id];
+    if (!radio.favicon) return null;
+    const candidates = modernImageSources(radio.favicon);
+    // expo-image tries sources in order; first successful decode wins (AVIF → WebP → original).
+    return candidates.length > 1 ? candidates : candidates[0] ?? { uri: radio.favicon };
+  }, [hasLocalLogo, radio.favicon, radio.id]);
+
+  const [loadedSourceKey, setLoadedSourceKey] = useState<string | null>(() =>
+    source && hasLocalLogo ? sourceKey : null,
+  );
   const [failedSourceKey, setFailedSourceKey] = useState<string | null>(null);
   const currentSourceKeyRef = useRef(sourceKey);
   const loadAttemptedRef = useRef(false);
-  // Actualizar durante el render cierra la ventana entre el cambio de props y el efecto.
-  // Así, un callback tardío nunca puede promover artwork de la emisora anterior.
   currentSourceKeyRef.current = sourceKey;
 
   const handleLoad = useCallback(() => {
@@ -76,7 +82,7 @@ export const StationLogo = memo(function StationLogo({
     setLoadedSourceKey(hasLocalLogo ? sourceKey : null);
     setFailedSourceKey(null);
     loadAttemptedRef.current = false;
-    
+
     if (radio.favicon && !hasLocalLogo && !loadAttemptedRef.current) {
       loadAttemptedRef.current = true;
       const prefetchLevel: PrefetchLevel = priority === "high" ? "hot" : "warm";
