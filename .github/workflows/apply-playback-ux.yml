@@ -1,0 +1,367 @@
+name: Apply playback UX phases
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch player-utils helpers
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("lib/player-utils.ts")
+          t = p.read_text()
+          if "stationPlaybackPhase" in t:
+              print("already patched"); raise SystemExit(0)
+          needle = '''export function playbackStatus(isLoading: boolean, isPlaying: boolean): "connecting" | "playing" | "ready" {
+  if (isLoading) return "connecting";
+  return isPlaying ? "playing" : "ready";
+}'''
+          insert = needle + '''
+
+/** Playback phase for a specific station relative to the singleton player. */
+export type StationPlaybackPhase = "idle" | "connecting" | "playing" | "error";
+
+export function stationPlaybackPhase(
+  currentRadioId: string | null | undefined,
+  targetRadioId: string,
+  isPlaying: boolean,
+  isLoading: boolean,
+  hasError: boolean,
+): StationPlaybackPhase {
+  if (currentRadioId !== targetRadioId) return "idle";
+  if (hasError) return "error";
+  if (isLoading) return "connecting";
+  if (isPlaying) return "playing";
+  return "idle";
+}
+
+/** Only promise "EN VIVO" when the stream is confirmed audible. */
+export function isLiveBadgeVisible(phase: StationPlaybackPhase): boolean {
+  return phase === "playing";
+}
+
+export function dialStatusLabel(phase: StationPlaybackPhase): string {
+  switch (phase) {
+    case "connecting":
+      return "CONECTANDO";
+    case "playing":
+      return "REPRODUCIENDO";
+    case "error":
+      return "SIN SEÑAL";
+    default:
+      return "LISTA PARA ESCUCHAR";
+  }
+}
+
+export function playbackControlLabel(phase: StationPlaybackPhase, stationName: string): string {
+  switch (phase) {
+    case "connecting":
+      return `Conectando con ${stationName}`;
+    case "playing":
+      return `Pausar ${stationName}`;
+    case "error":
+      return `Reintentar ${stationName}`;
+    default:
+      return `Reproducir ${stationName}`;
+  }
+}'''
+          if needle not in t:
+              raise SystemExit("needle missing")
+          p.write_text(t.replace(needle, insert, 1))
+          print("utils ok")
+          PY
+
+      - name: Apply small file patches
+        run: |
+          set -euo pipefail
+          git apply --verbose patches/playback-ux-phases.patch || patch -p1 < patches/playback-ux-phases.patch
+
+      - name: Patch radio detail UI
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("app/radio/[id].tsx")
+          t = p.read_text()
+          if "stationPlaybackPhase" in t and "showLive" in t:
+              print("detail already patched"); raise SystemExit(0)
+          t = t.replace(
+              'import { Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";',
+              'import { ActivityIndicator, Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";',
+          )
+          t = t.replace(
+              'import { playbackHandoff } from "@/lib/player-utils";',
+              'import { dialStatusLabel, isLiveBadgeVisible, playbackControlLabel, playbackHandoff, stationPlaybackPhase } from "@/lib/player-utils";',
+          )
+          t = t.replace(
+              "  const active = currentRadio?.id === radio.id && isPlaying;\n",
+              "  const phase = stationPlaybackPhase(currentRadio?.id, radio.id, isPlaying, isLoading, Boolean(playbackError));\n  const active = phase === \"playing\";\n  const connecting = phase === \"connecting\";\n  const showLive = isLiveBadgeVisible(phase);\n",
+              1,
+          )
+          old_live = """          <View style={styles.liveMeta}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveLabel}>EN VIVO</Text>
+            <Text style={styles.liveSeparator}>·</Text>
+            <Text style={styles.liveFrequency}>{radio.frequency}</Text>
+          </View>"""
+          new_live = """          <View style={styles.liveMeta}>
+            {showLive ? (
+              <>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveLabel}>EN VIVO</Text>
+                <Text style={styles.liveSeparator}>·</Text>
+              </>
+            ) : connecting ? (
+              <>
+                <View style={[styles.liveDot, styles.liveDotConnecting]} />
+                <Text style={styles.liveLabelConnecting}>CONECTANDO</Text>
+                <Text style={styles.liveSeparator}>·</Text>
+              </>
+            ) : phase === \"error\" ? (
+              <>
+                <View style={[styles.liveDot, styles.liveDotError]} />
+                <Text style={styles.liveLabelError}>SIN SEÑAL</Text>
+                <Text style={styles.liveSeparator}>·</Text>
+              </>
+            ) : null}
+            <Text style={styles.liveFrequency}>{radio.frequency}</Text>
+          </View>"""
+          if old_live not in t:
+              raise SystemExit("live meta missing")
+          t = t.replace(old_live, new_live, 1)
+          old_dial = """                <Pressable
+                  onPress={() => (currentRadio?.id === radio.id ? togglePlay() : playRadio(radio, true))}
+                  accessibilityRole=\"button\"
+                  accessibilityLabel={active ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`}
+                  style={({ pressed }) => [styles.dialButton, active && styles.dialButtonActive, pressed && styles.dialPressed]}
+                >
+                  <IconSymbol name={active ? \"pause.fill\" : \"play.fill\"} size={30} color=\"#F7F7F2\" />
+                </Pressable>
+                <Text style={styles.dialStatus}>{isLoading ? \"CONECTANDO\" : active ? \"REPRODUCIENDO\" : \"LISTA PARA ESCUCHAR\"}</Text>"""
+          # Fix escaping - use raw without over-escape
+          old_dial = '''                <Pressable
+                  onPress={() => (currentRadio?.id === radio.id ? togglePlay() : playRadio(radio, true))}
+                  accessibilityRole="button"
+                  accessibilityLabel={active ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`}
+                  style={({ pressed }) => [styles.dialButton, active && styles.dialButtonActive, pressed && styles.dialPressed]}
+                >
+                  <IconSymbol name={active ? "pause.fill" : "play.fill"} size={30} color="#F7F7F2" />
+                </Pressable>
+                <Text style={styles.dialStatus}>{isLoading ? "CONECTANDO" : active ? "REPRODUCIENDO" : "LISTA PARA ESCUCHAR"}</Text>'''
+          new_dial = '''                <Pressable
+                  onPress={() => {
+                    if (phase === "error") void playRadio(radio, true);
+                    else if (currentRadio?.id === radio.id) togglePlay();
+                    else void playRadio(radio, true);
+                  }}
+                  disabled={connecting}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: connecting, busy: connecting }}
+                  accessibilityLabel={playbackControlLabel(phase, radio.name)}
+                  style={({ pressed }) => [
+                    styles.dialButton,
+                    active && styles.dialButtonActive,
+                    connecting && styles.dialButtonConnecting,
+                    phase === "error" && styles.dialButtonError,
+                    pressed && !connecting && styles.dialPressed,
+                  ]}
+                >
+                  {connecting ? (
+                    <ActivityIndicator size="large" color="#F7F7F2" />
+                  ) : (
+                    <IconSymbol
+                      name={active ? "pause.fill" : phase === "error" ? "arrow.clockwise" : "play.fill"}
+                      size={30}
+                      color="#F7F7F2"
+                    />
+                  )}
+                </Pressable>
+                <Text style={[styles.dialStatus, active && styles.dialStatusActive, phase === "error" && styles.dialStatusError]}>
+                  {dialStatusLabel(phase)}
+                </Text>'''
+          if old_dial not in t:
+              raise SystemExit("dial missing")
+          t = t.replace(old_dial, new_dial, 1)
+          t = t.replace(
+              '  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#1ED760" },\n  liveLabel: { color: "#1ED760", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },',
+              '  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#1ED760" },\n  liveDotConnecting: { backgroundColor: "#F5A524" },\n  liveDotError: { backgroundColor: "#FF6B5A" },\n  liveLabel: { color: "#1ED760", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },\n  liveLabelConnecting: { color: "#F5A524", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },\n  liveLabelError: { color: "#FF6B5A", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },',
+              1,
+          )
+          t = t.replace(
+              '  dialButton: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center" },\n  dialButtonActive: { backgroundColor: "#1ED76033" },',
+              '  dialButton: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center" },\n  dialButtonActive: { backgroundColor: "#1ED76033" },\n  dialButtonConnecting: { backgroundColor: "#F5A52433" },\n  dialButtonError: { backgroundColor: "#FF6B5A33" },',
+              1,
+          )
+          t = t.replace(
+              '  dialStatus: { color: "#AEB5C2", fontSize: 10, fontWeight: "800", letterSpacing: 1.2 },',
+              '  dialStatus: { color: "#AEB5C2", fontSize: 10, fontWeight: "800", letterSpacing: 1.2 },\n  dialStatusActive: { color: "#1ED760" },\n  dialStatusError: { color: "#FF6B5A" },',
+              1,
+          )
+          p.write_text(t)
+          print("detail ok")
+          PY
+
+      - name: Patch mini-player
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("components/persistent-mini-player.tsx")
+          t = p.read_text()
+          if "stationPlaybackPhase" in t:
+              print("mini already"); raise SystemExit(0)
+          t = t.replace(
+              'import { useRadioPlayer, type Radio } from "@/lib/radio-player";',
+              'import { useRadioPlayer, type Radio } from "@/lib/radio-player";\nimport { dialStatusLabel, playbackControlLabel, stationPlaybackPhase } from "@/lib/player-utils";',
+          )
+          old_head = '''  const displayRadio = currentRadio ?? miniRadio;
+  if (!displayRadio || pathname === "/" || pathname === "/(tabs)" || pathname.startsWith("/radio/")) return null;
+  const lightMode = colorScheme === "light";
+  const bottom = bottomOffset;
+'''
+          new_head = '''  const displayRadio = currentRadio ?? miniRadio;
+  if (!displayRadio || pathname === "/" || pathname === "/(tabs)" || pathname.startsWith("/radio/")) return null;
+  const lightMode = colorScheme === "light";
+  const bottom = bottomOffset;
+  const phase = stationPlaybackPhase(
+    currentRadio?.id,
+    displayRadio.id,
+    isPlaying,
+    isLoading,
+    Boolean(playbackError),
+  );
+  const connecting = phase === "connecting";
+'''
+          t = t.replace(old_head, new_head, 1)
+          old_meta = '''          {isLoading ? (
+            <Text style={[styles.meta, { color: colors.muted }]}>Conectando...</Text>
+          ) : playbackError ? (
+            <Text style={[styles.meta, { color: colors.primary }]} numberOfLines={1}>Toca para reintentar</Text>
+          ) : (
+            <NowPlayingLabel streamUrl={displayRadio.streamUrl} compact />
+          )}'''
+          new_meta = '''          {phase === "connecting" ? (
+            <Text style={[styles.meta, { color: colors.muted }]}>{dialStatusLabel(phase)}</Text>
+          ) : phase === "error" ? (
+            <Text style={[styles.meta, { color: "#FF6B5A" }]} numberOfLines={1}>Toca para reintentar</Text>
+          ) : phase === "playing" ? (
+            <NowPlayingLabel streamUrl={displayRadio.streamUrl} compact />
+          ) : (
+            <Text style={[styles.meta, { color: colors.muted }]} numberOfLines={1}>{dialStatusLabel(phase)}</Text>
+          )}'''
+          t = t.replace(old_meta, new_meta, 1)
+          t = t.replace(
+              '<AudioEqualizer playing={isPlaying} color={lightMode ? "#C2413E" : displayRadio.accent} barCount={5} compact accessible={false} />',
+              '<AudioEqualizer playing={phase === "playing"} color={lightMode ? "#C2413E" : displayRadio.accent} barCount={5} compact accessible={false} />',
+              1,
+          )
+          old_btn = '''      <Pressable 
+        onPress={() => playbackError ? playRadio(displayRadio) : togglePlay()} 
+        accessibilityRole="button" 
+        accessibilityLabel={playbackError ? `Reintentar ${displayRadio.name}` : isPlaying ? `Pausar ${displayRadio.name}` : `Reproducir ${displayRadio.name}`}
+        accessibilityHint={playbackError ? "Intenta reproducir la emisora nuevamente" : isPlaying ? "Pausa la reproducción actual" : "Inicia la reproducción de la emisora"}
+        style={({ pressed }) => [styles.control, pressed && styles.pressed]}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="small" color={lightMode ? "#172033" : "#F5F3EE"} />
+        ) : (
+          <IconSymbol name={isPlaying ? "pause.fill" : "play.fill"} size={20} color={lightMode ? "#172033" : "#F5F3EE"} />
+        )}
+      </Pressable>'''
+          new_btn = '''      <Pressable 
+        onPress={() => phase === "error" ? void playRadio(displayRadio) : togglePlay()} 
+        disabled={connecting}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: connecting, busy: connecting }}
+        accessibilityLabel={playbackControlLabel(phase, displayRadio.name)}
+        accessibilityHint={
+          phase === "error"
+            ? "Intenta reproducir la emisora nuevamente"
+            : phase === "playing"
+              ? "Pausa la reproducción actual"
+              : phase === "connecting"
+                ? "Espera mientras se establece la conexión"
+                : "Inicia la reproducción de la emisora"
+        }
+        style={({ pressed }) => [styles.control, pressed && !connecting && styles.pressed]}
+      >
+        {connecting ? (
+          <ActivityIndicator size="small" color={lightMode ? "#172033" : "#F5F3EE"} />
+        ) : (
+          <IconSymbol
+            name={phase === "playing" ? "pause.fill" : phase === "error" ? "arrow.clockwise" : "play.fill"}
+            size={20}
+            color={lightMode ? "#172033" : "#F5F3EE"}
+          />
+        )}
+      </Pressable>'''
+          if old_btn not in t:
+              raise SystemExit("mini btn missing")
+          t = t.replace(old_btn, new_btn, 1)
+          p.write_text(t)
+          print("mini ok")
+          PY
+
+      - name: Add unit tests
+        run: |
+          cat > tests/station-playback-phase.test.ts <<'EOF'
+          import { describe, expect, it } from "vitest";
+          import {
+            dialStatusLabel,
+            isLiveBadgeVisible,
+            playbackControlLabel,
+            stationPlaybackPhase,
+          } from "../lib/player-utils";
+
+          describe("stationPlaybackPhase", () => {
+            it("is idle when another station is active", () => {
+              expect(stationPlaybackPhase("adn", "futuro", true, false, false)).toBe("idle");
+            });
+
+            it("prioritizes error over loading for the active station", () => {
+              expect(stationPlaybackPhase("adn", "adn", false, true, true)).toBe("error");
+            });
+
+            it("reports connecting then playing", () => {
+              expect(stationPlaybackPhase("adn", "adn", false, true, false)).toBe("connecting");
+              expect(stationPlaybackPhase("adn", "adn", true, false, false)).toBe("playing");
+            });
+          });
+
+          describe("live badge and dial copy", () => {
+            it("only shows EN VIVO while playing", () => {
+              expect(isLiveBadgeVisible("playing")).toBe(true);
+              expect(isLiveBadgeVisible("connecting")).toBe(false);
+              expect(isLiveBadgeVisible("idle")).toBe(false);
+              expect(isLiveBadgeVisible("error")).toBe(false);
+            });
+
+            it("maps labels for each phase", () => {
+              expect(dialStatusLabel("connecting")).toBe("CONECTANDO");
+              expect(dialStatusLabel("playing")).toBe("REPRODUCIENDO");
+              expect(dialStatusLabel("error")).toBe("SIN SEÑAL");
+              expect(dialStatusLabel("idle")).toBe("LISTA PARA ESCUCHAR");
+              expect(playbackControlLabel("error", "ADN")).toBe("Reintentar ADN");
+              expect(playbackControlLabel("playing", "ADN")).toBe("Pausar ADN");
+            });
+          });
+          EOF
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "fix(ux): unify playback phases across dial, mini-player and cover flow"
+          git push origin HEAD:main
