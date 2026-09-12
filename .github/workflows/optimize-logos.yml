@@ -1,0 +1,96 @@
+name: Optimize logos to WebP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ImageMagick
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
+
+      - name: Convert PNG/JPG logos to WebP
+        run: |
+          set -euo pipefail
+          convert_dir() {
+            local dir="$1"
+            [ -d "$dir" ] || return 0
+            for f in "$dir"/*.{png,jpg,jpeg,PNG,JPG,JPEG}; do
+              [ -f "$f" ] || continue
+              base="${f%.*}"
+              out="${base}.webp"
+              # Skip if webp already newer/same and smaller is not required; always regenerate
+              convert "$f" -strip -quality 82 "$out"
+              in_sz=$(stat -c%s "$f")
+              out_sz=$(stat -c%s "$out")
+              echo "$(basename "$f") → $(basename "$out") (${in_sz} → ${out_sz} bytes)"
+            done
+          }
+          convert_dir assets/images/radios
+          # cooperativa and rock-and-pop live one level up
+          for f in assets/images/radio-cooperativa.png assets/images/rock-and-pop.jpg; do
+            if [ -f "$f" ]; then
+              base="${f%.*}"
+              convert "$f" -strip -quality 82 "${base}.webp"
+              echo "$(basename "$f") → $(basename "${base}.webp")"
+            fi
+          done
+
+      - name: Point LOCAL_LOGOS requires at WebP
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path("components/station-logo.tsx")
+          text = path.read_text()
+          replacements = {
+            'require("@/assets/images/radios/fmlatina.png")': 'require("@/assets/images/radios/fmlatina.webp")',
+            'require("@/assets/images/radio-cooperativa.png")': 'require("@/assets/images/radio-cooperativa.webp")',
+            'require("@/assets/images/radios/pudahuel.png")': 'require("@/assets/images/radios/pudahuel.webp")',
+            'require("@/assets/images/radios/corazon.png")': 'require("@/assets/images/radios/corazon.webp")',
+            'require("@/assets/images/radios/futuro.png")': 'require("@/assets/images/radios/futuro.webp")',
+            'require("@/assets/images/radios/concierto.png")': 'require("@/assets/images/radios/concierto.webp")',
+            'require("@/assets/images/radios/activa.png")': 'require("@/assets/images/radios/activa.webp")',
+            'require("@/assets/images/radios/adn.png")': 'require("@/assets/images/radios/adn.webp")',
+            'require("@/assets/images/radios/los40.png")': 'require("@/assets/images/radios/los40.webp")',
+            'require("@/assets/images/radios/fmdos.png")': 'require("@/assets/images/radios/fmdos.webp")',
+            'require("@/assets/images/radios/imagina.png")': 'require("@/assets/images/radios/imagina.webp")',
+            'require("@/assets/images/radios/agricultura.jpg")': 'require("@/assets/images/radios/agricultura.webp")',
+            'require("@/assets/images/radios/duna.jpg")': 'require("@/assets/images/radios/duna.webp")',
+            'require("@/assets/images/radios/beethoven.png")': 'require("@/assets/images/radios/beethoven.webp")',
+            'require("@/assets/images/rock-and-pop.jpg")': 'require("@/assets/images/rock-and-pop.webp")',
+            'require("@/assets/images/radios/festival.jpg")': 'require("@/assets/images/radios/festival.webp")',
+            'require("@/assets/images/radios/carolina.png")': 'require("@/assets/images/radios/carolina.webp")',
+            'require("@/assets/images/radios/sonar.png")': 'require("@/assets/images/radios/sonar.webp")',
+            'require("@/assets/images/radios/oasis.png")': 'require("@/assets/images/radios/oasis.webp")',
+            'require("@/assets/images/radios/edelweiss.png")': 'require("@/assets/images/radios/edelweiss.webp")',
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  # already webp or missing — ok
+                  if new not in text:
+                      print(f"WARN missing: {old}")
+              else:
+                  text = text.replace(old, new)
+                  print(f"ok {old.split('/')[-1]}")
+          path.write_text(text)
+          PY
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/images components/station-logo.tsx
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "perf(assets): convert local radio logos to WebP and update requires"
+          git push origin HEAD:main
