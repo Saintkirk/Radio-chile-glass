@@ -5,14 +5,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { AudioEqualizer } from "@/components/audio-equalizer";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CoverFlowCarousel } from "@/components/cover-flow-carousel";
 import { NowPlayingLabel } from "@/components/now-playing-label";
 import { useRadioPlayer, type Radio } from "@/lib/radio-player";
-import { playbackHandoff } from "@/lib/player-utils";
+import { dialStatusLabel, isLiveBadgeVisible, playbackControlLabel, playbackHandoff, stationPlaybackPhase } from "@/lib/player-utils";
 import { useThemeContext } from "@/lib/theme-provider";
 import { detailOpenedHaptic } from "@/lib/haptics";
 import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
@@ -162,7 +162,10 @@ export default function RadioDetailScreen() {
     );
   }
 
-  const active = currentRadio?.id === radio.id && isPlaying;
+  const phase = stationPlaybackPhase(currentRadio?.id, radio.id, isPlaying, isLoading, Boolean(playbackError));
+  const active = phase === "playing";
+  const connecting = phase === "connecting";
+  const showLive = isLiveBadgeVisible(phase);
   const containerStyle = hasMeasuredContainer
     ? {
         left: Number(containerX) * viewportScaleX,
@@ -256,9 +259,25 @@ export default function RadioDetailScreen() {
             </View>
           </Animated.View>
           <View style={styles.liveMeta}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveLabel}>EN VIVO</Text>
-            <Text style={styles.liveSeparator}>·</Text>
+            {showLive ? (
+              <>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveLabel}>EN VIVO</Text>
+                <Text style={styles.liveSeparator}>·</Text>
+              </>
+            ) : connecting ? (
+              <>
+                <View style={[styles.liveDot, styles.liveDotConnecting]} />
+                <Text style={styles.liveLabelConnecting}>CONECTANDO</Text>
+                <Text style={styles.liveSeparator}>·</Text>
+              </>
+            ) : phase === "error" ? (
+              <>
+                <View style={[styles.liveDot, styles.liveDotError]} />
+                <Text style={styles.liveLabelError}>SIN SEÑAL</Text>
+                <Text style={styles.liveSeparator}>·</Text>
+              </>
+            ) : null}
             <Text style={styles.liveFrequency}>{radio.frequency}</Text>
           </View>
           <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">{radio.name}</Text>
@@ -280,14 +299,36 @@ export default function RadioDetailScreen() {
               <View style={[styles.dialRingInner, { borderColor: `${radio.accent}55` }]} />
               <View style={styles.dialCenter}>
                 <Pressable
-                  onPress={() => (currentRadio?.id === radio.id ? togglePlay() : playRadio(radio, true))}
+                  onPress={() => {
+                    if (phase === "error") void playRadio(radio, true);
+                    else if (currentRadio?.id === radio.id) togglePlay();
+                    else void playRadio(radio, true);
+                  }}
+                  disabled={connecting}
                   accessibilityRole="button"
-                  accessibilityLabel={active ? `Pausar ${radio.name}` : `Reproducir ${radio.name}`}
-                  style={({ pressed }) => [styles.dialButton, active && styles.dialButtonActive, pressed && styles.dialPressed]}
+                  accessibilityState={{ disabled: connecting, busy: connecting }}
+                  accessibilityLabel={playbackControlLabel(phase, radio.name)}
+                  style={({ pressed }) => [
+                    styles.dialButton,
+                    active && styles.dialButtonActive,
+                    connecting && styles.dialButtonConnecting,
+                    phase === "error" && styles.dialButtonError,
+                    pressed && !connecting && styles.dialPressed,
+                  ]}
                 >
-                  <IconSymbol name={active ? "pause.fill" : "play.fill"} size={30} color="#F7F7F2" />
+                  {connecting ? (
+                    <ActivityIndicator size="large" color="#F7F7F2" />
+                  ) : (
+                    <IconSymbol
+                      name={active ? "pause.fill" : phase === "error" ? "arrow.clockwise" : "play.fill"}
+                      size={30}
+                      color="#F7F7F2"
+                    />
+                  )}
                 </Pressable>
-                <Text style={styles.dialStatus}>{isLoading ? "CONECTANDO" : active ? "REPRODUCIENDO" : "LISTA PARA ESCUCHAR"}</Text>
+                <Text style={[styles.dialStatus, active && styles.dialStatusActive, phase === "error" && styles.dialStatusError]}>
+                  {dialStatusLabel(phase)}
+                </Text>
                 <Text style={styles.dialCounter}>{currentIndex >= 0 ? `${currentIndex + 1} / ${radios.length}` : "—"}</Text>
               </View>
             </Animated.View>
@@ -338,7 +379,11 @@ const styles = StyleSheet.create({
   artworkFlowWrap: { marginHorizontal: -20, marginBottom: 8, alignSelf: "stretch", overflow: "visible" },
   liveMeta: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#1ED760" },
+  liveDotConnecting: { backgroundColor: "#F5A524" },
+  liveDotError: { backgroundColor: "#FF6B5A" },
   liveLabel: { color: "#1ED760", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },
+  liveLabelConnecting: { color: "#F5A524", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },
+  liveLabelError: { color: "#FF6B5A", fontSize: 11, fontWeight: "800", letterSpacing: 1.7 },
   liveSeparator: { color: "#798292", fontSize: 14 },
   liveFrequency: { color: "#C8CDD6", fontSize: 13, fontWeight: "600" },
   name: { color: "#F7F7F2", fontSize: 31, fontWeight: "700", letterSpacing: -0.8, marginTop: 9 },
@@ -350,8 +395,12 @@ const styles = StyleSheet.create({
   dialCenter: { alignItems: "center", justifyContent: "center", gap: 8 },
   dialButton: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#FFFFFF14", alignItems: "center", justifyContent: "center" },
   dialButtonActive: { backgroundColor: "#1ED76033" },
+  dialButtonConnecting: { backgroundColor: "#F5A52433" },
+  dialButtonError: { backgroundColor: "#FF6B5A33" },
   dialPressed: { opacity: 0.75, transform: [{ scale: 0.96 }] },
   dialStatus: { color: "#AEB5C2", fontSize: 10, fontWeight: "800", letterSpacing: 1.2 },
+  dialStatusActive: { color: "#1ED760" },
+  dialStatusError: { color: "#FF6B5A" },
   dialCounter: { color: "#798292", fontSize: 11 },
   dialSkip: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#FFFFFF0D", alignItems: "center", justifyContent: "center" },
   navPressed: { opacity: 0.7 },

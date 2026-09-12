@@ -128,14 +128,14 @@ const SlotCard = memo(function SlotCard({
           />
           <Animated.View style={[styles.cardShine, centerGlow, nonInteractiveStyle]} />
           {isCenter && <View style={[styles.centerBorder, { borderColor: `${radio.accent}A8` }]} pointerEvents="none" />}
-          {isCenter && (
-            <View style={[styles.liveBadge, { borderColor: `${radio.accent}CC`, backgroundColor: `${radio.accent}DD` }, nonInteractiveStyle]}>
+          {isCenter && currentRadioId === radio.id && isPlaying && !isLoading && (
+            <View style={[styles.liveBadge, { borderColor: `${radio.accent}CC`, backgroundColor: `${radio.accent}DD` }, nonInteractiveStyle]} accessibilityLabel="En vivo">
               <IconSymbol name="waveform" size={14} color="#FFFFFF" />
               <Text style={styles.liveBadgeText}>EN VIVO</Text>
             </View>
           )}
           {isCenter && isLoading && (
-            <View style={[styles.bufferingOverlay, nonInteractiveStyle]} accessible accessibilityLabel={`Buffering ${radio.name}`}>
+            <View style={[styles.bufferingOverlay, nonInteractiveStyle]} accessible accessibilityLabel={`Conectando con ${radio.name}`}>
               <Text style={styles.bufferingText}>CONECTANDO…</Text>
             </View>
           )}
