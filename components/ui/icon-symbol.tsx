@@ -22,6 +22,7 @@ const MAPPING = {
   "heart": "favorite-border",
   "play.fill": "play-arrow",
   "pause.fill": "pause",
+  "arrow.clockwise": "refresh",
   "magnifyingglass": "search",
   "slider.horizontal.3": "tune",
   "line.3.horizontal": "menu",
