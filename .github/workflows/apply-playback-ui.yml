@@ -1,0 +1,29 @@
+name: Apply playback UI phases
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch cover flow and radio detail
+        run: |
+          python3 scripts/patch_cover_playback_phase.py
+          python3 scripts/patch_radio_playback_phase.py
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add components/cover-flow-carousel.tsx "app/radio/[id].tsx"
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "fix(ux): dial and cover-flow share live/connecting/error phases"
+          git push origin HEAD:main
