@@ -67,6 +67,8 @@ export type PlaybackStatusSnapshot = {
   playing?: boolean;
   isLoaded?: boolean;
   isBuffering?: boolean;
+  /** Raw ExoPlayer/AVPlayer state string from partial status maps. */
+  playbackState?: string;
 };
 
 /**
@@ -84,6 +86,13 @@ export function isPlaybackConfirmed(status: PlaybackStatusSnapshot): boolean {
  * active intent is a continuation of playback, never a pause: the previous
  * logic dropped to PAUSED on the first buffering burst, cutting streams
  * roughly one second after they became audible.
+ *
+ * expo-audio on Android emits PARTIAL status maps from its ExoPlayer
+ * listeners ({playbackState}, {isLoaded}, {playing}) plus a full periodic
+ * status only while playing. Once audio has been confirmed audible, partial
+ * maps without an explicit non-playing signal must keep the playing surface
+ * — otherwise a {playbackState:'ready'} update right after confirmation
+ * flips the UI to connecting and the session appears to never play.
  */
 export function intentPlaybackSurface(
   status: PlaybackStatusSnapshot,
@@ -96,7 +105,15 @@ export function intentPlaybackSurface(
     // non-playing status (buffering included) means the surface is paused.
     return status.playing === false ? "paused" : "connecting";
   }
-  if (status.isBuffering === true) return wasConfirmedAudible ? "playing" : "connecting";
+  if (wasConfirmedAudible) {
+    // Sticky audible: while the intent is active, only an explicit
+    // playing:false from the native player ends the confirmed state. A full
+    // rebuffer status ({playing:false, isBuffering:true}) is a continuation:
+    // the notification and lock screen must not blink to PAUSED.
+    if (status.isBuffering === true) return "playing";
+    return status.playing === false ? "connecting" : "playing";
+  }
+  if (status.isBuffering === true) return "connecting";
   // Active intent, not confirmed, not buffering: stay on the connecting
   // surface until the listener confirms audio or the startup timeout fires.
   return "connecting";

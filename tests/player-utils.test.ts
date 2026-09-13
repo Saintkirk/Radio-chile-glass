@@ -153,6 +153,20 @@ describe("player interaction utilities", () => {
     expect(intentPlaybackSurface(buffering, false, true)).toBe("paused");
   });
 
+  it("keeps confirmed audio sticky across partial Android status maps", () => {
+    // expo-audio on Android emits partial maps from ExoPlayer listeners:
+    // {playbackState:'ready'}, {isLoaded:false}, {playing:false}. After audio
+    // is confirmed those partials must not flip the surface back to
+    // connecting — that made playback appear dead right after starting.
+    expect(intentPlaybackSurface({ playing: true }, true, false)).toBe("playing");
+    expect(intentPlaybackSurface({ playbackState: "ready" }, true, true)).toBe("playing");
+    expect(intentPlaybackSurface({ isLoaded: false }, true, true)).toBe("playing");
+    expect(intentPlaybackSurface({ playing: false, isLoaded: true, isBuffering: true }, true, true)).toBe("playing");
+    // An explicit native pause ends the confirmed state but keeps connecting
+    // while the intent is still active so the listener can confirm again.
+    expect(intentPlaybackSurface({ playing: false, isLoaded: true, isBuffering: false }, true, true)).toBe("connecting");
+  });
+
   it("publishes confirmed audio and pauses only without user intent", () => {
     const audible = { playing: true, isLoaded: true, isBuffering: false };
     const stopped = { playing: false, isLoaded: true, isBuffering: false };
