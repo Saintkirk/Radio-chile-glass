@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -207,8 +208,15 @@ export function CoverFlowCarousel({
     setIsSpinning(false);
     spinning.set(0);
     spinProgress.set(0);
+    cancelAnimation(wheelOffset);
     wheelOffset.set(0);
-    setSelectedIndex(nextIndex);
+    // The wheel reset above lands on the UI thread immediately, while a plain
+    // setState reaches the UI a frame later — that gap is what made the
+    // previous cover flash back into the center slot. Committing the slot
+    // contents synchronously keeps both changes in the same rendered frame.
+    flushSync(() => {
+      setSelectedIndex(nextIndex);
+    });
     onSelect(nextRadio);
   }, [isMounted, onSelect, radios, spinProgress, spinning, wheelOffset]);
 
@@ -239,6 +247,9 @@ export function CoverFlowCarousel({
     const maxExtra = Math.max(0, Math.min(radios.length - 1, SLOT_RADIUS - 3));
     const targetSlots = 4 + (maxExtra > 0 ? Math.floor(Math.random() * (maxExtra + 1)) : 0);
     const finalIndex = spinLandingIndex(selectedIndexRef.current, targetSlots, radios.length);
+    // Warm the landing window while the wheel spins so the arriving covers are
+    // already decoded when the wheel stops — no empty cards at the landing.
+    void prefetchLogoWindow(radios, finalIndex, 3);
 
     if (reduceMotion) {
       setSelected(finalIndex);
@@ -260,7 +271,7 @@ export function CoverFlowCarousel({
         if (finished && isMounted.get()) runOnJS(setSelected)(finalIndex);
       }),
     ));
-  }, [active, isMounted, radios.length, reduceMotion, setSelected, spinProgress, spinning, wheelOffset]);
+  }, [active, isMounted, radios, reduceMotion, setSelected, spinProgress, spinning, wheelOffset]);
 
   useEffect(() => {
     if (safeActiveIndex < 0) return;
@@ -299,7 +310,9 @@ export function CoverFlowCarousel({
     const controller = new AbortController();
     prefetchAbortRef.current = controller;
     const handle = setTimeout(() => {
-      if (!controller.signal.aborted) void prefetchLogoWindow(radios, renderIndex, 3);
+      // SLOT_RADIUS defines the farthest visible card; a smaller window leaves
+      // the outer covers loading late and showing the initials fallback.
+      if (!controller.signal.aborted) void prefetchLogoWindow(radios, renderIndex, SLOT_RADIUS);
     }, 80);
     return () => {
       clearTimeout(handle);

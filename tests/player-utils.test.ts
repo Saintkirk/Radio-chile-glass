@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjacentPlayableRadioIndex, adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isLockScreenAudioCandidate, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, nearestCarouselSlot, playbackHandoff, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, spinLandingIndex, toggleFavoriteId, wrapCarouselIndex } from "../lib/player-utils";
+import { adjacentPlayableRadioIndex, adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, intentPlaybackSurface, isCurrentPlaybackRequest, isCurrentRadioId, isLockScreenAudioCandidate, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, nearestCarouselSlot, playbackHandoff, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, shouldReplayStalledPlayer, spinLandingIndex, toggleFavoriteId, wrapCarouselIndex } from "../lib/player-utils";
 import type { Radio } from "../lib/radios";
 
 const radio = {
@@ -141,6 +141,31 @@ describe("player interaction utilities", () => {
     expect(carouselSettleMode(true, false)).toBe("gesture");
     expect(carouselSettleMode(false, false)).toBe("entrance");
     expect(carouselSettleMode(true, true)).toBe("instant");
+  });
+
+  it("keeps a buffering stream on the playing surface while the intent stays active", () => {
+    // The reported loop: play → audible for ~1s → buffering burst → UI paused →
+    // user taps play → same cut. Buffering with an active intent must not
+    // publish paused, before or after the first audible confirmation.
+    const buffering = { playing: false, isLoaded: true, isBuffering: true };
+    expect(intentPlaybackSurface(buffering, true, false)).toBe("connecting");
+    expect(intentPlaybackSurface(buffering, true, true)).toBe("playing");
+    expect(intentPlaybackSurface(buffering, false, true)).toBe("paused");
+  });
+
+  it("publishes confirmed audio and pauses only without user intent", () => {
+    const audible = { playing: true, isLoaded: true, isBuffering: false };
+    const stopped = { playing: false, isLoaded: true, isBuffering: false };
+    expect(intentPlaybackSurface(audible, true, false)).toBe("playing");
+    expect(intentPlaybackSurface(stopped, false, true)).toBe("paused");
+    expect(intentPlaybackSurface(stopped, true, true)).toBe("connecting");
+  });
+
+  it("replays only a stalled player, never one that is buffering or loaded", () => {
+    expect(shouldReplayStalledPlayer({ playing: false, isLoaded: false, isBuffering: false })).toBe(true);
+    expect(shouldReplayStalledPlayer({ playing: false, isLoaded: false, isBuffering: true })).toBe(false);
+    expect(shouldReplayStalledPlayer({ playing: true, isLoaded: true, isBuffering: false })).toBe(false);
+    expect(shouldReplayStalledPlayer({ playing: false, isLoaded: true, isBuffering: false })).toBe(false);
   });
 
   it("maps Android audio focus transitions to safe player actions", () => {

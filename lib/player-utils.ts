@@ -78,6 +78,43 @@ export function isPlaybackConfirmed(status: PlaybackStatusSnapshot): boolean {
   return status.playing === true && status.isLoaded !== false && status.isBuffering !== true;
 }
 
+/**
+ * Visual state the player surface should publish for a status update while
+ * the user still intends to listen (playbackIntent). Buffering during an
+ * active intent is a continuation of playback, never a pause: the previous
+ * logic dropped to PAUSED on the first buffering burst, cutting streams
+ * roughly one second after they became audible.
+ */
+export function intentPlaybackSurface(
+  status: PlaybackStatusSnapshot,
+  playbackIntent: boolean,
+  wasConfirmedAudible: boolean,
+): "playing" | "connecting" | "paused" {
+  if (isPlaybackConfirmed(status)) return "playing";
+  if (!playbackIntent) {
+    // Without an active intent the user is never waiting for audio, so a
+    // non-playing status (buffering included) means the surface is paused.
+    return status.playing === false ? "paused" : "connecting";
+  }
+  if (status.isBuffering === true) return wasConfirmedAudible ? "playing" : "connecting";
+  // Active intent, not confirmed, not buffering: stay on the connecting
+  // surface until the listener confirms audio or the startup timeout fires.
+  return "connecting";
+}
+
+/**
+ * Whether the 350 ms replay safety net may re-issue play(). Only a player
+ * that actually stalled (not playing, not loaded, not buffering) qualifies;
+ * forcing play() during buffering resets the decoder and cuts live audio.
+ */
+export function shouldReplayStalledPlayer(player: {
+  playing?: boolean;
+  isLoaded?: boolean;
+  isBuffering?: boolean;
+}): boolean {
+  return player.playing !== true && player.isLoaded !== true && player.isBuffering !== true;
+}
+
 export const MAX_PLAYBACK_RETRIES = 3;
 
 export function isCurrentPlaybackRequest(requestId: number, currentRequestId: number): boolean {

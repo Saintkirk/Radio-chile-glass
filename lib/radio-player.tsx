@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadCatalog, RADIOS, selectStartupRadio, type Radio, validateStreamUrl } from "./radios";
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
-import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, adaptiveRetryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
+import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, adaptiveRetryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, intentPlaybackSurface, shouldReplayStalledPlayer, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
 import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "./audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "./radio-media-controls";
 
@@ -327,54 +327,49 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         playerRef.current = candidate;
         syncLockScreenControls(candidate, radio, backgroundPlaybackEnabled, false);
         let nativePlaybackConfirmed = false;
+        let bufferingSince: number | null = null;
         playerStatusSubscriptionRef.current = candidate.addListener("playbackStatusUpdate", (status) => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
-          const confirmed = isPlaybackConfirmed(status);
-          // Algunos streams emiten playing=true mientras aún están llenando el
-          // buffer. Solo ese estado confirmado termina la conexión y actualiza
-          // la MediaSession como reproduciendo.
-          if (confirmed) {
-            nativePlaybackConfirmed = true;
-            failedRadioUntilRef.current.delete(radio.id);
-            setIsPlaying(true);
-            updateNativeMediaState(true);
-            const successTime = Date.now();
-            logPerformance({
-              event: 'playRadio_success',
-              timestamp: successTime,
-              radioId: radio.id,
-              success: true,
-              duration: successTime - startTime,
-            });
-            if (crossfadeStartedRequestRef.current !== requestId) {
-              crossfadeStartedRequestRef.current = requestId;
-              startCrossfade(outgoingPlayer, candidate as ReturnType<typeof createAudioPlayer>, requestId);
+          const surface = intentPlaybackSurface(status, playbackIntentRef.current, nativePlaybackConfirmed);
+          if (surface === "playing") {
+            const confirmed = isPlaybackConfirmed(status);
+            bufferingSince = null;
+            if (confirmed && !nativePlaybackConfirmed) {
+              nativePlaybackConfirmed = true;
+              failedRadioUntilRef.current.delete(radio.id);
+              const successTime = Date.now();
+              logPerformance({
+                event: 'playRadio_success',
+                timestamp: successTime,
+                radioId: radio.id,
+                success: true,
+                duration: successTime - startTime,
+              });
+              if (crossfadeStartedRequestRef.current !== requestId) {
+                crossfadeStartedRequestRef.current = requestId;
+                startCrossfade(outgoingPlayer, candidate as ReturnType<typeof createAudioPlayer>, requestId);
+              }
+              if (startupTimeoutRef.current) {
+                clearTimeout(startupTimeoutRef.current);
+                startupTimeoutRef.current = null;
+              }
             }
             // Keep playbackIntentRef true until the user pauses/stops or a
             // hard error/timeout. Clearing it on first confirm caused live
             // streams to drop after ~1s when the next status said buffering.
-            if (startupTimeoutRef.current) {
-              clearTimeout(startupTimeoutRef.current);
-              startupTimeoutRef.current = null;
-            }
             setPlaybackError(null);
             setIsLoading(false);
+            setIsPlaying(true);
+            updateNativeMediaState(true);
             setNativeMediaSession(lockScreenMetadata(radio), true);
-          } else if (
-            nativePlaybackConfirmed &&
-            status.playing === false &&
-            status.isBuffering !== true &&
-            !playbackIntentRef.current
-          ) {
+          } else if (surface === "paused") {
+            bufferingSince = null;
             setIsPlaying(false);
             updateNativeMediaState(false);
-          } else if (
-            nativePlaybackConfirmed &&
-            status.isBuffering === true &&
-            playbackIntentRef.current
-          ) {
-            setIsPlaying(true);
-            setIsLoading(false);
+          } else {
+            if (status.isBuffering === true && bufferingSince === null) bufferingSince = Date.now();
+            setIsLoading(true);
+            setIsPlaying(false);
           }
         });
         const activeCandidate = candidate;
@@ -389,11 +384,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         if (replayTimeoutRef.current) clearTimeout(replayTimeoutRef.current);
         replayTimeoutRef.current = setTimeout(() => {
           replayTimeoutRef.current = null;
-          if (isCurrentPlaybackRequest(requestId, playRequestRef.current) && playerRef.current === activeCandidate && playbackIntentRef.current && !nativePlaybackConfirmed) {
-            try {
-              activeCandidate.play();
-            } catch { /* status listener reports the real failure */ }
-          }
+          if (!isCurrentPlaybackRequest(requestId, playRequestRef.current) || playerRef.current !== activeCandidate || !playbackIntentRef.current || nativePlaybackConfirmed) return;
+          // Only re-issue play() when the player actually stalled. Calling
+          // play() while the stream is buffering resets the decoder and cuts
+          // the audio right after it becomes audible (the 1-second loop).
+          if (!shouldReplayStalledPlayer(activeCandidate)) return;
+          try {
+            activeCandidate.play();
+          } catch { /* status listener reports the real failure */ }
         }, 350);
         startupTimeoutRef.current = setTimeout(() => {
           if (!isCurrentPlaybackRequest(requestId, playRequestRef.current) || !playbackIntentRef.current || nativePlaybackConfirmed) return;
@@ -535,12 +533,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       updateNativeMediaState(false);
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
     }, 8000);
-    // The playbackStatusUpdate listener is the only source of truth for an
-    // audible state. `player.playing` can flip before the stream is loaded.
+    // The playbackStatusUpdate listener is the source of truth for an audible
+    // state. The resume intent stays active, so the lock screen keeps showing
+    // the session with a PLAYING surface instead of blinking to PAUSED while
+    // the stream reconnects — publishing paused here was the resume loop's
+    // second trigger: the first buffering status then flipped the UI off.
     setIsPlaying(false);
     setIsLoading(true);
-    updateNativeMediaState(false);
-    if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
   }, [currentRadio, playRadio]);
 
   const togglePlay = useCallback(() => {

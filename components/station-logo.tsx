@@ -66,6 +66,16 @@ export const StationLogo = memo(function StationLogo({
   const loadAttemptedRef = useRef(false);
   currentSourceKeyRef.current = sourceKey;
 
+  // Local assets decode synchronously: commit on the same frame the identity
+  // changes so a station switch never paints another station's artwork or an
+  // initials flash for a cover that is already available.
+  useEffect(() => {
+    currentSourceKeyRef.current = sourceKey;
+    setLoadedSourceKey(hasLocalLogo ? sourceKey : null);
+    setFailedSourceKey(null);
+    loadAttemptedRef.current = false;
+  }, [hasLocalLogo, sourceKey]);
+
   const handleLoad = useCallback(() => {
     if (canCommitLogo(currentSourceKeyRef.current, sourceKey)) {
       setLoadedSourceKey(sourceKey);
@@ -79,16 +89,12 @@ export const StationLogo = memo(function StationLogo({
   }, [sourceKey]);
 
   useEffect(() => {
-    setLoadedSourceKey(hasLocalLogo ? sourceKey : null);
-    setFailedSourceKey(null);
-    loadAttemptedRef.current = false;
-
     if (radio.favicon && !hasLocalLogo && !loadAttemptedRef.current) {
       loadAttemptedRef.current = true;
       const prefetchLevel: PrefetchLevel = priority === "high" ? "hot" : "warm";
       void prefetchLogo(radio.favicon, prefetchLevel);
     }
-  }, [hasLocalLogo, radio.favicon, radio.id, sourceKey, priority]);
+  }, [hasLocalLogo, radio.favicon, radio.id, priority]);
 
   const fallback = (
     <LinearGradient
@@ -105,7 +111,10 @@ export const StationLogo = memo(function StationLogo({
   const isLoaded = loadedSourceKey === sourceKey;
   const hasFailed = failedSourceKey === sourceKey;
   const canRenderImage = Boolean(source && !hasFailed);
-  const transitionDuration = hasLocalLogo ? 0 : isLoaded ? 0 : 180;
+  // No crossfade on first display of a new station: the image either appears
+  // with the frame or stays hidden until it is decoded. Crossfading a station
+  // swap is what produced the perception of covers "jumping" between stations.
+  const transitionDuration = hasLocalLogo ? 0 : 0;
 
   return (
     <View style={[styles.container, { width: size, height: size, borderRadius: radius }]} accessible={false}>
