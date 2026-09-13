@@ -5,7 +5,7 @@ import { loadCatalog, RADIOS, selectStartupRadio, type Radio, validateStreamUrl 
 import { prefetchFrequentLogos } from "./logo-cache";
 import { loadFavoriteIds, saveFavoriteIds } from "./favorites-storage";
 import { adjacentPlayableRadioIndex, isLockScreenAudioCandidate, lockScreenMetadata, MAX_PLAYBACK_RETRIES, retryDelayMs, adaptiveRetryDelayMs, toggleFavoriteId, audioFocusAction, isCurrentPlaybackRequest, isCurrentRadioId, isPlaybackConfirmed, intentPlaybackSurface, shouldReplayStalledPlayer, shouldContinueCrossfade, type LockScreenMetadata } from "./player-utils";
-import { addAudioFocusChangeListener, abandonAudioFocus, requestAudioFocus } from "./audio-focus";
+import { addAudioFocusChangeListener, abandonAudioFocus } from "./audio-focus";
 import { clearNativeMediaSession, setNativeMediaSession, subscribeToNativeMediaActions, updateNativeMediaMetadata, updateNativeMediaState } from "./radio-media-controls";
 
 // Performance logging utilities for production debugging
@@ -301,11 +301,10 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       if (!isCurrentPlaybackRequest(requestId, playRequestRef.current)) return;
       let candidate: ReturnType<typeof createAudioPlayer> | null = null;
       try {
-        // El foco nativo es best effort. Expo Audio es el dueño del player y
-        // debe poder iniciar aunque otro audio mantenga el foco temporalmente;
-        // de lo contrario una respuesta nativa incompleta deja todas las radios
-        // atrapadas en buffering sin llegar a crear el stream.
-        await requestAudioFocus();
+        // Expo Audio pide y posee el foco nativo dentro de play(). Pedirlo
+        // también desde el módulo propio deja dos propietarios en cola y el
+        // sistema responde con un LOSS que pausa al player recién creado
+        // (bug "No reproduce").
         candidate = createAudioPlayer(
           {
             uri: radio.streamUrl,
@@ -501,11 +500,9 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       if (currentRadio) setNativeMediaSession(lockScreenMetadata(currentRadio), false);
       return;
     }
-    // Audio Focus nativo puede estar temporalmente ocupado; no bloqueamos el
-    // player por ese resultado y dejamos que Expo Audio resuelva la ruta real.
+    // Expo Audio gestiona el foco nativo dentro de play(); no hay que pedirlo
+    // por separado ni serializar la reanudación contra peticiones concurrentes.
     const requestId = playRequestRef.current;
-    await requestAudioFocus();
-    if (requestId !== playRequestRef.current || playerRef.current !== player) return;
     playbackIntentRef.current = true;
     setPlaybackError(null);
     setIsLoading(true);
@@ -596,11 +593,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       const action = audioFocusAction(change);
       const player = playerRef.current;
       if (!player) return;
-      // Evita pausar manualmente durante buffering transitorio. Solo pausa
-      // por pérdida definitiva de foco, manteniendo la reproducción activa
-      // mientras el buffer se llena.
       if (action === "pause") {
-        resumeAfterFocusGainRef.current = isPlaying && playbackIntentRef.current;
+        // Un LOSS recibido antes de confirmar audio es un despacho obsoleto
+        // del propietario anterior del foco: el sistema lo emite cuando otro
+        // request entra en cola. Pausarlo deja al player recién creado en
+        // pausa para siempre (bug "No reproduce").
+        if (!isPlaybackConfirmed(player)) return;
+        resumeAfterFocusGainRef.current = playbackIntentRef.current;
         player.pause();
         setIsPlaying(false);
         updateNativeMediaState(false);
@@ -617,8 +616,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       }
     });
     return () => subscription.remove();
-    // Suscribirse solo una vez al montar, usando refs para acceder a estado actualizado
-  }, []);
+  }, [setPlayingState]);
 
   useEffect(() => {
     const subscription = subscribeToNativeMediaActions((action) => {

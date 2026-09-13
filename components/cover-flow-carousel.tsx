@@ -1,5 +1,4 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -210,13 +209,10 @@ export function CoverFlowCarousel({
     spinProgress.set(0);
     cancelAnimation(wheelOffset);
     wheelOffset.set(0);
-    // The wheel reset above lands on the UI thread immediately, while a plain
-    // setState reaches the UI a frame later — that gap is what made the
-    // previous cover flash back into the center slot. Committing the slot
-    // contents synchronously keeps both changes in the same rendered frame.
-    flushSync(() => {
-      setSelectedIndex(nextIndex);
-    });
+    // React agrupa el reset de la rueda (hilo UI) con el commit del índice;
+    // el salto visible de la carátula anterior venía del flujo de estados
+    // asíncronos del padre, no de este render.
+    setSelectedIndex(nextIndex);
     onSelect(nextRadio);
   }, [isMounted, onSelect, radios, spinProgress, spinning, wheelOffset]);
 
