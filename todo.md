@@ -810,7 +810,6 @@
 - [x] Conectar el remoto de GitHub al nuevo repositorio radio-chile-glass
 - [x] Publicar la rama principal y los workflows
 - [x] Verificar los archivos publicados y entregar el enlace
-<<<<<<< HEAD
 
 ## Corrección de CI de GitHub Actions
 

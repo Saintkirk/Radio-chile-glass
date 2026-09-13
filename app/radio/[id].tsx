@@ -15,7 +15,7 @@ import { useRadioPlayer, type Radio } from "@/lib/radio-player";
 import { dialStatusLabel, isLiveBadgeVisible, playbackControlLabel, playbackHandoff, stationPlaybackPhase } from "@/lib/player-utils";
 import { useThemeContext } from "@/lib/theme-provider";
 import { detailOpenedHaptic } from "@/lib/haptics";
-import { nonInteractiveStyle, platformShadow } from "@/lib/platform-styles";
+import { nonInteractiveStyle } from "@/lib/platform-styles";
 
 export default function RadioDetailScreen() {
   const router = useRouter();

@@ -75,7 +75,7 @@ export type PlaybackStatusSnapshot = {
  * not drop the "en vivo" / isPlaying UI or tear down the player.
  */
 export function isPlaybackConfirmed(status: PlaybackStatusSnapshot): boolean {
-  return status.playing === true && status.isLoaded !== false;
+  return status.playing === true && status.isLoaded !== false && status.isBuffering !== true;
 }
 
 export const MAX_PLAYBACK_RETRIES = 3;
@@ -117,15 +117,32 @@ export function carouselSettleDurationMs(distance: number, mode: CarouselSettleM
   return Math.min(480, 180 + abs * 0.42);
 }
 
+/** Whether a gesture commit or an entrance animation drives the next settle. */
+export function carouselSettleMode(isGesture: boolean, isInstant: boolean): CarouselSettleMode {
+  if (isInstant) return "instant";
+  return isGesture ? "gesture" : "entrance";
+}
+
 export function retryDelayMs(attempt: number): number {
   return [0, 800, 1800, 3500][Math.max(0, Math.min(attempt, MAX_PLAYBACK_RETRIES))];
 }
 
+/** Wraps a step-based index around the catalog length; -1 when empty. */
+export function adjacentRadioIndex(length: number, index: number, direction: 1 | -1): number {
+  if (length <= 0 || !Number.isFinite(index)) return -1;
+  return ((index + direction) % length + length) % length;
+}
+
+/**
+ * Walks the catalog in a direction skipping stations that cannot provide
+ * lock-screen audio (remote and known non-audio ids) unless the caller
+ * supplies its own blocking rule.
+ */
 export function adjacentPlayableRadioIndex(
   radios: Radio[],
   fromIndex: number,
   direction: 1 | -1,
-  isBlocked: (radio: Radio) => boolean,
+  isBlocked: (radio: Radio) => boolean = (radio) => !isLockScreenAudioCandidate(radio.id),
 ): number {
   if (radios.length === 0) return -1;
   let index = fromIndex;
@@ -180,27 +197,56 @@ export type LockScreenMetadata = {
   artworkUrl?: string;
 };
 
-export function lockScreenMetadata(radio: Radio, nowPlaying?: string | null): LockScreenMetadata {
+export type NowPlayingData = {
+  available: boolean;
+  title?: string | null;
+  artist?: string | null;
+  fetchedAt?: number;
+};
+
+/**
+ * Parses an ICY StreamTitle line such as "Artist - Title" into its parts.
+ * Everything after the first " - " separator stays in the title so remixes
+ * and long names survive. Non-string inputs degrade to an empty result.
+ */
+export function parseICYMetadata(input?: string | null): { artist?: string; title?: string } {
+  if (typeof input !== "string") return {};
+  const value = input.trim();
+  if (!value) return {};
+  const separator = value.indexOf(" - ");
+  if (separator <= 0 || separator >= value.length - 3) return { title: value };
+  const artist = value.slice(0, separator).trim();
+  const title = value.slice(separator + 3).trim();
+  if (!artist) return { title };
+  if (!title) return { artist };
+  return { artist, title };
+}
+
+/** Prefer dynamic ICY "artist - title"; fall back to the station identity. */
+export function lockScreenMetadata(radio: Radio, nowPlaying?: NowPlayingData | null): LockScreenMetadata {
+  const dynamicTitle = nowPlaying?.available === true ? nowPlaying.title?.trim() : undefined;
+  const dynamicArtist = nowPlaying?.available === true ? nowPlaying.artist?.trim() : undefined;
   return {
     radioId: radio.id,
-    title: nowPlaying?.trim() || radio.name,
-    artist: radio.name,
-    albumTitle: radio.city ? `${radio.city} · Chile` : "Radio Chile Glass",
-    artworkUrl: radio.logoUrl,
+    title: dynamicTitle || radio.name,
+    artist: dynamicArtist || `${radio.frequency} · ${radio.genre}`,
+    albumTitle: "Radio Chile Glass",
+    artworkUrl: radio.favicon,
   };
 }
 
-export function isLockScreenAudioCandidate(radio: Radio | null | undefined): boolean {
-  return Boolean(radio?.streamUrl);
+/** Only station ids from the editorial catalog are safe lock-screen targets. */
+export function isLockScreenAudioCandidate(radioId: string): boolean {
+  return typeof radioId === "string" && !radioId.startsWith("remote-") && !radioId.startsWith("13c") && !radioId.startsWith("la-clave");
 }
 
 export function audioFocusAction(
   change: "gain" | "loss" | "loss_transient" | "loss_transient_can_duck" | "unknown",
-): "resume" | "pause" | "duck" | "ignore" {
-  if (change === "gain") return "resume";
+): "restore" | "pause" | "duck" | "none" {
+  if (change === "gain") return "restore";
   if (change === "loss" || change === "loss_transient") return "pause";
   if (change === "loss_transient_can_duck") return "duck";
-  return "ignore";
+  return "none";
 }
 
 export function validateStreamUrl(url: string | undefined | null): { ok: boolean; reason?: string } {
@@ -217,15 +263,16 @@ export function validateStreamUrl(url: string | undefined | null): { ok: boolean
 }
 
 export function safeRadioIndex(length: number, index: number): number {
-  if (length <= 0) return 0;
-  return ((index % length) + length) % length;
+  if (length <= 0 || !Number.isFinite(index)) return -1;
+  return Math.max(0, Math.min(length - 1, Math.trunc(index)));
 }
 
 export function wrapCarouselIndex(index: number, length: number): number {
-  return safeRadioIndex(length, index);
+  if (length <= 0 || !Number.isFinite(index)) return -1;
+  return ((Math.trunc(index) % length) + length) % length;
 }
 
 export function spinLandingIndex(offset: number, step: number, length: number): number {
-  if (length <= 0) return 0;
-  return safeRadioIndex(length, nearestCarouselSlot(offset, step));
+  if (length <= 0 || !Number.isFinite(offset) || !Number.isFinite(step)) return -1;
+  return wrapCarouselIndex(Math.trunc(offset) + Math.trunc(step), length);
 }

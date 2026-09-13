@@ -2,7 +2,7 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { ItunesRadioCard } from "@/components/itunes-radio-card";
-import { useRadioPlayer, type Radio } from "@/lib/radio-player";
+import { useRadioPlayer } from "@/lib/radio-player";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useThemeContext } from "@/lib/theme-provider";
 import { useColors } from "@/hooks/use-colors";

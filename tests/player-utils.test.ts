@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { adjacentPlayableRadioIndex, adjacentRadioIndex, audioFocusAction, carouselSettleMode, horizontalSwipeDirection, isCurrentPlaybackRequest, isCurrentRadioId, isLockScreenAudioCandidate, isPlaybackConfirmed, isRadioPlaying, lockScreenMetadata, nearestCarouselSlot, playbackHandoff, playbackStatus, retryDelayMs, safeRadioIndex, shouldAutoplayStation, shouldContinueCrossfade, spinLandingIndex, toggleFavoriteId, wrapCarouselIndex } from "../lib/player-utils";
+import type { Radio } from "../lib/radios";
 
 const radio = {
   id: "fmlatina",
@@ -59,9 +60,9 @@ describe("player interaction utilities", () => {
     expect(isLockScreenAudioCandidate("13c")).toBe(false);
     expect(isLockScreenAudioCandidate("la-clave")).toBe(false);
     expect(isLockScreenAudioCandidate("remote-abc-12")).toBe(false);
-    expect(adjacentPlayableRadioIndex(catalog, 0, 1)).toBe(3);
-    expect(adjacentPlayableRadioIndex(catalog, 3, -1)).toBe(0);
-    expect(adjacentPlayableRadioIndex(catalog, 1, 1)).toBe(3);
+    expect(adjacentPlayableRadioIndex(catalog as Radio[], 0, 1)).toBe(3);
+    expect(adjacentPlayableRadioIndex(catalog as Radio[], 3, -1)).toBe(0);
+    expect(adjacentPlayableRadioIndex(catalog as Radio[], 1, 1)).toBe(3);
   });
 
   it("uses one handoff decision for route, card, and mini-player starts", () => {
